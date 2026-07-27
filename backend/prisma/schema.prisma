@@ -1,0 +1,181 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  username String @unique
+  password String
+  role     String
+}
+
+model Transaction {
+  id                Int               @id @default(autoincrement())
+  sales_id          Int
+  customer_name     String?
+  customer_phone    String?
+  customer_address  String?
+  car_brand         String?
+  car_model         String?
+  plate_number      String?
+  chassis_number    String?
+  engine_number     String?
+  car_year          String?
+  installation_date String?
+  installation_time String?
+  total_amount      Float
+  discount          Float             @default(0)
+  sisa_tagihan      Float
+  status_pembayaran String            @default("Proses")
+  type              String            @default("WORKSHOP")
+  event             String?           // Nama sales/PIC yang bertugas (misal: "Femy", "Rosyid")
+  payment_type      String?
+  payment_method    String?
+  termin_schedule   String?
+  notes             String?
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @updatedAt
+  payments          Payment[]
+  items             TransactionItem[]
+  inventory_logs    InventoryLog[]
+  complaints        Complaint[]
+}
+
+model TransactionItem {
+  id             Int         @id @default(autoincrement())
+  transaction_id Int
+  product_name   String
+  product_note   String?
+  price          Float       @default(0)
+  quantity       Float       @default(1)
+  transaction    Transaction @relation(fields: [transaction_id], references: [id])
+}
+
+model Payment {
+  id             Int         @id @default(autoincrement())
+  transaction_id Int
+  amount         Float
+  method         String
+  notes          String?
+  payment_proof  String?
+  payment_date   DateTime    @default(now())
+  transaction    Transaction @relation(fields: [transaction_id], references: [id])
+}
+
+model Inventory {
+  id           String         @id  // e.g. "INV-001"
+  kategori     String
+  brand        String
+  varian       String
+  kegelapan    String?
+  harga_modal  Float          @default(0)   // HPP per unit (ditambahkan untuk laporan keuangan owner)
+  stok_utama   Int            @default(0)   // stok dalam satuan utama (Roll / Botol / Pcs)
+  stok_pecahan Float          @default(0)   // sisa dalam satuan pecahan (meter/ml/dll)
+  satuan       String         @default("Pcs")
+  branch       String         @default("Gallardo")
+  konversi     Int            @default(1)   // 1 Roll = 15 meter / 1 Botol = 50 aplikasi
+  min_stok     Int            @default(2)   // batas peringatan stok menipis
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @updatedAt
+  logs         InventoryLog[]
+}
+
+model InventoryLog {
+  id             Int          @id @default(autoincrement())
+  inventory_id   String
+  transaction_id Int?
+  jenis          String       // "DEDUCT" | "RESTOCK" | "ADJUST"
+  jumlah         Float        // jumlah base unit yang berubah
+  stok_sebelum   Float
+  stok_sesudah   Float
+  keterangan     String?
+  created_at     DateTime     @default(now())
+  inventory      Inventory?   @relation(fields: [inventory_id], references: [id])
+  transaction    Transaction? @relation(fields: [transaction_id], references: [id])
+}
+
+model Complaint {
+  id             Int         @id @default(autoincrement())
+  transaction_id Int
+  problem_type   String
+  description    String?
+  proof_photo    String?
+  status         String      @default("Pending")
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  transaction    Transaction @relation(fields: [transaction_id], references: [id])
+}
+
+model Vehicle {
+  id         Int      @id @default(autoincrement())
+  brand      String
+  model      String
+  size       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model SalesCategory {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model ProductPeruntukan {
+  id         Int      @id @default(autoincrement())
+  name       String
+  category   String   // PPF, Coating, Kaca Film, dll
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model PosisiPemasangan {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model PosisiPartial {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  title       String   // e.g., "Gaji Karyawan Juli", "Sewa Ruko"
+  category    String   // "Operational", "Salary", "Utility", "Other"
+  amount      Float
+  date        DateTime @default(now())
+  proofUrl    String?  // Lampiran foto nota/kwitansi
+  created_at  DateTime @default(now())
+}
+
+model CashFlowLog {
+  id          Int      @id @default(autoincrement())
+  type        String   // "IN" (Masuk) atau "OUT" (Keluar)
+  amount      Float
+  description String
+  referenceId String?  // ID Transaksi atau ID Expense
+  date        DateTime @default(now())
+}
+
+model PurchaseOrder {
+  id          Int      @id @default(autoincrement())
+  supplier    String
+  totalAmount Float
+  status      String   @default("Pending") // "Pending", "Received"
+  date        DateTime @default(now())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}

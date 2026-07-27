@@ -1,0 +1,411 @@
+/**
+ * transaction.controller.js
+ * Handles CRUD for POS transactions.
+ * createTransaction now uses prisma.$transaction for atomic stock deduction.
+ */
+const prisma = require('../../config/db');
+
+// ──────────────────────────────────────────────
+// GET  /api/transactions
+// ──────────────────────────────────────────────
+const getTransactions = async (req, res, next) => {
+  try {
+    const { role, user_id, id } = req.user || {};
+    const userId = parseInt(user_id || id);
+
+    let transactions;
+    if (role === 'sales' || role === 'sales_team') {
+      // Remove 'Sales', 'Team' etc from name to match event
+      const baseName = (req.user?.name || '').replace(/\s*(sales|team|internal|admin)\s*/gi, '').trim();
+
+      transactions = await prisma.transaction.findMany({
+        where: {
+          OR: [
+            { sales_id: userId },
+            { event: { contains: baseName } }
+          ]
+        },
+        include: { payments: true, items: true, complaints: true },
+        orderBy: { created_at: 'desc' }
+      });
+    } else {
+      // Admin / Finance sees all
+      transactions = await prisma.transaction.findMany({
+        include: { payments: true, items: true, complaints: true },
+        orderBy: { created_at: 'desc' }
+      });
+    }
+
+    res.json({ success: true, data: transactions || [] });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ──────────────────────────────────────────────
+// POST /api/transactions
+// Menggunakan prisma.$transaction agar pembuatan
+// transaksi + pengurangan stok berjalan atomik.
+// Jika stok kurang → seluruh operasi di-rollback.
+// ──────────────────────────────────────────────
+const createTransaction = async (req, res, next) => {
+  try {
+    const { user_id, id: tokenId, name: loggedInName } = req.user || {};
+    const userId = parseInt(user_id || tokenId);
+
+    const {
+      type,
+      total_amount,
+      discount = 0,
+      sisa_tagihan,
+      status_pembayaran,
+      items = [],
+      customer_name,
+      customer_phone,
+      event,           // nama sales/PIC yang bertugas (dari field Event di POS)
+      inventory_items, // [{ inventory_id, quantity }] — opsional, hanya untuk retail
+      payment_type,
+      payment_method,
+      termin_schedule,
+      notes,
+      customer_address,
+      car_brand,
+      car_model,
+      plate_number,
+      chassis_number,
+      engine_number,
+      car_year,
+      installation_date,
+      installation_time,
+      payment_proof
+    } = req.body;
+
+    const transactionType = type
+      ? type.toUpperCase()
+      : ((customer_name && customer_name.toLowerCase().includes('pelanggan umum')) ? 'RETAIL' : 'WORKSHOP');
+
+    // Fallback event: strip " Sales" dari nama login jika tidak dikirim
+    const salesEvent = event
+      || (loggedInName ? loggedInName.replace(/\s*sales\s*/gi, '').trim() : null);
+
+    // ── Jalankan dalam satu Prisma Transaction (atomik) ──────────────────
+    const result = await prisma.$transaction(async (tx) => {
+
+      // 1. Validasi & potong stok inventaris (jika ada inventory_items di payload)
+      const stockLogs = [];
+
+      if (Array.isArray(inventory_items) && inventory_items.length > 0) {
+        for (const invItem of inventory_items) {
+          const { inventory_id, quantity } = invItem;
+          if (!inventory_id || !quantity) continue;
+
+          // Ambil data produk dari DB
+          const product = await tx.inventory.findUnique({
+            where: { id: inventory_id }
+          });
+
+          if (!product) {
+            throw new Error(`Produk dengan ID ${inventory_id} tidak ditemukan di inventaris!`);
+          }
+
+          // Hitung total stok dalam satuan dasar (meter/ml/pcs)
+          let konversi = product.konversi || 1;
+          if (product.kategori === 'Kaca Film') konversi = 30;
+          else if (product.kategori === 'PPF') konversi = 15;
+          const totalBaseStock = (product.stok_utama * konversi) + product.stok_pecahan;
+
+          // ── Validasi kecukupan stok ───────────────────────────────────
+          if (totalBaseStock < quantity) {
+            throw new Error(
+              `Stok produk "${product.brand} ${product.varian}" tidak mencukupi! ` +
+              `Stok tersisa: ${product.stok_utama} ${product.satuan} ` +
+              `(${totalBaseStock} satuan dasar), dibutuhkan: ${quantity} satuan dasar.`
+            );
+          }
+
+          // ── Rumus Stok Baru = Stok Saat Ini - Qty Terjual ────────────
+          const newTotalBase   = totalBaseStock - quantity;
+          const newStokUtama   = Math.floor(newTotalBase / konversi);
+          const newStokPecahan = newTotalBase % konversi;
+
+          // Update stok di DB
+          await tx.inventory.update({
+            where: { id: inventory_id },
+            data: {
+              stok_utama:   newStokUtama,
+              stok_pecahan: newStokPecahan,
+              updated_at:   new Date()
+            }
+          });
+
+          // Simpan log untuk ditulis setelah transaksi terbentuk
+          stockLogs.push({
+            inventory_id,
+            jenis:        'DEDUCT',
+            jumlah:       quantity,
+            stok_sebelum: totalBaseStock,
+            stok_sesudah: newTotalBase,
+            keterangan:   `Penjualan POS — customer: ${customer_name || 'Umum'}`
+          });
+        }
+      }
+
+      // 2. Buat transaksi utama
+      const newTransaction = await tx.transaction.create({
+        data: {
+          sales_id:          userId,
+          type:              transactionType,
+          customer_name:     customer_name || null,
+          customer_phone:    customer_phone || null,
+          total_amount,
+          discount,
+          sisa_tagihan,
+          status_pembayaran: status_pembayaran || 'Proses',
+          event:             salesEvent || null,
+          payment_type:      payment_type || null,
+          payment_method:    payment_method || null,
+          termin_schedule:   termin_schedule ? JSON.stringify(termin_schedule) : null,
+          notes:             notes || null,
+          customer_address:  customer_address || null,
+          car_brand:         car_brand || null,
+          car_model:         car_model || null,
+          plate_number:      plate_number || null,
+          chassis_number:    chassis_number || null,
+          engine_number:     engine_number || null,
+          car_year:          car_year || null,
+          installation_date: installation_date || null,
+          installation_time: installation_time || null,
+          items: {
+            create: items.map(item => ({
+              product_name: item.product_name,
+              product_note: item.product_note || null,
+              price:        item.price        || 0,
+              quantity:     item.quantity     || 1
+            }))
+          },
+          ...(total_amount > sisa_tagihan ? {
+            payments: {
+              create: [{
+                amount: total_amount - sisa_tagihan,
+                method: payment_method || 'Tunai / Cash',
+                notes: 'Pembayaran Awal',
+                payment_proof: payment_proof || null
+              }]
+            }
+          } : {})
+        },
+        include: { items: true, payments: true }
+      });
+
+      // 3. Tulis inventory logs (non-blocking, tapi masih di dalam tx)
+      if (stockLogs.length > 0) {
+        await tx.inventoryLog.createMany({
+          data: stockLogs.map(log => ({
+            ...log,
+            transaction_id: newTransaction.id
+          }))
+        });
+      }
+
+      // 4. Catat Cash Flow jika ada pembayaran di awal
+      if (total_amount > sisa_tagihan) {
+        const paidAmount = total_amount - sisa_tagihan;
+        await tx.cashFlowLog.create({
+          data: {
+            type: 'IN',
+            amount: paidAmount,
+            description: `Pembayaran Transaksi POS (${customer_name || 'Umum'})`,
+            referenceId: `TRX-${newTransaction.id}`
+          }
+        });
+      }
+
+      return newTransaction;
+    });
+    // ─────────────────────────────────────────────────────────────────────
+
+    // Cek apakah ada stok menipis setelah transaksi selesai (untuk alert admin)
+    const lowStockItems = await prisma.inventory.findMany({
+      where: {
+        stok_utama: { lte: prisma.inventory.fields.min_stok }
+      }
+    }).catch(() => []); // graceful: jika query gagal, abaikan
+
+    res.status(201).json({
+      success: true,
+      message: 'Transaksi berhasil diproses dan stok admin telah diperbarui.',
+      data: result,
+      lowStockWarning: lowStockItems.length > 0
+        ? lowStockItems.map(i => `${i.brand} ${i.varian} (sisa: ${i.stok_utama} ${i.satuan})`)
+        : []
+    });
+  } catch (error) {
+    // Error dari validasi stok akan ditangkap di sini → 400
+    if (error.message && error.message.includes('tidak mencukupi')) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+};
+
+// ──────────────────────────────────────────────
+// DELETE /api/transactions/:id
+// ──────────────────────────────────────────────
+const deleteTransaction = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ success: false, error: 'Transaksi tidak ditemukan' });
+    }
+
+    // Hapus dependencies manual sebelum menghapus transaksi
+    await prisma.transactionItem.deleteMany({ where: { transaction_id: parseInt(id) } });
+    await prisma.payment.deleteMany({ where: { transaction_id: parseInt(id) } });
+    await prisma.transaction.delete({ where: { id: parseInt(id) } });
+
+    res.json({ success: true, message: 'Transaksi berhasil dihapus' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ──────────────────────────────────────────────
+// PATCH /api/transactions/:id/pay
+// ──────────────────────────────────────────────
+const updatePaymentStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { paid_amount, amount, payment_method, notes, payment_proof } = req.body;
+    
+    // Ambil nilai amount (support req.body.amount atau req.body.paid_amount)
+    const rawAmount = amount !== undefined ? amount : paid_amount;
+    const cleanAmount = Number(rawAmount.toString().replace(/\D/g, ''));
+
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ success: false, error: 'Transaksi tidak ditemukan' });
+    }
+
+    const previousPaid = transaction.total_amount - transaction.sisa_tagihan;
+    const totalPaid = previousPaid + cleanAmount;
+    const sisaTagihan = Math.max(0, transaction.total_amount - totalPaid);
+
+    let newStatus = transaction.status_pembayaran;
+    let newPaymentType = transaction.payment_type;
+    
+    if (sisaTagihan <= 0) {
+      newStatus = 'Lunas';
+      newPaymentType = 'Lunas';
+    } else {
+      // Biarkan status Belum Bayar atau ubah jadi Cicilan/DP
+      newStatus = newStatus === 'Belum Bayar' ? 'Belum Bayar' : newStatus;
+      newPaymentType = newPaymentType === 'Belum Bayar' ? 'Belum Bayar' : newPaymentType;
+      // You can also enforce it to 'Cicilan' or 'DP' as per user's preference, but let's keep it as is unless it's strictly required
+      if (newStatus === 'Belum Bayar') {
+        newStatus = 'DP / Sebagian';
+        newPaymentType = 'DP / Sebagian';
+      }
+    }
+
+    const updated = await prisma.transaction.update({
+      where: { id: parseInt(id) },
+      data: {
+        sisa_tagihan: sisaTagihan,
+        status_pembayaran: newStatus,
+        payment_type: newPaymentType,
+      }
+    });
+
+    // Add payment history
+    await prisma.payment.create({
+      data: {
+        transaction_id: parseInt(id),
+        amount: cleanAmount,
+        method: payment_method || 'Tunai / Cash',
+        notes: notes || null,
+        payment_proof: payment_proof || null
+      }
+    });
+
+    // Catat ke Cash Flow
+    if (cleanAmount > 0) {
+      await prisma.cashFlowLog.create({
+        data: {
+          type: 'IN',
+          amount: cleanAmount,
+          description: `Pembayaran/Cicilan Transaksi POS (${transaction.customer_name || 'Umum'})`,
+          referenceId: `TRX-${id}`
+        }
+      });
+    }
+
+    res.json({ success: true, message: 'Pembayaran berhasil', data: updated });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ──────────────────────────────────────────────
+// PUT /api/transactions/:id
+// ──────────────────────────────────────────────
+const updateTransaction = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const {
+      customer_name,
+      customer_phone,
+      customer_address,
+      car_brand,
+      car_model,
+      plate_number,
+      chassis_number,
+      engine_number,
+      car_year,
+      installation_date,
+      installation_time,
+      notes,
+      event
+    } = req.body;
+
+    const existingTx = await prisma.transaction.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!existingTx) {
+      return res.status(404).json({ success: false, error: 'Transaksi tidak ditemukan' });
+    }
+
+    const updated = await prisma.transaction.update({
+      where: { id: parseInt(id) },
+      data: {
+        customer_name: customer_name !== undefined ? customer_name : existingTx.customer_name,
+        customer_phone: customer_phone !== undefined ? customer_phone : existingTx.customer_phone,
+        customer_address: customer_address !== undefined ? customer_address : existingTx.customer_address,
+        car_brand: car_brand !== undefined ? car_brand : existingTx.car_brand,
+        car_model: car_model !== undefined ? car_model : existingTx.car_model,
+        plate_number: plate_number !== undefined ? plate_number : existingTx.plate_number,
+        chassis_number: chassis_number !== undefined ? chassis_number : existingTx.chassis_number,
+        engine_number: engine_number !== undefined ? engine_number : existingTx.engine_number,
+        car_year: car_year !== undefined ? car_year : existingTx.car_year,
+        installation_date: installation_date !== undefined ? installation_date : existingTx.installation_date,
+        installation_time: installation_time !== undefined ? installation_time : existingTx.installation_time,
+        notes: notes !== undefined ? notes : existingTx.notes,
+        event: event !== undefined ? event : existingTx.event
+      }
+    });
+
+    res.json({ success: true, message: 'Transaksi berhasil diupdate', data: updated });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getTransactions, createTransaction, deleteTransaction, updatePaymentStatus, updateTransaction };

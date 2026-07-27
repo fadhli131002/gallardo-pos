@@ -1,0 +1,278 @@
+.invoices-container {
+  width: 100%;
+}
+
+.invoices-container .invoices-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+}
+
+.invoices-container .btn-export {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-family: var(--font-mono-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.invoices-container .btn-export:hover {
+  background-color: var(--color-gray-800);
+  transform: translateY(-2px);
+}
+
+.invoices-container .invoices-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  gap: 1rem;
+}
+
+.invoices-container .search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+}
+
+.invoices-container .search-input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  outline: none;
+  font-size: 0.875rem;
+}
+
+.invoices-container .filter-dropdowns {
+  display: flex;
+  gap: 1rem;
+}
+
+.invoices-container .dropdown-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.invoices-container .dropdown-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--color-gray-500);
+  pointer-events: none;
+}
+
+.invoices-container .modern-select {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0.6rem 2.5rem 0.6rem 2.5rem;
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.875rem;
+  color: var(--color-black);
+  cursor: pointer;
+}
+
+.invoices-container .modern-select option {
+  color: var(--color-black);
+  background: var(--color-white);
+}
+
+.invoices-container .modern-select:focus {
+  border-color: var(--color-black);
+}
+
+/* Table Styles */
+.invoices-container .invoices-table-container {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.invoices-container .table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.invoices-container .invoices-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoices-container .invoices-table th {
+  text-align: left;
+  padding: 1.25rem 1.5rem;
+  color: var(--color-gray-500);
+  font-size: 0.75rem;
+  font-family: var(--font-mono-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: rgba(250, 250, 250, 0.5);
+}
+
+.invoices-container .invoices-table td {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  vertical-align: middle;
+}
+
+.invoices-container .invoices-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.invoices-container .customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.invoices-container .customer-name {
+  color: var(--color-black);
+}
+
+.invoices-container .invoice-badge {
+  display: inline-block;
+  padding: 0.35rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-family: var(--font-mono-ui);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.invoices-container .badge-lunas {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  border: 1px solid #059669;
+}
+
+.invoices-container .badge-dp {
+  background-color: #f97316 !important;
+  color: #ffffff !important;
+  border: 1px solid #ea580c;
+}
+
+.invoices-container .badge-belum-lunas {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  border: 1px solid #dc2626;
+}
+
+.invoices-container .action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.invoices-container .action-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-gray-500);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.invoices-container .action-btn:hover {
+  background: var(--color-gray-100);
+  color: var(--color-black);
+}
+
+.invoices-container .text-right { text-align: right; }
+.invoices-container .text-center { text-align: center; }
+
+/* Modal Styles */
+.invoice-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.invoice-modal-content {
+  background: #ffffff;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.invoice-modal-content .detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.invoice-modal-content .text-black { color: #000000; }
+.invoice-modal-content .my-4 { margin-top: 1rem; margin-bottom: 1rem; }
+.invoice-modal-content .mt-2 { margin-top: 0.5rem; }
+.invoice-modal-content .mt-6 { margin-top: 1.5rem; }
+.invoice-modal-content .pt-4 { padding-top: 1rem; }
+.invoice-modal-content .pb-4 { padding-bottom: 1rem; }
+.invoice-modal-content .mb-4 { margin-bottom: 1rem; }
+.invoice-modal-content .border-b { border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
+.invoice-modal-content .border-t { border-top: 1px solid rgba(0, 0, 0, 0.1); }
+.invoice-modal-content .flex { display: flex; }
+.invoice-modal-content .justify-end { justify-content: flex-end; }
+.invoice-modal-content .gap-3 { gap: 0.75rem; }
+.invoice-modal-content .text-lg { font-size: 1.125rem; }
+
+.invoice-modal-content .btn-secondary {
+  background-color: transparent;
+  color: var(--color-black);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.invoice-modal-content .btn-secondary:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.invoice-modal-content .btn-primary {
+  background-color: var(--color-black);
+  color: var(--color-white);
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.invoice-modal-content .btn-primary:hover {
+  background-color: var(--color-gray-800);
+}

@@ -1,0 +1,20 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install dependencies and generate prisma client
+RUN npm install
+RUN npx prisma generate
+
+# Copy the rest of the application
+COPY . .
+
+# Expose port
+EXPOSE 5000
+
+# Start command (syncs database schema and starts the server)
+CMD npx prisma db push --accept-data-loss && node src/app.js

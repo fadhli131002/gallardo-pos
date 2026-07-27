@@ -1,0 +1,43 @@
+.finance-sidebar {
+  background-color: var(--color-black);
+  color: var(--color-white);
+  border-right: none;
+}
+
+.finance-sidebar .nav-item {
+  color: var(--color-gray-400);
+}
+
+.finance-sidebar .nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+}
+
+.finance-sidebar .nav-item.active {
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+
+.finance-sidebar .sidebar-brand {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+}
+
+.finance-sidebar .sidebar-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.finance-sidebar .logout-btn {
+  color: #f87171;
+}
+
+.finance-sidebar .logout-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.finance-main {
+  background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-color: #f9fafb;
+}

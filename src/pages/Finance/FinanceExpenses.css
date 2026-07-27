@@ -1,0 +1,411 @@
+.expenses-container {
+  width: 100%;
+  color: #111827; /* Dark gray for text */
+}
+
+/* Typography Helpers */
+.expenses-container .text-dark { color: #111827; }
+.expenses-container .text-gray-500 { color: #6b7280; }
+.expenses-container .text-gray-400 { color: #9ca3af; }
+.expenses-container .text-gray-600 { color: #4b5563; }
+.expenses-container .text-red { color: #dc2626 !important; }
+.expenses-container .bg-dark { background-color: #111827; }
+.expenses-container .bg-red { background-color: #dc2626; }
+.expenses-container .icon-muted { color: #9ca3af; }
+
+.expenses-container .expenses-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+}
+
+/* Buttons */
+.expenses-container .btn-solid-dark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #111827;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.expenses-container .btn-solid-dark:hover {
+  background-color: #374151;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Budget Summary Grid */
+.expenses-container .budget-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .expenses-container .budget-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .expenses-container .budget-summary-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.expenses-container .summary-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s;
+}
+
+.expenses-container .summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+}
+
+.expenses-container .card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.expenses-container .card-amount {
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-family: var(--font-mono-ui);
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.expenses-container .card-subtext {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-bottom: 1.25rem;
+}
+
+/* Progress Bar */
+.expenses-container .progress-bar-container {
+  width: 100%;
+  height: 6px;
+  background-color: #f3f4f6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.expenses-container .progress-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+/* Tabs Navigation */
+.expenses-container .tabs-navigation {
+  display: flex;
+  gap: 0.5rem;
+  background: #f3f4f6;
+  padding: 0.35rem;
+  border-radius: 99px;
+  display: inline-flex;
+}
+
+.expenses-container .tab-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 99px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.expenses-container .tab-btn:hover {
+  color: #111827;
+}
+
+.expenses-container .tab-btn.active {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Table Glass */
+.expenses-container .table-glass {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.expenses-container .expenses-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.expenses-container .expenses-table th {
+  text-align: left;
+  padding: 1rem 1.5rem;
+  background: #f9fafb;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.expenses-container .expenses-table td {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.875rem;
+}
+
+.expenses-container .expenses-table tr:hover td {
+  background: #f9fafb;
+}
+
+.expenses-container .expenses-table tr:last-child td {
+  border-bottom: none;
+}
+
+.expenses-container .badge-exceeded {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Filter area */
+.expenses-container .filters-glass {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.expenses-container .search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+}
+
+.expenses-container .search-box input {
+  background: transparent;
+  border: none;
+  width: 100%;
+  outline: none;
+}
+
+.expenses-container .filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+}
+
+.expenses-container .filter-group select {
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  padding-right: 1.5rem;
+}
+
+/* Calendar Grid */
+.expenses-container .calendar-container {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.expenses-container .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.expenses-container .calendar-header-cell {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  padding-bottom: 0.5rem;
+}
+
+.expenses-container .calendar-cell {
+  aspect-ratio: 1.2;
+  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s;
+}
+
+.expenses-container .calendar-cell:hover:not(.empty) {
+  border-color: #d1d5db;
+  cursor: pointer;
+}
+
+.expenses-container .calendar-cell.empty {
+  background: #f9fafb;
+  border-color: transparent;
+}
+
+.expenses-container .cell-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: auto;
+}
+
+.expenses-container .day-number {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.expenses-container .tx-count {
+  font-size: 0.65rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.expenses-container .cell-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.25rem;
+  border-radius: 4px;
+  font-family: var(--font-mono-ui);
+}
+
+.expenses-container .tag-high {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+
+.expenses-container .tag-normal {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.expenses-container .tag-low {
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+
+/* Modal */
+.expenses-container .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.expenses-container .modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.expenses-container .form-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.expenses-container .input-light {
+  width: 100%;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.expenses-container .input-light:focus {
+  border-color: #111827;
+  background: #ffffff;
+}
+
+.expenses-container .file-input-light {
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.expenses-container .file-input-light::file-selector-button {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  color: #374151;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 1rem;
+  transition: all 0.2s;
+}
+
+.expenses-container .file-input-light::file-selector-button:hover {
+  background: #e5e7eb;
+}
+
+.expenses-container .btn-cancel-light {
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #6b7280;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.expenses-container .btn-cancel-light:hover {
+  color: #111827;
+  background: #f3f4f6;
+}

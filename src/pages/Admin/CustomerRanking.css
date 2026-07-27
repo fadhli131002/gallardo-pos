@@ -1,0 +1,213 @@
+.ranking-container {
+  padding: 1.5rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.ranking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.ranking-title h1 {
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-black);
+  margin-bottom: 0.25rem;
+}
+
+.ranking-title p {
+  font-family: var(--font-mono-ui);
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+}
+
+.ranking-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-excel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--success);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono-ui);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: opacity 0.2s;
+}
+
+.btn-excel:hover { opacity: 0.9; }
+
+.btn-pdf {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  color: var(--color-black);
+  border: 1px solid var(--color-black);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-mono-ui);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.btn-pdf:hover {
+  background-color: var(--color-gray-100);
+}
+
+.ranking-card {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.ranking-toolbar {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-gray-200);
+  background-color: var(--color-gray-50);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-300);
+  border-radius: 4px;
+  padding: 0.35rem 0.75rem;
+  width: 320px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 0.25rem;
+  font-family: var(--font-mono-ui);
+  font-size: 0.875rem;
+  background: transparent;
+}
+
+.filter-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-box label {
+  font-family: var(--font-mono-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-700);
+}
+
+.filter-box select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 4px;
+  font-family: var(--font-mono-ui);
+  font-size: 0.875rem;
+  outline: none;
+  background-color: var(--color-white);
+}
+
+.ranking-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.ranking-table th {
+  padding: 1rem;
+  font-family: var(--font-mono-ui);
+  font-weight: 600;
+  color: var(--color-gray-600);
+  background-color: var(--color-gray-100);
+  border-bottom: 1px solid var(--color-gray-200);
+  font-size: 0.875rem;
+}
+
+.ranking-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-gray-100);
+  vertical-align: middle;
+}
+
+.ranking-table tbody tr:hover {
+  background-color: var(--color-gray-50);
+}
+
+.rank-badge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.rank-text {
+  font-weight: bold;
+  color: var(--color-gray-500);
+}
+
+.customer-info .name {
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin-bottom: 0.25rem;
+}
+
+.customer-info .tx-count {
+  font-size: 0.75rem;
+  color: var(--color-gray-500);
+  font-family: var(--font-mono-ui);
+}
+
+.phone-text {
+  font-family: var(--font-mono-ui);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+}
+
+.roll-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border-radius: 9999px;
+  font-family: var(--font-mono-num);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.omzet-text {
+  font-family: var(--font-mono-num);
+  font-weight: 700;
+  color: var(--color-gray-900);
+  text-align: right;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-gray-500);
+  font-family: var(--font-mono-ui);
+}
