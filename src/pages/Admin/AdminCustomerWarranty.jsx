@@ -32,7 +32,7 @@ const AdminCustomerWarranty = () => {
       .trim();
 
   const { inventory, deductStock, deductRetailStock, processInventoryDeduction } = useInventory();
-  const { orders, settlePayment, completeOrder, updateOrderOperational, deleteOrder } = useOrders();
+  const { orders, settlePayment, completeOrder, updateOrderOperational, deleteOrder, refreshOrdersFromApi } = useOrders();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -346,7 +346,7 @@ const AdminCustomerWarranty = () => {
         </div>
       </div>
 
-        <div className="customers-list premium-card">
+        <div className="customers-list premium-card" style={{ overflow: 'visible' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px', padding: '1.5rem 1.5rem 0 1.5rem', flexWrap: 'nowrap' }} className="print:hidden">
             {/* Sisi Kiri: Search Input */}
             <div style={{ position: 'relative', flex: 1, minWidth: '0' }}>
@@ -1111,20 +1111,20 @@ const AdminCustomerWarranty = () => {
 
             <form onSubmit={async (e) => {
               e.preventDefault();
-              const formData = new FormData(e.target);
-              const paymentType = formData.get('payment_type');
+              const form = e.target;
+              const formData = new FormData(form);
               const sisaRaw = formData.get('sisa_tagihan') || '0';
               const cleanSisa = Number(sisaRaw.toString().replace(/\D/g, ''));
 
               try {
-                const response = await fetch(`${window.API_URL}/api/transactions/${manualPaymentOrder.id}/payment-status-manual`, {
+                const response = await fetch(`${window.API_URL}/api/transactions/${manualPaymentOrder.dbId || manualPaymentOrder.id.replace('RTL-DB-', '')}/payment-status-manual`, {
                   method: 'PUT',
                   headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                   },
                   body: JSON.stringify({
-                    payment_type: paymentType,
+                    payment_type: form.payment_type.value,
                     sisa_tagihan: cleanSisa
                   })
                 });
@@ -1133,7 +1133,7 @@ const AdminCustomerWarranty = () => {
                 if (response.ok && result.success) {
                   toast.success('Status pembayaran berhasil diubah manual.');
                   setShowManualPaymentModal(false);
-                  fetchOrders();
+                  refreshOrdersFromApi();
                 } else {
                   throw new Error(result.error || 'Gagal mengubah status');
                 }
