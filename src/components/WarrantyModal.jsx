@@ -115,7 +115,7 @@ const WarrantyModal = ({ order, onClose }) => {
       const chassis = (order.chassisNumber && order.chassisNumber !== '-') ? order.chassisNumber : (order.engineNumber || 'TanpaRangka');
       const productName = (order.items && order.items.length > 0) ? (order.items[0].name || order.items[0].varian) : (order.service || 'Produk');
       
-      const installationDateStr = order.completedAt || order.updatedAt || order.date || new Date();
+      const installationDateStr = order.installationDate || order.completedAt || order.updatedAt || order.date || new Date();
       const { years } = getWarrantyDetails(productName, new Date(installationDateStr));
       
       const rawFileName = `Garansi_${customerName}_${chassis}_${productName}_${years}Tahun.pdf`;
@@ -130,7 +130,7 @@ const WarrantyModal = ({ order, onClose }) => {
 
   
   // 3. Logika Tanggal Instalasi & Kalkulasi Maintenance
-  const installationDateStr = order.completedAt || order.updatedAt || order.date || new Date();
+  const installationDateStr = order.installationDate || order.completedAt || order.updatedAt || order.date || new Date();
   const installationDate = new Date(installationDateStr);
   
   const maintenanceDate = new Date(installationDate);
