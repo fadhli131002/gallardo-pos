@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { Package, Plus, Edit2, Trash2, X, AlertTriangle, Printer, Loader2 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { useInventory } from '../../context/InventoryContext';
+import { useAuth } from '../../context/AuthContext';
 import './AdminInventory.css';
 
 const AdminInventory = () => {
+  const { user } = useAuth();
+  const userRole = user?.role || 'sales';
   const { inventory, inventoryLogs, addStock, updateStock, deleteStock, refreshInventoryFromApi } = useInventory();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -413,7 +416,9 @@ const AdminInventory = () => {
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>JENIS LAYANAN</th>
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>BRAND & SERIES</th>
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>VARIAN / KEGELAPAN</th>
-              <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>HARGA MODAL</th>
+              {(userRole === 'owner' || userRole === 'superadmin') && (
+                <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>HARGA MODAL</th>
+              )}
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>STOK TERSEDIA</th>
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600, textAlign: 'center' }}>AKSI</th>
             </tr>
@@ -437,9 +442,11 @@ const AdminInventory = () => {
                       {item.kategori === 'Kaca Film' && item.kegelapan ? ` (Kegelapan ${item.kegelapan})` : ''}
                     </div>
                   </td>
-                  <td style={{ padding: '1rem', fontWeight: 600 }}>
-                    {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_modal || 0)}
-                  </td>
+                  {(userRole === 'owner' || userRole === 'superadmin') && (
+                    <td style={{ padding: '1rem', fontWeight: 600 }}>
+                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_modal || 0)}
+                    </td>
+                  )}
                   <td style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {item.kategori === 'Tools & Equipment' ? (
@@ -635,19 +642,21 @@ const AdminInventory = () => {
                     </select>
                   </div>
                   
-                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                    <label>Harga Modal (Rp)</label>
-                    <input 
-                      type="text" 
-                      value={formData.harga_modal ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(formData.harga_modal) : ''} 
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, '');
-                        setFormData({ ...formData, harga_modal: val ? Number(val) : '' });
-                      }} 
-                      required 
-                      placeholder="Rp 0"
-                    />
-                  </div>
+                  {(userRole === 'owner' || userRole === 'superadmin') && (
+                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                      <label>Harga Modal (Rp)</label>
+                      <input 
+                        type="text" 
+                        value={formData.harga_modal ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(formData.harga_modal) : ''} 
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setFormData({ ...formData, harga_modal: val ? Number(val) : '' });
+                        }} 
+                        required 
+                        placeholder="Rp 0"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 

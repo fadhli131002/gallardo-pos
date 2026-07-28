@@ -408,4 +408,37 @@ const updateTransaction = async (req, res, next) => {
   }
 };
 
-module.exports = { getTransactions, createTransaction, deleteTransaction, updatePaymentStatus, updateTransaction };
+// ────────────────────────────────────────
+// PUT /api/transactions/:id/payment-status-manual
+// ────────────────────────────────────────
+const updatePaymentStatusManual = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { payment_type, sisa_tagihan } = req.body;
+
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ success: false, error: 'Transaksi tidak ditemukan' });
+    }
+
+    const cleanSisaTagihan = Number(sisa_tagihan);
+
+    const updated = await prisma.transaction.update({
+      where: { id: parseInt(id) },
+      data: {
+        payment_type: payment_type,
+        sisa_tagihan: cleanSisaTagihan,
+        ...(payment_type === 'Lunas' ? { status_pembayaran: 'Selesai' } : {})
+      }
+    });
+
+    res.json({ success: true, message: 'Status pembayaran berhasil diubah manual', data: updated });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getTransactions, createTransaction, deleteTransaction, updatePaymentStatus, updatePaymentStatusManual, updateTransaction };

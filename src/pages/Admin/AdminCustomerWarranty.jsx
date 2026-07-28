@@ -39,6 +39,8 @@ const AdminCustomerWarranty = () => {
   const [historyOrder, setHistoryOrder] = useState(null);
   const [showHistoryPaymentModal, setShowHistoryPaymentModal] = useState(false);
   const [historyPaymentOrder, setHistoryPaymentOrder] = useState(null);
+  const [showManualPaymentModal, setShowManualPaymentModal] = useState(false);
+  const [manualPaymentOrder, setManualPaymentOrder] = useState(null);
   const [invoiceOrder, setInvoiceOrder] = useState(null);
   const [settlementOrder, setSettlementOrder] = useState(null);
   const [showEditCustomerModal, setShowEditCustomerModal] = useState(false);
@@ -290,6 +292,7 @@ const AdminCustomerWarranty = () => {
         if (selectedOrder) setSelectedOrder(null);
         else if (showHistoryModal) setShowHistoryModal(false);
         else if (showHistoryPaymentModal) setShowHistoryPaymentModal(false);
+        else if (showManualPaymentModal) setShowManualPaymentModal(false);
         else if (invoiceOrder) setInvoiceOrder(null);
         else if (settlementOrder) setSettlementOrder(null);
         else if (showEditCustomerModal) setShowEditCustomerModal(false);
@@ -772,8 +775,16 @@ const AdminCustomerWarranty = () => {
                                 </>
                               )}
 
-                              {isRetailOrder && (userRole === 'owner' || userRole === 'superadmin') && (
-                                <button onClick={() => {
+                              {(!isPenawaran) && (userRole === 'owner' || userRole === 'superadmin') && (
+                                <>
+                                  <button onClick={() => {
+                                    setActiveDropdown(null);
+                                    setManualPaymentOrder(order);
+                                    setShowManualPaymentModal(true);
+                                  }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#10b981', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#ecfdf5'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                    <CreditCard size={16} color="#10b981" /> Ubah Status Pembayaran
+                                  </button>
+                                  <button onClick={() => {
                                   setActiveDropdown(null);
                                   setDeleteRetailOrder(order);
                                   setDeleteConfirmText('');
@@ -832,9 +843,9 @@ const AdminCustomerWarranty = () => {
               <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                 <ShieldAlert size={32} color="#ef4444" />
               </div>
-              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', marginBottom: '8px' }}>Hapus Transaksi Retail?</h2>
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', marginBottom: '8px' }}>Hapus Transaksi?</h2>
               <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '24px', lineHeight: '1.5' }}>
-                Anda akan menghapus permanen data transaksi retail dari customer <strong>{deleteRetailOrder.customerName}</strong>. Tindakan ini tidak dapat dibatalkan.
+                Anda akan menghapus permanen data transaksi dari customer <strong>{deleteRetailOrder.customerName}</strong>. Tindakan ini tidak dapat dibatalkan.
               </p>
 
               <div style={{ width: '100%', textAlign: 'left', marginBottom: '24px' }}>
@@ -1076,6 +1087,105 @@ const AdminCustomerWarranty = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ubah Status Pembayaran Manual Modal */}
+      {showManualPaymentModal && manualPaymentOrder && (
+        <div className="modal-overlay animate-fade-in" onClick={() => setShowManualPaymentModal(false)} style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(2px)' }}>
+          <div className="modal-content animate-fade-in" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', width: '95%', backgroundColor: '#ffffff', borderRadius: '24px', padding: '0', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden' }}>
+            <div style={{ padding: '24px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', backgroundColor: '#f8fafc' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: '#111827' }}>Ubah Status Pembayaran</h3>
+                <p style={{ margin: 0, fontSize: '13px', color: '#6b7280' }}>POS No: {manualPaymentOrder.id}</p>
+              </div>
+              <button onClick={() => setShowManualPaymentModal(false)} style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4b5563' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const paymentType = formData.get('payment_type');
+              const sisaRaw = formData.get('sisa_tagihan') || '0';
+              const cleanSisa = Number(sisaRaw.toString().replace(/\D/g, ''));
+
+              try {
+                const response = await fetch(`${API_URL}/api/transactions/${manualPaymentOrder.id}/payment-status-manual`, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify({
+                    payment_type: paymentType,
+                    sisa_tagihan: cleanSisa
+                  })
+                });
+
+                const result = await response.json();
+                if (response.ok && result.success) {
+                  toast.success('Status pembayaran berhasil diubah manual.');
+                  setShowManualPaymentModal(false);
+                  fetchOrders();
+                } else {
+                  throw new Error(result.error || 'Gagal mengubah status');
+                }
+              } catch (error) {
+                console.error("Error updating manual payment status:", error);
+                toast.error(error.message);
+              }
+            }} style={{ padding: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Tipe Pembayaran</label>
+                  <select
+                    name="payment_type"
+                    required
+                    defaultValue={manualPaymentOrder.paymentType || 'DP'}
+                    onChange={(e) => {
+                      const sisaInput = document.getElementById('manual-sisa-tagihan');
+                      if (e.target.value === 'Lunas') {
+                        if (sisaInput) sisaInput.value = '0';
+                      }
+                    }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px', backgroundColor: '#f9fafb', color: '#111827' }}
+                  >
+                    <option value="Lunas">Lunas</option>
+                    <option value="DP">DP</option>
+                    <option value="Belum Lunas">Belum Lunas</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Sisa Tagihan (Rp)</label>
+                  <input
+                    id="manual-sisa-tagihan"
+                    type="text"
+                    name="sisa_tagihan"
+                    required
+                    defaultValue={manualPaymentOrder.sisaTagihan?.toLocaleString('id-ID') || '0'}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\D/g, '');
+                      e.target.value = raw ? Number(raw).toLocaleString('id-ID') : '';
+                    }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '6px' }}>Otomatis 0 jika pilih Lunas.</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+                <button type="button" onClick={() => setShowManualPaymentModal(false)} style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#fff', color: '#374151', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
+                  Batal
+                </button>
+                <button type="submit" style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#10b981', color: '#fff', fontSize: '14px', fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Save size={16} /> Simpan Perubahan
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

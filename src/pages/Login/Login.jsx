@@ -80,11 +80,11 @@ const Login = () => {
         setAnimationStage(2);
 
         setTimeout(() => {
-          if (loggedInRole === 'admin' || loggedInRole === 'superadmin') {
+          if (loggedInRole === 'admin') {
             navigate('/admin/workspace');
           } else if (loggedInRole === 'finance') {
             navigate('/finance/dashboard');
-          } else if (loggedInRole === 'owner') {
+          } else if (loggedInRole === 'owner' || loggedInRole === 'superadmin') {
             navigate('/owner-portal/dashboard');
           } else {
             navigate('/sales/dashboard');

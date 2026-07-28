@@ -44,9 +44,9 @@ const DashboardEntry = () => {
 
   const userRole = user.role || 'sales';
 
-  if (userRole === 'admin' || userRole === 'superadmin') {
+  if (userRole === 'admin') {
     return <Navigate to="/admin/workspace" replace />;
-  } else if (userRole === 'owner') {
+  } else if (userRole === 'owner' || userRole === 'superadmin') {
     return <Navigate to="/owner-portal/dashboard" replace />;
   } else if (userRole === 'finance') {
     return <Navigate to="/finance/dashboard" replace />;
@@ -57,7 +57,7 @@ const DashboardEntry = () => {
 function App() {
   return (
     <Router>
-      <Toaster position="top-center" richColors />
+      <Toaster position="top-right" richColors />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<DashboardEntry />} />
@@ -104,7 +104,7 @@ function App() {
         </Route>
 
         {/* Owner Portal Routes */}
-        <Route element={<ProtectedRoute allowedRoles={['owner']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['owner', 'superadmin']} />}>
           <Route path="/owner-portal" element={<OwnerLayout />}>
             <Route index element={<Navigate to="/owner-portal/dashboard" replace />} />
             <Route path="dashboard" element={<OwnerDashboard />} />
