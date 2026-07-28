@@ -622,11 +622,13 @@ const AdminCustomerWarranty = () => {
                           )}
                         </div>
                       ) : (
-                        <div>
-                          <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-2" style={{ letterSpacing: '0.05em' }}>Informasi Kendaraan</div>
-                          <div className="text-sm font-bold text-primary">{order.carBrand} {order.carModel}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <div>
+                            <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-1" style={{ letterSpacing: '0.05em' }}>Informasi Kendaraan</div>
+                            <div className="text-sm font-bold text-primary">{order.carBrand} {order.carModel}</div>
+                          </div>
                           
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <div className="text-xs font-mono-ui font-bold" style={{ padding: '4px 8px', border: '1px solid #d1d5db', borderRadius: '6px', backgroundColor: '#ffffff', color: '#111827', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                               {order.plateNumber}
                             </div>
@@ -635,7 +637,7 @@ const AdminCustomerWarranty = () => {
                             </div>
                           </div>
 
-                          <div className="text-xs mt-4" style={{ display: 'flex', flexDirection: 'column', gap: '12px', lineHeight: '1.6' }}>
+                          <div className="text-xs" style={{ display: 'flex', flexDirection: 'column', gap: '12px', lineHeight: '1.6' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <User size={14} color="#6b7280" />
                               <span className="text-secondary">Sales/PIC:</span>
@@ -668,19 +670,23 @@ const AdminCustomerWarranty = () => {
                         </div>
                       )}
 
-                      <div style={{ paddingTop: '20px', borderTop: '1px solid #f3f4f6' }}>
-                        <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-2" style={{ letterSpacing: '0.05em' }}>Informasi Customer</div>
-                        <div className="font-bold text-sm text-primary mb-1">{isRetailOrder ? (order.customerName || order.supplierName) : order.customerName}</div>
-                        <div className="text-xs text-secondary font-mono-ui" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: order.customerAddress ? '10px' : '0' }}>
-                          <Phone size={12} color="#25D366" />
-                          {order.customerHp || '-'}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '20px', borderTop: '1px solid #f3f4f6' }}>
+                        <div>
+                          <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-1" style={{ letterSpacing: '0.05em' }}>Informasi Customer</div>
+                          <div className="font-bold text-sm text-primary">{isRetailOrder ? (order.customerName || order.supplierName) : order.customerName}</div>
                         </div>
-                        {order.customerAddress && (
-                          <div className="text-xs text-secondary" style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: '1.4' }}>
-                            <MapPin size={12} color="#9ca3af" style={{ flexShrink: 0, marginTop: '2px' }} />
-                            <span>{order.customerAddress}</span>
+                        <div className="text-xs" style={{ display: 'flex', flexDirection: 'column', gap: '12px', lineHeight: '1.6' }}>
+                          <div className="text-secondary font-mono-ui" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Phone size={12} color="#25D366" />
+                            {order.customerHp || '-'}
                           </div>
-                        )}
+                          {order.customerAddress && (
+                            <div className="text-secondary" style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                              <MapPin size={12} color="#9ca3af" style={{ flexShrink: 0, marginTop: '2px' }} />
+                              <span>{order.customerAddress}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
