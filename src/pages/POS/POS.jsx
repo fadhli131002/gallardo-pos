@@ -1323,10 +1323,6 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                     onChange={e => setDiscount(e.target.value === '' ? 0 : Number(e.target.value))} 
                   />
                 </div>
-                <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '12px', gridColumn: '1 / -1', padding: '16px', backgroundColor: '#f9fafb', borderRadius: '10px', border: '1px dashed #d1d5db' }}>
-                  <input type="checkbox" id="pajak" checked={paymentState.useTax} onChange={e => setPaymentState(prev => ({ ...prev, useTax: e.target.checked }))} style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#4f46e5' }} />
-                  <label htmlFor="pajak" style={{ fontSize: '14px', fontWeight: '600', color: '#374151', cursor: 'pointer', margin: 0, userSelect: 'none' }}>Tambahkan Faktur Pajak (PPN 11%)</label>
-                </div>
               </div>
 
               <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e5e7eb', padding: '24px', marginBottom: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
@@ -1342,12 +1338,18 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                       <span style={{ fontSize: '15px', fontWeight: '600', color: '#ef4444' }}>- {formatCurrency(discountAmount)}</span>
                     </div>
                   )}
-                  {paymentState.useTax && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '14px', color: '#4b5563' }}>PPN 11%</span>
+                  
+                  <div style={{ height: '1px', backgroundColor: '#e5e7eb', margin: '4px 0' }}></div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label htmlFor="pajak" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: 0 }}>
+                      <input type="checkbox" id="pajak" checked={paymentState.useTax} onChange={e => setPaymentState(prev => ({ ...prev, useTax: e.target.checked }))} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#4f46e5' }} />
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#374151', userSelect: 'none' }}>Tambahkan Faktur Pajak (PPN 11%)</span>
+                    </label>
+                    {paymentState.useTax && (
                       <span style={{ fontSize: '15px', fontWeight: '600', color: '#ef4444' }}>+ {formatCurrency(taxAmount)}</span>
-                    </div>
-                  )}
+                    )}
+                  </div>
                   
                   <div style={{ height: '1px', backgroundColor: '#e5e7eb', margin: '8px 0' }}></div>
                   
