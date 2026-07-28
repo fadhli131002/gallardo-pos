@@ -469,8 +469,19 @@ export const OrderProvider = ({ children }) => {
     }));
   };
 
-  const deleteOrder = (orderId) => {
+  const deleteOrder = async (orderId) => {
+    const order = orders.find(o => o.id === orderId);
     setOrders(prev => prev.filter(o => o.id !== orderId));
+    if (order && order.dbId && token) {
+      try {
+        await fetch(`${window.API_URL}/api/transactions/${order.dbId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (err) {
+        console.error('Error deleting transaction from backend:', err);
+      }
+    }
   };
 
   const settlePayment = async (orderId, amount, method, notes = '', paymentProof = null) => {
