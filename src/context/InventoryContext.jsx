@@ -64,6 +64,7 @@ export const InventoryProvider = ({ children }) => {
             kegelapan: item.kegelapan || '',
             stokUtama: item.stok_utama,
             stokPecahan: item.stok_pecahan,
+            harga_modal: Number(item.harga_modal) || 0,
             satuan: item.satuan,
             branch: item.branch,
             konversi: item.konversi,
@@ -176,6 +177,7 @@ export const InventoryProvider = ({ children }) => {
             kegelapan: item.kegelapan,
             stok_utama: item.stokUtama,
             stok_pecahan: item.stokPecahan,
+            harga_modal: item.harga_modal || 0,
             satuan: item.satuan,
             branch: item.branch || 'Gallardo',
             konversi: item.konversi || 15
@@ -201,6 +203,7 @@ export const InventoryProvider = ({ children }) => {
           body: JSON.stringify({
             stok_utama: updatedItem.stokUtama,
             stok_pecahan: updatedItem.stokPecahan,
+            harga_modal: updatedItem.harga_modal || 0,
             min_stok: updatedItem.minStok,
             keterangan: 'Update stok oleh Admin'
           })
