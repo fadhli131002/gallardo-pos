@@ -138,7 +138,7 @@ const Layout = () => {
             </>
           )}
 
-          {userRole === 'admin' && (
+          {(userRole === 'admin' || userRole === 'superadmin') && (
             <>
               <motion.span 
                 className="font-sans text-xs text-secondary px-4 mb-2 block font-semibold tracking-wider" 
