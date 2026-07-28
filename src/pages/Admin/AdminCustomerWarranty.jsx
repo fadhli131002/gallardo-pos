@@ -777,7 +777,7 @@ const AdminCustomerWarranty = () => {
                                 </>
                               )}
 
-                              {(!isPenawaran) && (userRole !== 'sales' && userRole !== 'sales_team') && (
+                              {(!isPenawaran) && (userRole === 'superadmin' || userRole === 'owner') && (
                                 <>
                                   <button onClick={() => {
                                     setActiveDropdown(null);
@@ -807,7 +807,7 @@ const AdminCustomerWarranty = () => {
                                     <FileCheck size={16} color="#2563eb" /> Konversi ke Work Order
                                   </button>
 
-                                  {(userRole !== 'sales' && userRole !== 'sales_team') && (
+                                  {(userRole === 'superadmin' || userRole === 'owner') && (
                                     <button onClick={() => {
                                       setActiveDropdown(null);
                                       if (window.confirm("Apakah Anda yakin ingin membatalkan penawaran ini?")) {
