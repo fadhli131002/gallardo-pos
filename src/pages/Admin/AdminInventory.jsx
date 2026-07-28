@@ -565,107 +565,154 @@ const AdminInventory = () => {
       </div>
 
       {isModalOpen && (
-        <div className="modal-backdrop-blur">
-          <div className="modal-container-centered">
-            <div className="modal-header">
-              <h2 className="font-sans text-xl font-bold">{editingItem ? 'Edit Stok Material' : 'Tambah Stok Masuk'}</h2>
-              <button onClick={handleCloseModal} className="btn-close"><X size={24} /></button>
+        <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '24px' }}>
+          <div className="modal-content premium-card" style={{ width: '100%', maxWidth: '600px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+            
+            {/* Header */}
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f9fafb', flexShrink: 0 }}>
+              <h2 className="font-sans text-xl font-bold" style={{ margin: 0, color: '#111827' }}>
+                {editingItem ? 'Edit Stok Material' : 'Tambah Stok Masuk'}
+              </h2>
+              <button onClick={handleCloseModal} className="icon-btn" style={{ padding: '8px', borderRadius: '50%', backgroundColor: '#f3f4f6', color: '#6b7280', border: 'none', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#e5e7eb'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#f3f4f6'}>
+                <X size={20} />
+              </button>
             </div>
 
-            <form onSubmit={handleSave} className="modal-body">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label>Jenis Layanan</label>
-                  <select
-                    value={formData.kategori}
-                    onChange={handleKategoriChange}
-                    required
-                  >
-                    <option value="Kaca Film">Kaca Film</option>
-                    <option value="PPF">PPF</option>
-                    <option value="Coating">Coating</option>
-                  </select>
-                </div>
-
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label>Brand & Series</label>
-                  <select
-                    value={formData.brand}
-                    onChange={handleBrandChange}
-                    required
-                  >
-                    {getAvailableBrands().map((brand) => (
-                      <option key={brand} value={brand}>{brand}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label>Varian / Kegelapan</label>
-                  <select
-                    value={formData.varian}
-                    onChange={(e) => setFormData({ ...formData, varian: e.target.value })}
-                    required
-                  >
-                    {getAvailableVariants().map((variant) => (
-                      <option key={variant} value={variant}>{variant}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div style={{ gridColumn: 'span 2', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  {formData.kategori === 'Tools & Equipment' ? (
-                    <div className="form-group">
-                      <label>Stok</label>
-                      <input type="number" min="0" value={formData.stokUtama} onChange={(e) => setFormData({ ...formData, stokUtama: e.target.value })} required />
-                    </div>
-                  ) : (
-                    <>
-                      <div className="form-group">
-                        <label>Stok Bulk ({formData.kategori === 'Coating' ? 'Botol' : 'Roll'})</label>
-                        <input type="number" min="0" value={editBulk} onChange={(e) => setEditBulk(e.target.value)} required />
-                      </div>
-                      <div className="form-group">
-                        <label>Stok Eceran ({formData.kategori === 'Coating' ? 'ml' : 'Meter'})</label>
-                        <input type="number" min="0" value={editEceran} onChange={(e) => setEditEceran(e.target.value)} required />
-                      </div>
-                    </>
-                  )}
-                  <div className="form-group">
-                    <label>Satuan</label>
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              
+              {/* Scrollable Body */}
+              <div style={{ padding: '24px 32px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Jenis Layanan</label>
                     <select
-                      value={formData.satuan}
-                      onChange={(e) => setFormData({ ...formData, satuan: e.target.value })}
+                      value={formData.kategori}
+                      onChange={handleKategoriChange}
                       required
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white' }}
+                      className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                     >
-                      <option value="Roll">Roll</option>
-                      <option value="Botol">Botol</option>
-                      <option value="Pcs">Pcs</option>
-                      <option value="Unit">Unit</option>
+                      <option value="Kaca Film">Kaca Film</option>
+                      <option value="PPF">PPF</option>
+                      <option value="Coating">Coating</option>
                     </select>
                   </div>
-                  
-                  {(isSuperOrOwner) && (
+
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Brand & Series</label>
+                    <select
+                      value={formData.brand}
+                      onChange={handleBrandChange}
+                      required
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white' }}
+                      className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                    >
+                      {getAvailableBrands().map((brand) => (
+                        <option key={brand} value={brand}>{brand}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Varian / Kegelapan</label>
+                    <select
+                      value={formData.varian}
+                      onChange={(e) => setFormData({ ...formData, varian: e.target.value })}
+                      required
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white' }}
+                      className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                    >
+                      {getAvailableVariants().map((variant) => (
+                        <option key={variant} value={variant}>{variant}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div style={{ gridColumn: 'span 2', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    {formData.kategori === 'Tools & Equipment' ? (
+                      <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Stok</label>
+                        <input 
+                          type="number" 
+                          min="0" 
+                          value={formData.stokUtama} 
+                          onChange={(e) => setFormData({ ...formData, stokUtama: e.target.value })} 
+                          required 
+                          style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                          className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <div className="form-group">
+                          <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Stok Bulk ({formData.kategori === 'Coating' ? 'Botol' : 'Roll'})</label>
+                          <input 
+                            type="number" 
+                            min="0" 
+                            value={editBulk} 
+                            onChange={(e) => setEditBulk(e.target.value)} 
+                            required 
+                            style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                            className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Stok Eceran ({formData.kategori === 'Coating' ? 'ml' : 'Meter'})</label>
+                          <input 
+                            type="number" 
+                            min="0" 
+                            value={editEceran} 
+                            onChange={(e) => setEditEceran(e.target.value)} 
+                            required 
+                            style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                            className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                          />
+                        </div>
+                      </>
+                    )}
                     <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                      <label>Harga Modal (Rp)</label>
-                      <input 
-                        type="text" 
-                        value={formData.harga_modal ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(formData.harga_modal) : ''} 
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
-                          setFormData({ ...formData, harga_modal: val ? Number(val) : '' });
-                        }} 
-                        required 
-                        placeholder="Rp 0"
-                      />
+                      <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Satuan</label>
+                      <select
+                        value={formData.satuan}
+                        onChange={(e) => setFormData({ ...formData, satuan: e.target.value })}
+                        required
+                        style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white' }}
+                        className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                      >
+                        <option value="Roll">Roll</option>
+                        <option value="Botol">Botol</option>
+                        <option value="Pcs">Pcs</option>
+                        <option value="Unit">Unit</option>
+                      </select>
                     </div>
-                  )}
+                    
+                    {(isSuperOrOwner) && (
+                      <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Harga Modal (Rp)</label>
+                        <input 
+                          type="text" 
+                          value={formData.harga_modal ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(formData.harga_modal) : ''} 
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            setFormData({ ...formData, harga_modal: val ? Number(val) : '' });
+                          }} 
+                          required 
+                          placeholder="Rp 0"
+                          style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                          className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="modal-footer" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                <button type="button" onClick={handleCloseModal} className="btn-secondary">Batal</button>
-                <button type="submit" className="btn-primary">
+              {/* Fixed Footer */}
+              <div style={{ padding: '20px 32px', display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb', flexShrink: 0 }}>
+                <button type="button" onClick={handleCloseModal} style={{ padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #d1d5db', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#ffffff'}>
+                  Batal
+                </button>
+                <button type="submit" style={{ padding: '10px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: 'white', backgroundColor: '#111827', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#374151'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#111827'}>
                   {editingItem ? 'Simpan Perubahan' : 'Tambahkan'}
                 </button>
               </div>
