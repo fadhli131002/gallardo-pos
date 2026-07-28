@@ -5,7 +5,7 @@ import { PRICING_MATRIX, CAR_BRANDS, formatCurrency, PRODUCT_CATALOG } from '../
 import { useOrders } from '../../context/OrderContext';
 import { useInventory } from '../../context/InventoryContext';
 import { format } from 'date-fns';
-import { Trash2, Plus, Minus, Calculator, Wallet, User, Car, CheckCircle, Package, Search, Tag, Settings, CreditCard, ChevronDown, ChevronRight, Check, CheckSquare, Printer, MessageCircle, X, ShoppingCart, Loader2, FileText, CarFront, Upload, Percent } from 'lucide-react';
+import { Trash2, Plus, Minus, Calculator, Wallet, User, Car, CheckCircle, Package, Search, Tag, Settings, CreditCard, ChevronDown, ChevronRight, Check, CheckSquare, Printer, MessageCircle, X, ShoppingCart, Loader2, FileText, CarFront, Upload, Percent, Banknote, QrCode, Gift } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import SharedInvoice from '../../components/SharedInvoice';
 import logoGallardo from '../../assets/logo-gallardo.png';
@@ -1130,203 +1130,276 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
 
       {/* Payment Modal */}
       {showPaymentModal && (
-        <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 9999, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '3rem 1rem', overflowY: 'auto' }}>
-          <div className="modal-content payment-modal premium-card p-6" style={{ width: '800px', maxWidth: '95%', position: 'relative', margin: 'auto' }}>
-            <button className="modal-close" style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', zIndex: 100 }} onClick={() => setShowPaymentModal(false)}><X size={24} /></button>
-            <div className="text-center mb-6 mt-4">
-              <Wallet size={48} className="mx-auto text-primary mb-4" />
-              <h2 className="font-sans text-2xl font-bold">Checkout Pembayaran</h2>
-            </div>
-
-            <div className="form-grid border-b border-gray-200 pb-6 mb-6">
-              <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-                <input type="checkbox" id="pajak" checked={paymentState.useTax} onChange={e => setPaymentState(prev => ({ ...prev, useTax: e.target.checked }))} style={{ width: '20px', height: '20px', cursor: 'pointer' }} />
-                <label htmlFor="pajak" className="font-sans font-semibold cursor-pointer" style={{ marginBottom: 0 }}>Tambahkan Faktur Pajak (PPN 11%)</label>
-              </div>
-            </div>
-
-            <div className="payment-summary mb-6 p-4 rounded border border-gray-200" style={{ backgroundColor: '#F3F4F6' }}>
-              <div className="summary-row mb-2">
-                <span className="text-secondary">Sub Total</span>
-                <span className="font-mono-num font-semibold">{formatCurrency(rawTotalPrice)}</span>
-              </div>
-              <div className="summary-row mb-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  Diskon
-                  <select
-                    value={paymentState.discountType}
-                    onChange={(e) => setPaymentState(prev => ({ ...prev, discountType: e.target.value, discountValue: 0 }))}
-                    style={{ backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '4px', color: '#171717', padding: '2px 4px', fontSize: '12px', outline: 'none' }}
-                  >
-                    <option value="nominal" style={{ color: '#000' }}>Rp</option>
-                    <option value="persen" style={{ color: '#000' }}>%</option>
-                  </select>
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {paymentState.discountType === 'nominal' && <span className="font-mono-num font-semibold text-primary">Rp</span>}
-                  <input
-                    type="text"
-                    className="font-mono-num font-semibold text-primary text-right"
-                    style={{ width: paymentState.discountType === 'persen' ? '60px' : '130px', padding: '4px 8px', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '4px', color: '#171717', outline: 'none' }}
-                    value={paymentState.discountValue === 0 ? '' : (paymentState.discountType === 'persen' ? paymentState.discountValue : paymentState.discountValue.toLocaleString('id-ID'))}
-                    onChange={(e) => {
-                      const rawValue = e.target.value.replace(/\D/g, '');
-                      const val = parseInt(rawValue, 10) || 0;
-                      let finalVal = val;
-                      if (paymentState.discountType === 'persen' && val > 100) finalVal = 100;
-                      setPaymentState(prev => ({ ...prev, discountValue: finalVal }));
-                    }}
-                    placeholder="0"
-                  />
-                  {paymentState.discountType === 'persen' && <span className="font-mono-num font-semibold text-primary">%</span>}
+        <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 9999, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '3rem 1rem', overflowY: 'auto' }}>
+          <div className="modal-content payment-modal" style={{ width: '850px', maxWidth: '95%', position: 'relative', margin: 'auto', backgroundColor: '#ffffff', borderRadius: '24px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden' }}>
+            
+            {/* Header */}
+            <div style={{ padding: '32px 32px 24px', borderBottom: '1px solid #f3f4f6', backgroundColor: '#f8fafc', position: 'relative' }}>
+              <button onClick={() => setShowPaymentModal(false)} style={{ position: 'absolute', top: '24px', right: '24px', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#ffffff'}><X size={20} /></button>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                <div style={{ backgroundColor: '#e0e7ff', padding: '16px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.1)' }}>
+                  <Wallet size={36} color="#4f46e5" />
                 </div>
-              </div>
-              {discountAmount > 0 && (
-                <div className="summary-row mb-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span className="text-secondary">Total Setelah Diskon</span>
-                  <span className="font-mono-num font-semibold">{formatCurrency(totalPrice)}</span>
+                <div style={{ textAlign: 'center' }}>
+                  <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 'bold', color: '#111827', fontFamily: '"Inter", sans-serif' }}>Checkout Pembayaran</h2>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#6b7280' }}>Selesaikan transaksi dan tentukan metode pembayaran</p>
                 </div>
-              )}
-              {paymentState.useTax && (
-                <div className="summary-row mb-2">
-                  <span className="text-secondary">PPN 11%</span>
-                  <span className="font-mono-num font-semibold text-red-500">+ {formatCurrency(taxAmount)}</span>
-                </div>
-              )}
-              <div className="summary-row pt-2 border-t border-gray-200">
-                <span className="font-semibold">Net Total Tagihan</span>
-                <span className="font-mono-num text-xl font-bold">{formatCurrency(netTotal)}</span>
-              </div>
-              <div className="summary-row pt-2 mt-2 border-t border-gray-200" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span className="font-semibold">Telah Dibayar</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="font-mono-num font-semibold text-primary">Rp</span>
-                  <input
-                    type="text"
-                    className="font-mono-num font-semibold text-primary text-right"
-                    style={{ width: '130px', padding: '4px 8px', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '4px', color: '#171717' }}
-                    value={modalPaidAmount === 0 ? '' : modalPaidAmount.toLocaleString('id-ID')}
-                    onChange={(e) => {
-                      const rawValue = e.target.value.replace(/\D/g, '');
-                      const val = parseInt(rawValue, 10) || 0;
-                      setPaymentState(prev => ({
-                        ...prev,
-                        type: prev.type === 'Kredit Dagang' && val < netTotal ? 'Kredit Dagang' : (val === netTotal ? 'Lunas' : (val === 0 ? 'Tanpa DP' : 'DP Custom')),
-                        dpAmount: val
-                      }));
-                    }}
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-              <div className="summary-row pt-2 mt-2 border-t border-gray-500">
-                <span className="font-semibold">Sisa Tagihan</span>
-                <span className="font-mono-num font-semibold text-red-500">{formatCurrency(modalRemainingAmount)}</span>
               </div>
             </div>
 
-            <div className="form-group mb-6">
-              <label className="font-mono-ui text-sm text-secondary mb-2 block">Tipe Pembayaran</label>
-              <div className="radio-group">
-                <label className={`radio-card ${paymentState.type === 'Lunas' ? 'active' : ''}`}>
-                  <input type="radio" checked={paymentState.type === 'Lunas'} onChange={() => setPaymentState(prev => ({ ...prev, type: 'Lunas' }))} className="hidden-radio" />
-                  <div className="radio-content">
-                    <span className="font-sans font-semibold">Lunas</span>
-                  </div>
-                </label>
-                <label className={`radio-card ${paymentState.type === 'Kredit Dagang' ? 'active' : ''}`}>
-                  <input type="radio" checked={paymentState.type === 'Kredit Dagang'} onChange={() => setPaymentState(prev => ({ ...prev, type: 'Kredit Dagang', dpAmount: 0 }))} className="hidden-radio" />
-                  <div className="radio-content">
-                    <span className="font-sans font-semibold">Kredit Dagang (Credit Term)</span>
-                  </div>
-                </label>
-                <label className={`radio-card ${paymentState.type === 'DP 50%' ? 'active' : ''}`}>
-                  <input type="radio" checked={paymentState.type === 'DP 50%'} onChange={() => setPaymentState(prev => ({ ...prev, type: 'DP 50%', dpAmount: netTotal / 2 }))} className="hidden-radio" />
-                  <div className="radio-content">
-                    <span className="font-sans font-semibold">DP 50%</span>
-                  </div>
-                </label>
-                <label className={`radio-card ${paymentState.type === 'DP Custom' ? 'active' : ''}`}>
-                  <input type="radio" checked={paymentState.type === 'DP Custom'} onChange={() => setPaymentState(prev => ({ ...prev, type: 'DP Custom', dpAmount: 0 }))} className="hidden-radio" />
-                  <div className="radio-content">
-                    <span className="font-sans font-semibold">DP Custom</span>
-                  </div>
-                </label>
-                <label className={`radio-card ${paymentState.type === 'Tanpa DP' ? 'active' : ''}`}>
-                  <input type="radio" checked={paymentState.type === 'Tanpa DP'} onChange={() => setPaymentState(prev => ({ ...prev, type: 'Tanpa DP', dpAmount: 0 }))} className="hidden-radio" />
-                  <div className="radio-content">
-                    <span className="font-sans font-semibold">Tanpa DP</span>
-                  </div>
-                </label>
+            {/* Body */}
+            <div style={{ padding: '32px' }}>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', backgroundColor: '#f9fafb', borderRadius: '10px', border: '1px dashed #d1d5db', marginBottom: '24px' }}>
+                <input type="checkbox" id="pajak" checked={paymentState.useTax} onChange={e => setPaymentState(prev => ({ ...prev, useTax: e.target.checked }))} style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#4f46e5' }} />
+                <label htmlFor="pajak" style={{ fontSize: '14px', fontWeight: '600', color: '#374151', cursor: 'pointer', margin: 0, userSelect: 'none' }}>Tambahkan Faktur Pajak (PPN 11%)</label>
               </div>
-              {paymentState.type === 'DP Custom' && (
-                <div className="mt-3">
-                  <input type="number" className="input-field" value={paymentState.dpAmount || ''} onChange={e => setPaymentState(prev => ({ ...prev, dpAmount: parseInt(e.target.value) || 0 }))} placeholder="Nominal DP (Rp)" />
-                </div>
-              )}
-              {paymentState.type === 'Kredit Dagang' && (
-                <div className="mt-3">
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '12px' }}>
-                    <div>
-                      <label className="font-mono-ui text-xs text-secondary mb-1 block">Tanggal Jatuh Tempo (Batas Akhir Pelunasan)</label>
-                      <input type="date" className="input-field w-full" value={paymentState.terminStartDate || ''} onChange={e => setPaymentState(prev => ({ ...prev, terminStartDate: e.target.value }))} />
+
+              <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e5e7eb', padding: '24px', marginBottom: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+                <h3 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ringkasan Finansial</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '14px', color: '#4b5563' }}>Sub Total</span>
+                    <span style={{ fontSize: '15px', fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>{formatCurrency(rawTotalPrice)}</span>
+                  </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '14px', color: '#4b5563', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      Diskon
+                      <select
+                        value={paymentState.discountType}
+                        onChange={(e) => setPaymentState(prev => ({ ...prev, discountType: e.target.value, discountValue: 0 }))}
+                        style={{ backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '6px', color: '#171717', padding: '4px 8px', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
+                      >
+                        <option value="nominal" style={{ color: '#000' }}>Rp</option>
+                        <option value="persen" style={{ color: '#000' }}>%</option>
+                      </select>
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {paymentState.discountType === 'nominal' && <span style={{ fontSize: '14px', fontWeight: '600', color: '#4f46e5', fontFamily: 'monospace' }}>Rp</span>}
+                      <input
+                        type="text"
+                        style={{ width: paymentState.discountType === 'persen' ? '60px' : '130px', padding: '6px 10px', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '6px', color: '#171717', outline: 'none', fontSize: '14px', fontWeight: '600', textAlign: 'right', fontFamily: 'monospace', transition: 'border-color 0.2s' }}
+                        onFocus={e => e.target.style.borderColor = '#4f46e5'}
+                        onBlur={e => e.target.style.borderColor = '#d1d5db'}
+                        value={paymentState.discountValue === 0 ? '' : (paymentState.discountType === 'persen' ? paymentState.discountValue : paymentState.discountValue.toLocaleString('id-ID'))}
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/\D/g, '');
+                          const val = parseInt(rawValue, 10) || 0;
+                          let finalVal = val;
+                          if (paymentState.discountType === 'persen' && val > 100) finalVal = 100;
+                          setPaymentState(prev => ({ ...prev, discountValue: finalVal }));
+                        }}
+                        placeholder="0"
+                      />
+                      {paymentState.discountType === 'persen' && <span style={{ fontSize: '14px', fontWeight: '600', color: '#4f46e5', fontFamily: 'monospace' }}>%</span>}
                     </div>
                   </div>
 
-                  {paymentState.terminStartDate && (
-                    <div className="mt-3 p-3" style={{ backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '6px', border: '1px solid #374151' }}>
-                      <label className="font-mono-ui text-xs text-white mb-2 block font-semibold">Preview Jadwal Pembayaran</label>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {(() => {
-                          const hasDP = modalPaidAmount > 0;
-                          const remainingToSplit = netTotal - modalPaidAmount;
-
-                          return (
-                            <>
-                              {hasDP && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px dashed #4b5563', paddingBottom: '6px' }}>
-                                  <span className="text-gray-300">DP Awal &bull; Saat Ini</span>
-                                  <span className="font-mono-num font-semibold text-white">{modalPaidAmount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
-                                </div>
-                              )}
-                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                                <span className="text-gray-300">Pelunasan &bull; {new Date(paymentState.terminStartDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                                <span className="font-mono-num font-semibold text-white">{remainingToSplit.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
+                  {discountAmount > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '14px', color: '#4b5563' }}>Total Setelah Diskon</span>
+                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>{formatCurrency(totalPrice)}</span>
                     </div>
                   )}
+
+                  {paymentState.useTax && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '14px', color: '#4b5563' }}>PPN 11%</span>
+                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#ef4444', fontFamily: 'monospace' }}>+ {formatCurrency(taxAmount)}</span>
+                    </div>
+                  )}
+                  
+                  <div style={{ height: '1px', backgroundColor: '#e5e7eb', margin: '4px 0' }}></div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>Net Total Tagihan</span>
+                    <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827', fontFamily: 'monospace' }}>{formatCurrency(netTotal)}</span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>Telah Dibayar</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#10b981', fontFamily: 'monospace' }}>Rp</span>
+                      <input
+                        type="text"
+                        style={{ width: '130px', padding: '6px 10px', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '6px', color: '#171717', outline: 'none', fontSize: '14px', fontWeight: '600', textAlign: 'right', fontFamily: 'monospace', transition: 'border-color 0.2s' }}
+                        onFocus={e => e.target.style.borderColor = '#10b981'}
+                        onBlur={e => e.target.style.borderColor = '#d1d5db'}
+                        value={modalPaidAmount === 0 ? '' : modalPaidAmount.toLocaleString('id-ID')}
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/\D/g, '');
+                          const val = parseInt(rawValue, 10) || 0;
+                          setPaymentState(prev => ({
+                            ...prev,
+                            type: prev.type === 'Kredit Dagang' && val < netTotal ? 'Kredit Dagang' : (val === netTotal ? 'Lunas' : (val === 0 ? 'Tanpa DP' : 'DP Custom')),
+                            dpAmount: val
+                          }));
+                        }}
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div style={{ height: '2px', borderBottom: '2px dashed #e5e7eb', margin: '4px 0' }}></div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fef2f2', padding: '16px', borderRadius: '12px', border: '1px solid #fecaca' }}>
+                    <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#991b1b' }}>Sisa Tagihan</span>
+                    <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#b91c1c', fontFamily: 'monospace' }}>{formatCurrency(modalRemainingAmount)}</span>
+                  </div>
                 </div>
-              )}
-            </div>
-
-            <div className="form-group mb-6">
-              <label className="font-mono-ui text-sm text-secondary mb-2 block">Metode Pembayaran</label>
-              <div className="radio-group" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
-                {['Penagihan', 'QRIS', 'Cash', 'Debit', 'Kartu Kredit', 'Transfer Bank', 'Online Shop', 'Free of Charge', 'Penawaran'].map(m => {
-                  const isDisabled = modalPaidAmount === 0 && m !== 'Penagihan';
-                  return (
-                    <label key={m} className={`radio-card ${paymentState.method === m ? 'active' : ''} ${isDisabled ? 'cursor-not-allowed' : ''}`} style={isDisabled ? { opacity: 0.4, pointerEvents: 'none', filter: 'grayscale(100%)' } : {}}>
-                      <input type="radio" disabled={isDisabled} checked={paymentState.method === m} onChange={() => setPaymentState(prev => ({ ...prev, method: m }))} className="hidden-radio" />
-                      <div className="radio-content items-center text-center p-2">
-                        <span className="font-sans font-semibold" style={{ fontSize: '13px' }}>{m}</span>
-                      </div>
-                    </label>
-                  );
-                })}
               </div>
-            </div>
 
-            <div className="form-group mb-6">
-              <label className="font-mono-ui text-sm text-secondary mb-2 block">Upload file</label>
+              <div style={{ marginBottom: '32px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', color: '#374151', marginBottom: '16px' }}>Tipe Pembayaran</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
+                  {['Lunas', 'Kredit Dagang', 'DP 50%', 'DP Custom', 'Tanpa DP'].map(type => {
+                    const isActive = paymentState.type === type;
+                    return (
+                      <div 
+                        key={type}
+                        onClick={() => {
+                          if (type === 'Lunas') setPaymentState(prev => ({ ...prev, type, dpAmount: netTotal }));
+                          else if (type === 'DP 50%') setPaymentState(prev => ({ ...prev, type, dpAmount: netTotal / 2 }));
+                          else if (type === 'Kredit Dagang') setPaymentState(prev => ({ ...prev, type, dpAmount: 0 }));
+                          else setPaymentState(prev => ({ ...prev, type, dpAmount: 0 }));
+                        }}
+                        style={{ 
+                          padding: '16px 12px', 
+                          borderRadius: '12px', 
+                          border: isActive ? '2px solid #4f46e5' : '1px solid #d1d5db', 
+                          backgroundColor: isActive ? '#4f46e5' : '#ffffff',
+                          color: isActive ? '#ffffff' : '#374151',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          fontWeight: '600',
+                          fontSize: '13px',
+                          lineHeight: '1.2',
+                          transition: 'all 0.2s ease',
+                          boxShadow: isActive ? '0 4px 6px -1px rgba(79, 70, 229, 0.2)' : 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        onMouseOver={e => { if(!isActive) { e.currentTarget.style.borderColor = '#9ca3af'; e.currentTarget.style.backgroundColor = '#f9fafb'; } }}
+                        onMouseOut={e => { if(!isActive) { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.backgroundColor = '#ffffff'; } }}
+                      >
+                        {type === 'Kredit Dagang' ? 'Kredit Dagang (Credit Term)' : type}
+                      </div>
+                    )
+                  })}
+                </div>
+                {paymentState.type === 'DP Custom' && (
+                  <div style={{ marginTop: '16px', animation: 'fadeIn 0.3s ease' }}>
+                    <input 
+                      type="number" 
+                      style={{ width: '100%', padding: '14px 16px', borderRadius: '10px', border: '2px solid #4f46e5', fontSize: '15px', fontWeight: 'bold', color: '#111827', outline: 'none', boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.1)' }}
+                      value={paymentState.dpAmount || ''} 
+                      onChange={e => setPaymentState(prev => ({ ...prev, dpAmount: parseInt(e.target.value) || 0 }))} 
+                      placeholder="Masukkan Nominal DP (Rp)" 
+                    />
+                  </div>
+                )}
+                {paymentState.type === 'Kredit Dagang' && (
+                  <div style={{ marginTop: '16px', animation: 'fadeIn 0.3s ease', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px' }}>
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#4b5563', marginBottom: '8px' }}>Tanggal Jatuh Tempo (Batas Akhir Pelunasan)</label>
+                      <input 
+                        type="date" 
+                        style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '2px solid #d1d5db', fontSize: '14px', backgroundColor: '#fff', color: '#111827', outline: 'none', transition: 'border-color 0.2s' }}
+                        onFocus={e => { e.target.style.borderColor = '#4f46e5'; }}
+                        onBlur={e => { e.target.style.borderColor = '#d1d5db'; }}
+                        value={paymentState.terminStartDate || ''} 
+                        onChange={e => setPaymentState(prev => ({ ...prev, terminStartDate: e.target.value }))} 
+                      />
+                    </div>
+                    {paymentState.terminStartDate && (
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e5e7eb', padding: '16px' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#4f46e5', marginBottom: '12px' }}>Preview Jadwal Pembayaran</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {(() => {
+                            const hasDP = modalPaidAmount > 0;
+                            const remainingToSplit = netTotal - modalPaidAmount;
 
-              {!paymentState.paymentProofName ? (
-                <>
+                            return (
+                              <>
+                                {hasDP && (
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', borderBottom: '1px dashed #d1d5db', paddingBottom: '8px' }}>
+                                    <span style={{ color: '#6b7280' }}>DP Awal &bull; Saat Ini</span>
+                                    <span style={{ fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>{modalPaidAmount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
+                                  </div>
+                                )}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', paddingTop: hasDP ? '4px' : '0' }}>
+                                  <span style={{ color: '#6b7280' }}>Pelunasan &bull; {new Date(paymentState.terminStartDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                  <span style={{ fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>{remainingToSplit.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ marginBottom: '32px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', color: '#374151', marginBottom: '16px' }}>Metode Pembayaran</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '12px' }}>
+                  {[
+                    { id: 'Penagihan', icon: <FileText size={20} /> },
+                    { id: 'QRIS', icon: <QrCode size={20} /> },
+                    { id: 'Cash', icon: <Banknote size={20} /> },
+                    { id: 'Debit', icon: <CreditCard size={20} /> },
+                    { id: 'Kartu Kredit', icon: <CreditCard size={20} /> },
+                    { id: 'Transfer Bank', icon: <Banknote size={20} /> },
+                    { id: 'Online Shop', icon: <ShoppingCart size={20} /> },
+                    { id: 'Free of Charge', icon: <Gift size={20} /> },
+                    { id: 'Penawaran', icon: <FileText size={20} /> }
+                  ].map(m => {
+                    const isActive = paymentState.method === m.id;
+                    const isDisabled = modalPaidAmount === 0 && m.id !== 'Penagihan';
+                    return (
+                      <div 
+                        key={m.id} 
+                        onClick={() => { if(!isDisabled) setPaymentState(prev => ({ ...prev, method: m.id })) }}
+                        style={{ 
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          padding: '16px 12px', 
+                          borderRadius: '12px', 
+                          border: isActive ? '2px solid #4f46e5' : '1px solid #e5e7eb', 
+                          backgroundColor: isActive ? '#eef2ff' : '#ffffff',
+                          color: isActive ? '#4f46e5' : '#6b7280',
+                          cursor: isDisabled ? 'not-allowed' : 'pointer',
+                          transition: 'all 0.2s',
+                          opacity: isDisabled ? 0.4 : 1,
+                          filter: isDisabled ? 'grayscale(100%)' : 'none'
+                        }}
+                        onMouseOver={e => { if(!isActive && !isDisabled) { e.currentTarget.style.borderColor = '#c7d2fe'; e.currentTarget.style.backgroundColor = '#f8fafc'; } }}
+                        onMouseOut={e => { if(!isActive && !isDisabled) { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.backgroundColor = '#ffffff'; } }}
+                      >
+                        <div style={{ color: isActive ? '#4f46e5' : '#9ca3af', transition: 'color 0.2s' }}>
+                          {m.icon}
+                        </div>
+                        <span style={{ fontSize: '13px', fontWeight: isActive ? '700' : '500', textAlign: 'center', lineHeight: '1.2' }}>{m.id}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', color: '#374151', marginBottom: '12px' }}>
+                  <Upload size={16} color="#6b7280" /> Upload Bukti Pembayaran
+                </label>
+
+                {!paymentState.paymentProofName ? (
                   <div
-                    className={`upload-dropzone ${isDragging ? 'dragging' : ''}`}
                     onClick={() => fileInputRef.current?.click()}
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                     onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
@@ -1342,77 +1415,88 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                         reader.readAsDataURL(file);
                       }
                     }}
+                    style={{ 
+                      border: isDragging ? '2px dashed #4f46e5' : '2px dashed #d1d5db', 
+                      borderRadius: '16px', 
+                      padding: '40px 24px', 
+                      textAlign: 'center', 
+                      backgroundColor: isDragging ? '#eef2ff' : '#f9fafb',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}
+                    onMouseOver={e => { e.currentTarget.style.borderColor = '#4f46e5'; e.currentTarget.style.backgroundColor = '#eef2ff'; }}
+                    onMouseOut={e => { if(!isDragging) { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.backgroundColor = '#f9fafb'; } }}
                   >
                     <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*,application/pdf" onChange={handleFileUpload} />
-                    <Upload size={32} className="mx-auto mb-3 text-secondary" style={{ color: isDragging ? '#10b981' : '#fff' }} />
-                    <p style={{ color: '#fff', fontSize: '14px' }}>
-                      Drag and Drop file here or <span style={{ textDecoration: 'underline', fontWeight: 'bold' }}>Choose file</span>
-                    </p>
+                    <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '50%', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                      <Upload size={24} color="#4f46e5" />
+                    </div>
+                    <div>
+                      <p style={{ color: '#374151', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>Klik untuk upload atau drag and drop</p>
+                      <p style={{ color: '#6b7280', fontSize: '13px', margin: 0 }}>Maksimal ukuran file: 5MB (JPG, PNG, PDF)</p>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: '#9ca3af' }}>
-                    <span>Supported formats: JPG, PNG, PDF</span>
-                    <span>Maximum size: 5MB</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: '#9ca3af', marginBottom: '12px' }}>
-                    <span>Supported formats: JPG, PNG, PDF</span>
-                    <span>Maximum size: 5MB</span>
-                  </div>
-                  <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '16px', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative' }}>
-                    <div style={{ backgroundColor: '#10b981', padding: '10px', borderRadius: '4px' }}>
-                      <FileText size={24} style={{ color: '#fff' }} />
+                ) : (
+                  <div style={{ backgroundColor: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ backgroundColor: '#10b981', padding: '12px', borderRadius: '8px' }}>
+                      <FileText size={24} color="#ffffff" />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <p style={{ color: '#fff', fontSize: '14px', fontWeight: 'bold', margin: 0 }}>{paymentState.paymentProofName}</p>
-                      <p style={{ color: '#9ca3af', fontSize: '12px', margin: 0 }}>File ready</p>
-                      <div style={{ height: '4px', backgroundColor: '#10b981', width: '100%', borderRadius: '2px', marginTop: '8px' }}></div>
+                      <p style={{ color: '#065f46', fontSize: '14px', fontWeight: 'bold', margin: '0 0 4px 0' }}>{paymentState.paymentProofName}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <CheckCircle size={14} color="#10b981" />
+                        <span style={{ color: '#059669', fontSize: '12px', fontWeight: '500' }}>File siap diunggah</span>
+                      </div>
                     </div>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setPaymentState(prev => ({ ...prev, paymentProof: null, paymentProofName: '' }));
                       }}
-                      style={{ background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}
+                      style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
+                      onMouseOver={e => { e.currentTarget.style.backgroundColor = '#fef2f2'; e.currentTarget.style.color = '#dc2626'; }}
+                      onMouseOut={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#ef4444'; }}
                     >
-                      <X size={20} />
+                      <X size={16} />
                     </button>
                   </div>
-                </>
-              )}
+                )}
+              </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem' }}>
+            {/* Footer */}
+            <div style={{ padding: '24px 32px', borderTop: '1px solid #f3f4f6', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
               <button
                 type="button"
-                className="btn-batal"
                 onClick={() => setShowPaymentModal(false)}
                 disabled={isSubmitting}
-                style={{ opacity: isSubmitting ? 0.5 : 1 }}
+                style={{ opacity: isSubmitting ? 0.5 : 1, padding: '12px 24px', borderRadius: '10px', fontSize: '15px', fontWeight: '600', color: '#4b5563', backgroundColor: '#ffffff', border: '1px solid #d1d5db', cursor: isSubmitting ? 'not-allowed' : 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
+                onMouseOver={e => { if(!isSubmitting) e.currentTarget.style.backgroundColor = '#f9fafb' }}
+                onMouseOut={e => { if(!isSubmitting) e.currentTarget.style.backgroundColor = '#ffffff' }}
               >
                 Batal
               </button>
               <button
                 type="button"
-                className="btn-konfirmasi"
                 onClick={handleConfirmPayment}
                 disabled={isSubmitting}
-                style={{
-                  opacity: isSubmitting ? 0.7 : 1,
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
+                style={{ padding: '12px 32px', borderRadius: '10px', fontSize: '15px', fontWeight: '600', color: '#ffffff', backgroundColor: '#4f46e5', border: 'none', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1, transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.3)', display: 'flex', alignItems: 'center', gap: '8px' }}
+                onMouseOver={e => { if(!isSubmitting) e.currentTarget.style.backgroundColor = '#4338ca' }}
+                onMouseOut={e => { if(!isSubmitting) e.currentTarget.style.backgroundColor = '#4f46e5' }}
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 size={16} className="animate-spin" />
+                    <Loader2 size={18} className="animate-spin" />
                     Loading...
                   </>
                 ) : (
-                  'Konfirmasi'
+                  <>
+                    <CheckCircle size={18} /> Konfirmasi Pembayaran
+                  </>
                 )}
               </button>
             </div>
