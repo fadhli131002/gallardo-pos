@@ -129,8 +129,8 @@ const AdminDashboard = () => {
     <div className="dashboard-container animate-fade-in">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Admin Workspace</h1>
-          <p className="page-subtitle">Pusat kendali operasional, order masuk, dan penugasan</p>
+          <h1 className="page-title">Halo, {displayName} 👋</h1>
+          <p className="page-subtitle">Admin Workspace - Pusat kendali operasional, order masuk, dan penugasan</p>
         </div>
       </div>
 

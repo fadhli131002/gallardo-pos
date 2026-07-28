@@ -120,8 +120,8 @@ const Dashboard = () => {
       {/* HEADER */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Dashboard Operasional</h1>
-          <p className="page-subtitle">Ringkasan aktivitas dan performa bengkel hari ini</p>
+          <h1 className="page-title">Halo, {userName || 'Sales'} 👋</h1>
+          <p className="page-subtitle">Dashboard Operasional - Ringkasan aktivitas dan performa bengkel hari ini</p>
         </div>
 
         {/* Right side actions - simulating Hostinger Top Nav */}

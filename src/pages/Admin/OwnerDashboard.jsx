@@ -33,8 +33,11 @@ import {
 } from 'recharts';
 import { toast } from 'sonner';
 import './OwnerDashboard.css';
+import { useAuth } from '../../context/AuthContext';
 
 export default function OwnerDashboard() {
+  const { user } = useAuth();
+  const userName = user?.name || 'Owner';
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [month, setMonth] = useState('');
 
@@ -215,8 +218,8 @@ export default function OwnerDashboard() {
       {/* HEADER */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Executive Dashboard</h1>
-          <p className="page-subtitle">Ringkasan kinerja bisnis, pendapatan, dan efisiensi operasional</p>
+          <h1 className="page-title">Halo, {userName} 👋</h1>
+          <p className="page-subtitle">Executive Dashboard - Ringkasan kinerja bisnis, pendapatan, dan efisiensi operasional</p>
         </div>
         <div className="header-actions">
           <button onClick={toggleTheme} className="btn-icon theme-toggle-btn" title="Toggle Theme">
