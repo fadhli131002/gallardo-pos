@@ -151,25 +151,28 @@ const WarrantyModal = ({ order, onClose }) => {
   }, [onClose]);
 
   return (
-    <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(4px)' }} onClick={onClose}>
-      <div className="modal-content animate-fade-in" style={{ width: '480px', maxWidth: '100%', position: 'relative', display: 'flex', flexDirection: 'column', maxHeight: '95vh' }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '16px', backgroundColor: '#f3f4f6', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', borderBottom: '1px solid #e5e7eb' }}>
-          <button onClick={handleDownload} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#059669'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#10b981'}>
-            <Download size={18} /> Unduh PDF (A6)
-          </button>
-          <button onClick={onClose} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', backgroundColor: '#e5e7eb', color: '#374151', border: 'none', borderRadius: '50%', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#d1d5db'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#e5e7eb'}>
-            <X size={20} />
-          </button>
-        </div>
+    <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px' }} onClick={onClose}>
+      
+      {/* Floating Action Bar */}
+      <div className="animate-fade-in" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '12px 16px', backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(4px)', borderRadius: '16px', marginBottom: '24px', width: '100%', maxWidth: '460px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }} onClick={e => e.stopPropagation()}>
+        <button onClick={handleDownload} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 16px', backgroundColor: '#10b981', color: '#ffffff', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)', fontSize: '14px' }} onMouseOver={e => { e.currentTarget.style.backgroundColor = '#059669'; e.currentTarget.style.transform = 'translateY(-1px)' }} onMouseOut={e => { e.currentTarget.style.backgroundColor = '#10b981'; e.currentTarget.style.transform = 'none' }}>
+          <Download size={18} /> Unduh PDF (A6)
+        </button>
+        <button onClick={onClose} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', backgroundColor: '#ffffff', color: '#4b5563', border: '1px solid #d1d5db', borderRadius: '10px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.backgroundColor = '#f3f4f6'; e.currentTarget.style.color = '#111827' }} onMouseOut={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#4b5563' }}>
+          <X size={20} />
+        </button>
+      </div>
 
+      <div className="modal-content animate-scale-up" style={{ width: '460px', maxWidth: '100%', position: 'relative', display: 'flex', flexDirection: 'column', maxHeight: 'calc(100vh - 120px)' }} onClick={e => e.stopPropagation()}>
+        
         {/* Certificate Preview Container */}
-        <div style={{ backgroundColor: '#d1d5db', padding: '24px', display: 'flex', justifyContent: 'center', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
-          <div className="overflow-y-auto max-h-[70vh] w-full flex justify-center bg-gray-100 p-4 rounded-md">
+        <div style={{ backgroundColor: 'transparent', display: 'flex', justifyContent: 'center', overflowY: 'auto', paddingBottom: '16px' }} className="custom-scrollbar">
+          <div className="flex justify-center" style={{ borderRadius: '4px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
             <div 
               ref={printRef}
-              className="bg-white text-black px-8 py-14 mx-auto relative w-[420px] min-h-[595px] flex flex-col justify-between shrink-0 box-border shadow-md"
+              className="bg-white text-black px-10 py-12 relative w-[420px] min-h-[595px] flex flex-col justify-between shrink-0 box-border"
               style={{ 
-                
+                border: '1px solid #e5e7eb'
               }}
             >
             {/* 2. Header */}

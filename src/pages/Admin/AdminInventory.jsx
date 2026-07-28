@@ -724,10 +724,10 @@ const AdminInventory = () => {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="modal-content premium-card relative" style={{ width: '420px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '16px', padding: '2rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+          <div className="modal-content premium-card relative animate-scale-up" style={{ width: '100%', maxWidth: '400px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '24px', padding: '32px 24px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
 
-            <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 6h18"></path>
                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
@@ -736,27 +736,29 @@ const AdminInventory = () => {
               </svg>
             </div>
 
-            <h2 className="font-sans font-bold text-xl mb-3" style={{ color: '#111827', fontSize: '1.5rem' }}>Hapus Data Stok?</h2>
-            <p className="font-sans mb-8" style={{ color: '#4b5563', fontSize: '1rem', lineHeight: '1.5' }}>
-              Data stok yang dihapus tidak dapat dikembalikan. Anda yakin ingin melanjutkan?
-            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '32px' }}>
+              <h2 className="font-sans font-bold" style={{ color: '#111827', fontSize: '1.25rem', margin: 0 }}>Hapus Data Stok?</h2>
+              <p className="font-sans" style={{ color: '#6b7280', fontSize: '0.9375rem', lineHeight: '1.6', margin: 0, padding: '0 12px' }}>
+                Data stok yang dihapus tidak dapat dikembalikan. Anda yakin ingin melanjutkan?
+              </p>
+            </div>
 
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
               <button
                 onClick={cancelDelete}
-                style={{ flex: 1, padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px', color: '#374151', background: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#fff'}
+                style={{ flex: 1, padding: '12px', border: '1px solid #d1d5db', borderRadius: '12px', color: '#4b5563', background: '#ffffff', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', fontSize: '14px' }}
+                onMouseOver={(e) => { e.target.style.backgroundColor = '#f3f4f6'; e.target.style.color = '#111827'; }}
+                onMouseOut={(e) => { e.target.style.backgroundColor = '#ffffff'; e.target.style.color = '#4b5563'; }}
               >
-                BATAL
+                Batal
               </button>
               <button
                 onClick={confirmDelete}
-                style={{ flex: 1, padding: '0.75rem', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.3)' }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#dc2626'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#ef4444'}
+                style={{ flex: 1, padding: '12px', backgroundColor: '#ef4444', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', fontSize: '14px', boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.2)' }}
+                onMouseOver={(e) => { e.target.style.backgroundColor = '#dc2626'; e.target.style.boxShadow = '0 10px 15px -3px rgba(239, 68, 68, 0.3)'; e.target.style.transform = 'translateY(-1px)'; }}
+                onMouseOut={(e) => { e.target.style.backgroundColor = '#ef4444'; e.target.style.boxShadow = '0 4px 6px -1px rgba(239, 68, 68, 0.2)'; e.target.style.transform = 'none'; }}
               >
-                HAPUS DATA
+                Hapus Data
               </button>
             </div>
           </div>
