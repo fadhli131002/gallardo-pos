@@ -61,7 +61,7 @@
 }
 
 .login-header h1 {
-  font-family: 'Inter', 'Poppins', sans-serif;
+  
   font-size: 1.8rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -70,7 +70,7 @@
 }
 
 .login-header p {
-  font-family: 'Inter', 'Poppins', sans-serif;
+  
   font-weight: 400;
   color: #9CA3AF;
   font-size: 0.875rem;
@@ -89,7 +89,7 @@
 }
 
 .input-group label {
-  font-family: 'Inter', 'Poppins', sans-serif;
+  
   color: #D1D5DB;
   font-weight: 500;
   font-size: 0.75rem;
@@ -103,7 +103,7 @@
   border-radius: 8px;
   padding: 0.75rem 1rem;
   color: #ffffff;
-  font-family: 'Inter', 'Poppins', sans-serif;
+  
   font-size: 1rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
@@ -154,7 +154,7 @@
   border-radius: 8px;
   padding: 0.75rem 1rem;
   color: #ffffff;
-  font-family: 'Inter', 'Poppins', sans-serif;
+  
   font-size: 1rem;
   cursor: pointer;
   appearance: none;
@@ -192,7 +192,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  font-family: 'Inter', 'Poppins', sans-serif;
+  
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
 }

@@ -114,14 +114,14 @@ const Complaints = () => {
               placeholder="Cari nama pelanggan, plat, atau kendala..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ width: '100%', height: '42px', padding: '0 16px 0 44px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', boxSizing: 'border-box' }}
+              style={{ width: '100%', height: '42px', padding: '0 16px 0 44px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', boxSizing: 'border-box' }}
             />
           </div>
           <div style={{ display: 'flex', itemsCenter: 'center', gap: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
               <Filter size={18} />
               <select
-                style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#f9fafb', cursor: 'pointer' }}
+                style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', backgroundColor: '#f9fafb', cursor: 'pointer' }}
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
@@ -214,7 +214,7 @@ const Complaints = () => {
                   </td>
                   <td style={{ textAlign: 'right', verticalAlign: 'middle' }}>
                     <select
-                      style={{ padding: '6px 12px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '13px', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#fff', cursor: 'pointer', fontWeight: '500' }}
+                      style={{ padding: '6px 12px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '13px', outline: 'none', backgroundColor: '#fff', cursor: 'pointer', fontWeight: '500' }}
                       value={complaint.status}
                       onChange={(e) => updateStatus(complaint.id, e.target.value)}
                     >

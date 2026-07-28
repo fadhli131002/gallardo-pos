@@ -241,7 +241,7 @@ const VehicleMaster = () => {
         <input 
           type="text" 
           placeholder="Cari brand atau model kendaraan..." 
-          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontFamily: 'inherit' }}
+          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none' }}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -261,7 +261,7 @@ const VehicleMaster = () => {
           <tbody>
             {filteredVehicles.map((vehicle) => (
               <tr key={vehicle.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                <td style={{ padding: '16px', color: '#6b7280', fontFamily: 'monospace' }}>#{vehicle.id.toString().padStart(3, '0')}</td>
+                <td style={{ padding: '16px', color: '#6b7280' }}>#{vehicle.id.toString().padStart(3, '0')}</td>
                 <td style={{ padding: '16px', fontWeight: '600', color: '#111' }}>{vehicle.brand}</td>
                 <td style={{ padding: '16px' }}>{vehicle.model}</td>
                 <td style={{ padding: '16px' }}>
@@ -300,7 +300,7 @@ const VehicleMaster = () => {
             <input 
               type="text" 
               placeholder="Masukkan kategori baru (Contoh: GIIAS 2026, Ads Instagram)..." 
-              style={{ flex: 1, border: '1px solid #d1d5db', padding: '10px 16px', borderRadius: '8px', outline: 'none', fontFamily: 'inherit' }}
+              style={{ flex: 1, border: '1px solid #d1d5db', padding: '10px 16px', borderRadius: '8px', outline: 'none' }}
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
@@ -363,7 +363,7 @@ const VehicleMaster = () => {
                   <input 
                     type="text" 
                     placeholder="Cari Nama Peruntukan / Bagian..." 
-                    style={{ width: '100%', border: '1px solid #d1d5db', padding: '10px 16px 10px 40px', borderRadius: '8px', outline: 'none', fontFamily: 'inherit' }}
+                    style={{ width: '100%', border: '1px solid #d1d5db', padding: '10px 16px 10px 40px', borderRadius: '8px', outline: 'none' }}
                     value={peruntukanSearchTerm}
                     onChange={(e) => setPeruntukanSearchTerm(e.target.value)}
                   />
@@ -371,7 +371,7 @@ const VehicleMaster = () => {
                 <select 
                   value={peruntukanFilterKat}
                   onChange={(e) => setPeruntukanFilterKat(e.target.value)}
-                  style={{ border: '1px solid #d1d5db', padding: '10px 16px', borderRadius: '8px', outline: 'none', fontFamily: 'inherit', width: '200px', whiteSpace: 'nowrap' }}
+                  style={{ border: '1px solid #d1d5db', padding: '10px 16px', borderRadius: '8px', outline: 'none', width: '200px', whiteSpace: 'nowrap' }}
                 >
                   <option value="Semua">Semua Kategori</option>
                   <option value="PPF">PPF</option>
@@ -452,7 +452,7 @@ const VehicleMaster = () => {
                 <input 
                   type="text" 
                   placeholder={`Tambahkan opsi ${activeVariantType}...`}
-                  style={{ flex: 1, border: '1px solid #d1d5db', padding: '10px 16px', borderRadius: '8px', outline: 'none', fontFamily: 'inherit' }}
+                  style={{ flex: 1, border: '1px solid #d1d5db', padding: '10px 16px', borderRadius: '8px', outline: 'none' }}
                   value={newVariantValue}
                   onChange={(e) => setNewVariantValue(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddVariantItem()}
@@ -506,16 +506,16 @@ const VehicleMaster = () => {
       {isModalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ width: '400px', backgroundColor: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '20px', fontFamily: 'var(--font-sans)' }}>{editingVehicleId ? 'Edit Kendaraan' : 'Tambah Master Kendaraan'}</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '20px' }}>{editingVehicleId ? 'Edit Kendaraan' : 'Tambah Master Kendaraan'}</h2>
             
             {duplicateError && (
-              <div style={{ padding: '10px 12px', backgroundColor: '#fef2f2', border: '1px solid #f87171', color: '#b91c1c', borderRadius: '6px', fontSize: '0.8rem', fontFamily: 'var(--font-sans)', fontWeight: '600', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ padding: '10px 12px', backgroundColor: '#fef2f2', border: '1px solid #f87171', color: '#b91c1c', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 Data kendaraan ini sudah terdaftar.
               </div>
             )}
 
             <div style={{ marginBottom: '16px', position: 'relative' }} ref={brandInputRef}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', color: '#4b5563', fontWeight: '600', fontFamily: 'var(--font-sans)' }}>Brand Kendaraan</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', color: '#4b5563', fontWeight: '600' }}>Brand Kendaraan</label>
               <input 
                 type="text" 
                 value={formData.brand} 
@@ -525,7 +525,7 @@ const VehicleMaster = () => {
                   setShowBrandDropdown(true);
                   setDuplicateError(false);
                 }} 
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontFamily: 'var(--font-sans)', outline: 'none' }} 
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} 
                 placeholder="Contoh: Honda" 
                 autoComplete="off"
               />
@@ -540,7 +540,7 @@ const VehicleMaster = () => {
                           setFormData({...formData, brand});
                           setShowBrandDropdown(false);
                         }}
-                        style={{ padding: '10px 12px', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: '0.875rem', borderBottom: '1px solid #f3f4f6' }}
+                        style={{ padding: '10px 12px', cursor: 'pointer', fontSize: '0.875rem', borderBottom: '1px solid #f3f4f6' }}
                         onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                         onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
@@ -554,7 +554,7 @@ const VehicleMaster = () => {
                       onClick={() => {
                         setShowBrandDropdown(false);
                       }}
-                      style={{ padding: '10px 12px', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: '0.875rem', color: '#2563eb', fontWeight: '600', backgroundColor: '#eff6ff' }}
+                      style={{ padding: '10px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#2563eb', fontWeight: '600', backgroundColor: '#eff6ff' }}
                     >
                       + Tambah brand: "{formData.brand.trim()}"
                     </div>
@@ -564,7 +564,7 @@ const VehicleMaster = () => {
             </div>
 
             <div style={{ marginBottom: '16px', position: 'relative' }} ref={modelInputRef}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', color: '#4b5563', fontWeight: '600', fontFamily: 'var(--font-sans)' }}>Model Kendaraan</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', color: '#4b5563', fontWeight: '600' }}>Model Kendaraan</label>
               <input 
                 type="text" 
                 value={formData.model} 
@@ -575,7 +575,7 @@ const VehicleMaster = () => {
                   setShowModelDropdown(true);
                   setDuplicateError(false); 
                 }} 
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: !formData.brand.trim() ? '#f3f4f6' : '#fff', cursor: !formData.brand.trim() ? 'not-allowed' : 'text' }} 
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none', backgroundColor: !formData.brand.trim() ? '#f3f4f6' : '#fff', cursor: !formData.brand.trim() ? 'not-allowed' : 'text' }} 
                 placeholder={!formData.brand.trim() ? "Isi Brand Kendaraan terlebih dahulu" : "Contoh: HR-V"}
                 autoComplete="off"
               />
@@ -590,7 +590,7 @@ const VehicleMaster = () => {
                           setFormData({...formData, model});
                           setShowModelDropdown(false);
                         }}
-                        style={{ padding: '10px 12px', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: '0.875rem', borderBottom: '1px solid #f3f4f6' }}
+                        style={{ padding: '10px 12px', cursor: 'pointer', fontSize: '0.875rem', borderBottom: '1px solid #f3f4f6' }}
                         onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                         onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
@@ -599,7 +599,7 @@ const VehicleMaster = () => {
                     ))
                   ) : (
                     formData.model.trim() === '' && (
-                      <div style={{ padding: '10px 12px', fontFamily: 'var(--font-sans)', fontSize: '0.875rem', color: '#6b7280' }}>
+                      <div style={{ padding: '10px 12px', fontSize: '0.875rem', color: '#6b7280' }}>
                         Ketik model untuk {normalizeText(formData.brand)}...
                       </div>
                     )
@@ -610,7 +610,7 @@ const VehicleMaster = () => {
                       onClick={() => {
                         setShowModelDropdown(false);
                       }}
-                      style={{ padding: '10px 12px', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: '0.875rem', color: '#2563eb', fontWeight: '600', backgroundColor: '#eff6ff' }}
+                      style={{ padding: '10px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#2563eb', fontWeight: '600', backgroundColor: '#eff6ff' }}
                     >
                       + Tambah model: "{formData.model.trim()}"
                     </div>
@@ -620,8 +620,8 @@ const VehicleMaster = () => {
             </div>
 
             <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', color: '#4b5563', fontWeight: '600', fontFamily: 'var(--font-sans)' }}>Kategori Ukuran</label>
-              <select value={formData.size} onChange={e => setFormData({...formData, size: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#fff' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', color: '#4b5563', fontWeight: '600' }}>Kategori Ukuran</label>
+              <select value={formData.size} onChange={e => setFormData({...formData, size: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none', backgroundColor: '#fff' }}>
                 <option value="Small">Small</option>
                 <option value="Medium">Medium</option>
                 <option value="Large">Large</option>
@@ -630,8 +630,8 @@ const VehicleMaster = () => {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button onClick={() => { setIsModalOpen(false); setDuplicateError(false); setEditingVehicleId(null); setFormData({ brand: '', model: '', size: 'Medium' }); }} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#fff', fontWeight: '600', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}>Batal</button>
-              <button onClick={handleSaveVehicle} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#111', color: '#fff', fontWeight: '600', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}>Simpan Data</button>
+              <button onClick={() => { setIsModalOpen(false); setDuplicateError(false); setEditingVehicleId(null); setFormData({ brand: '', model: '', size: 'Medium' }); }} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#fff', fontWeight: '600', cursor: 'pointer' }}>Batal</button>
+              <button onClick={handleSaveVehicle} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#111', color: '#fff', fontWeight: '600', cursor: 'pointer' }}>Simpan Data</button>
             </div>
           </div>
         </div>
@@ -685,7 +685,7 @@ const VehicleMaster = () => {
             <tbody>
               {salesItems.map((sales) => (
                 <tr key={sales.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '16px', color: '#6b7280', fontFamily: 'monospace' }}>{sales.id}</td>
+                  <td style={{ padding: '16px', color: '#6b7280' }}>{sales.id}</td>
                   <td style={{ padding: '16px', fontWeight: '600', color: '#111' }}>
                     {editingSalesId === sales.id ? (
                       <input 

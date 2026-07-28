@@ -356,7 +356,7 @@ const AdminCustomerWarranty = () => {
                 placeholder="Cari nama, plat mobil, no rangka..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ width: '100%', height: '42px', padding: '0 16px 0 44px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', boxSizing: 'border-box' }}
+                style={{ width: '100%', height: '42px', padding: '0 16px 0 44px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', boxSizing: 'border-box' }}
                 className="focus:border-black focus:ring-1 focus:ring-black transition-all"
               />
             </div>
@@ -367,7 +367,7 @@ const AdminCustomerWarranty = () => {
                 <select
                   value={filterTransactionType}
                   onChange={(e) => setFilterTransactionType(e.target.value)}
-                  style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box', cursor: 'pointer' }}
+                  style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box', cursor: 'pointer' }}
                   className="focus:border-black focus:ring-1 focus:ring-black transition-colors"
                 >
                   <option value="Semua Transaksi">Semua Transaksi</option>
@@ -378,7 +378,7 @@ const AdminCustomerWarranty = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box', cursor: 'pointer' }}
+                style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box', cursor: 'pointer' }}
                 className="focus:border-black focus:ring-1 focus:ring-black transition-colors"
               >
                 <option value="Semua Status">Semua Status</option>
@@ -390,7 +390,7 @@ const AdminCustomerWarranty = () => {
               <select
                 value={paymentFilter}
                 onChange={(e) => setPaymentFilter(e.target.value)}
-                style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box', cursor: 'pointer' }}
+                style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box', cursor: 'pointer' }}
                 className="focus:border-black focus:ring-1 focus:ring-black transition-colors"
               >
                 <option value="Semua Pembayaran">Semua Pembayaran</option>
@@ -406,16 +406,16 @@ const AdminCustomerWarranty = () => {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box' }}
+                style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box' }}
                 title="Tanggal Mulai"
                 className="focus:border-black focus:ring-1 focus:ring-black transition-colors cursor-pointer"
               />
-              <span style={{ color: '#d1d5db', fontFamily: 'var(--font-sans)', fontSize: '1.125rem', fontWeight: '300' }}>-</span>
+              <span style={{ color: '#d1d5db', fontSize: '1.125rem', fontWeight: '300' }}>-</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box' }}
+                style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box' }}
                 title="Tanggal Akhir"
                 className="focus:border-black focus:ring-1 focus:ring-black transition-colors cursor-pointer"
               />
@@ -976,7 +976,7 @@ const AdminCustomerWarranty = () => {
                                 <span style={{ fontSize: '10px', backgroundColor: '#ffe4e6', color: '#be123c', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold', alignSelf: 'flex-start' }}>KLAIM GARANSI</span>
                               )}
                             </div>
-                            <span style={{ fontSize: '12px', color: historyItem.isRoot ? '#047857' : (historyItem.isComplaint ? '#be123c' : '#4b5563'), fontFamily: 'monospace', backgroundColor: historyItem.isRoot ? '#d1fae5' : (historyItem.isComplaint ? '#ffe4e6' : '#f3f4f6'), padding: '4px 8px', borderRadius: '6px', fontWeight: '500' }}>
+                            <span style={{ fontSize: '12px', color: historyItem.isRoot ? '#047857' : (historyItem.isComplaint ? '#be123c' : '#4b5563'), backgroundColor: historyItem.isRoot ? '#d1fae5' : (historyItem.isComplaint ? '#ffe4e6' : '#f3f4f6'), padding: '4px 8px', borderRadius: '6px', fontWeight: '500' }}>
                               {format(new Date(historyItem.date), 'dd MMM yyyy')}
                             </span>
                           </div>
@@ -1212,7 +1212,7 @@ const AdminCustomerWarranty = () => {
         {(() => {
           const isRetailReport = filterTransactionType === 'Retail (Grosir)';
           return (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: isRetailReport ? '10px' : '12px', fontFamily: 'sans-serif' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: isRetailReport ? '10px' : '12px' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f3f4f6' }}>
                   <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', width: isRetailReport ? '3%' : '5%' }}>No.</th>
@@ -1488,31 +1488,31 @@ const AdminCustomerWarranty = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '1.25rem' }}>
               <div className="form-group" style={{ gridColumn: 'span 6' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Nama Lengkap <span className="text-red-500">*</span></label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Nama Lengkap <span className="text-red-500">*</span></label>
                 <input type="text" value={editCustomerData.customerName} onChange={e => setEditCustomerData({ ...editCustomerData, customerName: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Nomor Telepon <span className="text-red-500">*</span></label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Nomor Telepon <span className="text-red-500">*</span></label>
                 <input type="tel" value={editCustomerData.customerHp} onChange={e => setEditCustomerData({ ...editCustomerData, customerHp: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Email</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Email</label>
                 <input type="email" value={editCustomerData.customerEmail} onChange={e => setEditCustomerData({ ...editCustomerData, customerEmail: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 6' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Alamat Lengkap <span className="text-red-500">*</span></label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Alamat Lengkap <span className="text-red-500">*</span></label>
                 <textarea value={editCustomerData.customerAddress} onChange={e => setEditCustomerData({ ...editCustomerData, customerAddress: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none', resize: 'vertical' }} rows="3" onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'}></textarea>
               </div>
               <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Kota</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Kota</label>
                 <input type="text" value={editCustomerData.customerCity} onChange={e => setEditCustomerData({ ...editCustomerData, customerCity: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Provinsi</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Provinsi</label>
                 <input type="text" value={editCustomerData.customerProvince} onChange={e => setEditCustomerData({ ...editCustomerData, customerProvince: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Kode Pos</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Kode Pos</label>
                 <input type="text" value={editCustomerData.customerZip} onChange={e => setEditCustomerData({ ...editCustomerData, customerZip: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
 
@@ -1521,31 +1521,31 @@ const AdminCustomerWarranty = () => {
               </div>
 
               <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Warna Kendaraan</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Warna Kendaraan</label>
                 <input type="text" value={editCustomerData.carColor} onChange={e => setEditCustomerData({ ...editCustomerData, carColor: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Nomor Polisi</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Nomor Polisi</label>
                 <input type="text" value={editCustomerData.plateNumber} onChange={e => setEditCustomerData({ ...editCustomerData, plateNumber: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none', textTransform: 'uppercase' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>No. Rangka (VIN)</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>No. Rangka (VIN)</label>
                 <input type="text" value={editCustomerData.chassisNumber} onChange={e => setEditCustomerData({ ...editCustomerData, chassisNumber: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none', textTransform: 'uppercase' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Nomor Mesin</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Nomor Mesin</label>
                 <input type="text" value={editCustomerData.engineNumber} onChange={e => setEditCustomerData({ ...editCustomerData, engineNumber: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none', textTransform: 'uppercase' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Estimasi Tanggal</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Estimasi Tanggal</label>
                 <input type="date" value={editCustomerData.installationDate} onChange={e => setEditCustomerData({ ...editCustomerData, installationDate: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Estimasi Waktu</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Estimasi Waktu</label>
                 <input type="time" value={editCustomerData.installationTime} onChange={e => setEditCustomerData({ ...editCustomerData, installationTime: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 6' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'var(--font-mono-ui)' }}>Keterangan</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Keterangan</label>
                 <textarea value={editCustomerData.notes} onChange={e => setEditCustomerData({ ...editCustomerData, notes: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none', resize: 'vertical' }} rows="3" onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'}></textarea>
               </div>
             </div>

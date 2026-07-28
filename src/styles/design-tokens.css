@@ -66,8 +66,11 @@
   padding: 0;
 }
 
+html, body, *, button, input, optgroup, select, textarea {
+  font-family: 'Inter', 'Poppins', sans-serif;
+}
+
 body {
-  font-family: var(--font-sans);
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
@@ -80,8 +83,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Utility Classes */
-.font-mono-ui { font-family: var(--font-mono-ui); }
-.font-mono-num { font-family: var(--font-mono-num); }
+.font-mono-ui, .font-mono-ui * { font-family: var(--font-mono-ui) !important; }
+.font-mono-num, .font-mono-num * { font-family: var(--font-mono-num) !important; }
 
 .text-primary { color: var(--text-primary); }
 .text-secondary { color: var(--text-secondary); }

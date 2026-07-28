@@ -181,7 +181,7 @@ const AdminScheduling = () => {
             <select
               value={bookingSlotBranch}
               onChange={(e) => setBookingSlotBranch(e.target.value)}
-              style={{ marginLeft: '12px', padding: '4px 12px', height: '32px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#f9fafb', cursor: 'pointer' }}
+              style={{ marginLeft: '12px', padding: '4px 12px', height: '32px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', backgroundColor: '#f9fafb', cursor: 'pointer' }}
               className="focus:border-black focus:ring-1 focus:ring-black transition-colors"
             >
               <option value="Gallardo">Gallardo</option>
@@ -190,13 +190,13 @@ const AdminScheduling = () => {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ display: 'flex', gap: '8px', marginRight: '16px' }}>
-              <button onClick={() => { setCalendarView('minggu'); setCurrentDate(new Date()); }} style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 'bold', fontFamily: 'var(--font-sans)', border: '1px solid #111', borderRadius: '4px', background: calendarView === 'minggu' ? '#111' : 'transparent', color: calendarView === 'minggu' ? '#fff' : '#111', cursor: 'pointer', transition: 'all 0.2s' }}>Minggu Ini</button>
-              <button onClick={() => { setCalendarView('bulan'); setCurrentDate(new Date()); }} style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 'bold', fontFamily: 'var(--font-sans)', border: '1px solid #111', borderRadius: '4px', background: calendarView === 'bulan' ? '#111' : 'transparent', color: calendarView === 'bulan' ? '#fff' : '#111', cursor: 'pointer', transition: 'all 0.2s' }}>Bulan Ini</button>
+              <button onClick={() => { setCalendarView('minggu'); setCurrentDate(new Date()); }} style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid #111', borderRadius: '4px', background: calendarView === 'minggu' ? '#111' : 'transparent', color: calendarView === 'minggu' ? '#fff' : '#111', cursor: 'pointer', transition: 'all 0.2s' }}>Minggu Ini</button>
+              <button onClick={() => { setCalendarView('bulan'); setCurrentDate(new Date()); }} style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid #111', borderRadius: '4px', background: calendarView === 'bulan' ? '#111' : 'transparent', color: calendarView === 'bulan' ? '#fff' : '#111', cursor: 'pointer', transition: 'all 0.2s' }}>Bulan Ini</button>
             </div>
             <button onClick={prevMonth} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px' }}>
               <ChevronLeft size={20} className="text-gray-600 hover:text-black transition-colors" />
             </button>
-            <h4 style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', fontWeight: 'bold', color: '#111', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, minWidth: '140px', textAlign: 'center' }}>
+            <h4 style={{ fontSize: '1rem', fontWeight: 'bold', color: '#111', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, minWidth: '140px', textAlign: 'center' }}>
               {format(currentDate, 'MMMM yyyy', { locale: id })}
             </h4>
             <button onClick={nextMonth} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px' }}>
@@ -208,7 +208,7 @@ const AdminScheduling = () => {
         <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
             {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(dayName => (
-              <div key={dayName} style={{ textAlign: 'center', fontSize: '0.75rem', fontWeight: '700', color: '#6b7280', padding: '12px 8px', borderRight: '1px solid #e5e7eb', fontFamily: 'var(--font-sans)' }} className="last:border-r-0">
+              <div key={dayName} style={{ textAlign: 'center', fontSize: '0.75rem', fontWeight: '700', color: '#6b7280', padding: '12px 8px', borderRight: '1px solid #e5e7eb' }} className="last:border-r-0">
                 {dayName}
               </div>
             ))}
@@ -263,11 +263,10 @@ const AdminScheduling = () => {
                     borderBottom: sameMonth && hasOrders && !isFull ? '2px solid #111' : '1px solid #e5e7eb',
                     display: 'flex',
                     flexDirection: 'column',
-                    fontFamily: 'var(--font-sans)',
                   }}
                   className="transition-colors"
                 >
-                  <span style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '8px', display: 'block', fontFamily: 'var(--font-mono-num)' }}>
+                  <span style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '8px', display: 'block' }}>
                     {format(day, 'd')}
                   </span>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
@@ -330,7 +329,7 @@ const AdminScheduling = () => {
               placeholder="Cari ID Order, customer, kendaraan, atau PIC..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ width: '100%', height: '42px', padding: '0 16px 0 44px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', boxSizing: 'border-box' }}
+              style={{ width: '100%', height: '42px', padding: '0 16px 0 44px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', boxSizing: 'border-box' }}
               className="focus:border-black focus:ring-1 focus:ring-black transition-all"
             />
           </div>
@@ -340,7 +339,7 @@ const AdminScheduling = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box', cursor: 'pointer' }}
+              style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box', cursor: 'pointer' }}
               className="focus:border-black focus:ring-1 focus:ring-black transition-colors"
             >
               <option value="Semua">Semua Status</option>
@@ -354,16 +353,16 @@ const AdminScheduling = () => {
               type="date" 
               value={customStartDate} 
               onChange={(e) => setCustomStartDate(e.target.value)}
-              style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box' }}
+              style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box' }}
               title="Tanggal Mulai"
               className="focus:border-black focus:ring-1 focus:ring-black transition-colors cursor-pointer"
             />
-            <span style={{ color: '#d1d5db', fontFamily: 'var(--font-sans)', fontSize: '1.125rem', fontWeight: '300' }}>-</span>
+            <span style={{ color: '#d1d5db', fontSize: '1.125rem', fontWeight: '300' }}>-</span>
             <input 
               type="date" 
               value={customEndDate} 
               onChange={(e) => setCustomEndDate(e.target.value)}
-              style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box' }}
+              style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', outline: 'none', backgroundColor: '#f9fafb', boxSizing: 'border-box' }}
               title="Tanggal Selesai"
               className="focus:border-black focus:ring-1 focus:ring-black transition-colors cursor-pointer"
             />
@@ -393,14 +392,14 @@ const AdminScheduling = () => {
                 
                 return (
                   <tr key={order.id} style={{ borderBottom: '1px solid #f3f4f6' }} className="hover:bg-gray-50 transition-colors">
-                    <td style={{ padding: '16px 20px', fontFamily: 'var(--font-sans)', fontWeight: 'bold' }} className="text-gray-800">
+                    <td style={{ padding: '16px 20px', fontWeight: 'bold' }} className="text-gray-800">
                       {order.id}
                     </td>
-                    <td style={{ padding: '16px 20px', fontFamily: 'monospace' }} className="text-gray-800">
+                    <td style={{ padding: '16px 20px' }} className="text-gray-800">
                       {format(startDate, "dd MMMM yyyy", { locale: id })}<br/>
                       <span className="text-gray-500 font-bold">{format(startDate, "HH:mm 'WIB'")}</span>
                     </td>
-                    <td style={{ padding: '16px 20px', fontFamily: 'monospace' }} className="text-gray-800">
+                    <td style={{ padding: '16px 20px' }} className="text-gray-800">
                       {format(endDate, "dd MMMM yyyy", { locale: id })}<br/>
                       <span className="text-gray-500 font-bold">{format(endDate, "HH:mm 'WIB'")}</span>
                     </td>
@@ -496,12 +495,12 @@ const AdminScheduling = () => {
       {/* Hidden Print Layout */}
       <div id="pdf-report-content" style={{ display: 'none', padding: '20px', backgroundColor: '#fff', color: '#000' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid #000', paddingBottom: '10px' }}>
-          <h1 style={{ fontFamily: 'var(--font-sans)', fontSize: '24px', fontWeight: 'bold', margin: '0' }}>GALLARDO AUTO SPORT</h1>
-          <h2 style={{ fontFamily: 'var(--font-mono-ui)', fontSize: '14px', letterSpacing: '2px', margin: '5px 0 0 0' }}>LAPORAN OPERASIONAL CUSTOM MINGGUAN / BULANAN</h2>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', marginTop: '10px' }}>Periode: {reportPeriodStart} - {reportPeriodEnd}</p>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0' }}>GALLARDO AUTO SPORT</h1>
+          <h2 style={{ fontSize: '14px', letterSpacing: '2px', margin: '5px 0 0 0' }}>LAPORAN OPERASIONAL CUSTOM MINGGUAN / BULANAN</h2>
+          <p style={{ fontSize: '12px', marginTop: '10px' }}>Periode: {reportPeriodStart} - {reportPeriodEnd}</p>
         </div>
         
-        <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '10px', fontFamily: 'var(--font-sans)' }}>
+        <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '10px' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid #000' }}>
               <th style={{ padding: '8px 4px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>ID Order</th>
@@ -537,7 +536,7 @@ const AdminScheduling = () => {
         </table>
 
         <div style={{ marginTop: '20px', borderTop: '2px solid #000', paddingTop: '10px', textAlign: 'right' }}>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 'bold', margin: '0' }}>
+          <p style={{ fontSize: '12px', fontWeight: 'bold', margin: '0' }}>
             Total Operasional: {filteredOrdersTable.length} Kendaraan
           </p>
         </div>
@@ -586,7 +585,7 @@ const AdminScheduling = () => {
               <div style={{ padding: '16px', backgroundColor: '#f9fafb', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
                 <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px', fontWeight: '500', margin: 0 }}>Informasi Kendaraan</p>
                 <p style={{ fontWeight: 'bold', fontSize: '18px', color: '#111827', margin: '4px 0' }}>{selectedOrderForDetail.carBrand} {selectedOrderForDetail.carModel}</p>
-                <p style={{ fontFamily: 'monospace', color: '#4b5563', fontWeight: '500', margin: 0 }}>{selectedOrderForDetail.plateNumber}</p>
+                <p style={{ color: '#4b5563', fontWeight: '500', margin: 0 }}>{selectedOrderForDetail.plateNumber}</p>
               </div>
 
               <div>

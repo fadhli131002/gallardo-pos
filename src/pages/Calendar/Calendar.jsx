@@ -130,7 +130,7 @@ const Calendar = () => {
             <div className="cell-content">
               {isSameMonth(day, monthStart) && (
                 hasOrders ? (
-                  <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#fff', fontFamily: 'var(--font-sans)' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#fff' }}>
                     {dayOrders.length} Mobil
                   </span>
                 ) : (

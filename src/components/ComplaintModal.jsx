@@ -220,7 +220,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
 
               {/* Transaction Selection */}
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', fontFamily: 'var(--font-mono-ui)' }}>Data Transaksi / Pelanggan <span style={{ color: '#ef4444' }}>*</span></label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Data Transaksi / Pelanggan <span style={{ color: '#ef4444' }}>*</span></label>
                 {transactionData ? (
                   <div style={{ padding: '12px', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
                     <p style={{ margin: '0 0 4px', fontWeight: '600', color: '#1f2937' }}>{transactionData.customer_name} - {transactionData.plate_number}</p>
@@ -249,7 +249,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
 
               {/* Problem Type */}
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', fontFamily: 'var(--font-mono-ui)' }}>Jenis Kendala <span style={{ color: '#ef4444' }}>*</span></label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Jenis Kendala <span style={{ color: '#ef4444' }}>*</span></label>
                 <select
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#fff', color: '#111827', fontSize: '14px', outline: 'none' }}
                   value={formData.problem_type}
@@ -267,7 +267,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
 
               {/* Description */}
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', fontFamily: 'var(--font-mono-ui)' }}>Deskripsi Catatan</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Deskripsi Catatan</label>
                 <textarea
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#fff', color: '#111827', fontSize: '14px', outline: 'none', resize: 'vertical' }}
                   rows="3"
@@ -281,7 +281,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
               <div className="form-group" style={{ padding: '16px', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', fontFamily: 'var(--font-mono-ui)' }}>Penggunaan Material (Opsional)</label>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151' }}>Penggunaan Material (Opsional)</label>
                     <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>Pilih bahan yang dipotong untuk pengerjaan komplain ini (Rp 0)</p>
                   </div>
                   <button type="button" onClick={handleAddInventoryItem} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 12px', fontSize: '12px', fontWeight: '600', color: '#10b981', backgroundColor: '#d1fae5', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
@@ -338,7 +338,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
 
               {/* Photo Upload */}
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', fontFamily: 'var(--font-mono-ui)' }}>Foto Bukti Kerusakan <span style={{ color: '#ef4444' }}>*</span></label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Foto Bukti Kerusakan <span style={{ color: '#ef4444' }}>*</span></label>
 
                 <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center', borderRadius: '8px', border: '2px dashed #d1d5db', padding: '24px', position: 'relative', backgroundColor: '#f9fafb', cursor: 'pointer', transition: 'background-color 0.2s' }}
                   onClick={() => document.getElementById('file-upload').click()}

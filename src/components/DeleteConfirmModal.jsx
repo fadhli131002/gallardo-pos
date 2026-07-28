@@ -16,17 +16,17 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, title = "Hapus Data?",
             <AlertTriangle size={28} />
           </div>
           
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111', marginBottom: '8px', fontFamily: 'var(--font-sans, sans-serif)' }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111', marginBottom: '8px' }}>
             {title}
           </h3>
-          <p style={{ color: '#4b5563', fontSize: '0.875rem', marginBottom: '24px', fontFamily: 'var(--font-sans, sans-serif)', lineHeight: '1.5' }}>
+          <p style={{ color: '#4b5563', fontSize: '0.875rem', marginBottom: '24px', lineHeight: '1.5' }}>
             {message}
           </p>
           
           <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
             <button 
               onClick={onClose}
-              style={{ flex: 1, padding: '10px 16px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#fff', color: '#374151', fontWeight: '600', cursor: 'pointer', fontFamily: 'var(--font-sans, sans-serif)' }}
+              style={{ flex: 1, padding: '10px 16px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#fff', color: '#374151', fontWeight: '600', cursor: 'pointer' }}
             >
               Batal
             </button>
@@ -34,7 +34,7 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, title = "Hapus Data?",
               onClick={() => {
                 onConfirm();
               }}
-              style={{ flex: 1, padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#dc2626', color: '#fff', fontWeight: '600', cursor: 'pointer', fontFamily: 'var(--font-sans, sans-serif)' }}
+              style={{ flex: 1, padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#dc2626', color: '#fff', fontWeight: '600', cursor: 'pointer' }}
             >
               Hapus
             </button>

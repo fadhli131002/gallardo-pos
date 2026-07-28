@@ -293,8 +293,7 @@ const POS = () => {
         borderColor: '#10b981'
       },
       padding: '2px',
-      borderRadius: '8px',
-      fontFamily: 'inherit'
+      borderRadius: '8px'
     }),
     option: (base, state) => ({
       ...base,
@@ -983,7 +982,6 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                               borderRadius: '8px',
                               outline: 'none',
                               transition: 'box-shadow 0.2s, border-color 0.2s',
-                              fontFamily: 'inherit',
                               fontSize: '14px',
                               backgroundColor: '#FFFFFF',
                               color: '#1F2937'
@@ -1336,18 +1334,18 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '14px', color: '#4b5563' }}>Sub Total</span>
-                    <span style={{ fontSize: '15px', fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>{formatCurrency(totalPrice)}</span>
+                    <span style={{ fontSize: '15px', fontWeight: '600', color: '#111827' }}>{formatCurrency(totalPrice)}</span>
                   </div>
                   {discountAmount > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '14px', color: '#4b5563' }}>Diskon</span>
-                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#ef4444', fontFamily: 'monospace' }}>- {formatCurrency(discountAmount)}</span>
+                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#ef4444' }}>- {formatCurrency(discountAmount)}</span>
                     </div>
                   )}
                   {paymentState.useTax && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '14px', color: '#4b5563' }}>PPN 11%</span>
-                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#ef4444', fontFamily: 'monospace' }}>+ {formatCurrency(taxAmount)}</span>
+                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#ef4444' }}>+ {formatCurrency(taxAmount)}</span>
                     </div>
                   )}
                   
@@ -1355,18 +1353,18 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>Net Total Tagihan</span>
-                    <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827', fontFamily: 'monospace' }}>{formatCurrency(netTotal)}</span>
+                    <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827' }}>{formatCurrency(netTotal)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>Telah Dibayar</span>
-                    <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#10b981', fontFamily: 'monospace' }}>{formatCurrency(modalPaidAmount)}</span>
+                    <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#10b981' }}>{formatCurrency(modalPaidAmount)}</span>
                   </div>
                   
                   <div style={{ height: '2px', borderBottom: '2px dashed #e5e7eb', margin: '12px 0' }}></div>
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fef2f2', padding: '16px', borderRadius: '12px', border: '1px solid #fecaca' }}>
                     <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#991b1b' }}>Sisa Tagihan</span>
-                    <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#b91c1c', fontFamily: 'monospace' }}>{formatCurrency(modalRemainingAmount)}</span>
+                    <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#b91c1c' }}>{formatCurrency(modalRemainingAmount)}</span>
                   </div>
                 </div>
               </div>

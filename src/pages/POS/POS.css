@@ -405,7 +405,7 @@ select.input-field {
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
-  font-family: 'Inter', 'Poppins', sans-serif;
+  
 }
 
 .category-tab:hover {
@@ -457,7 +457,7 @@ select.input-field {
   display: flex;
   flex-direction: column;
   height: 100%;
-  font-family: 'Inter', 'Poppins', sans-serif;
+  
 }
 
 .product-card:hover {
@@ -521,7 +521,7 @@ select.input-field {
   color: #4F46E5;
   font-size: 13px;
   font-weight: 600;
-  font-family: 'Inter', 'Poppins', sans-serif;
+  
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;

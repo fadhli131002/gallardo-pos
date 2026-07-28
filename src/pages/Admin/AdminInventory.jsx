@@ -397,13 +397,13 @@ const AdminInventory = () => {
       <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', borderBottom: '1px solid #e5e7eb', paddingBottom: '0' }}>
         <button 
           onClick={() => setActiveTab('inventory')}
-          style={{ padding: '12px 24px', background: 'transparent', border: 'none', borderBottom: activeTab === 'inventory' ? '2px solid #111' : '2px solid transparent', color: activeTab === 'inventory' ? '#111' : '#6b7280', fontWeight: activeTab === 'inventory' ? 'bold' : '500', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s', fontFamily: 'Montserrat, sans-serif' }}
+          style={{ padding: '12px 24px', background: 'transparent', border: 'none', borderBottom: activeTab === 'inventory' ? '2px solid #111' : '2px solid transparent', color: activeTab === 'inventory' ? '#111' : '#6b7280', fontWeight: activeTab === 'inventory' ? 'bold' : '500', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s' }}
         >
           Data Master Inventory
         </button>
         <button 
           onClick={() => setActiveTab('logs')}
-          style={{ padding: '12px 24px', background: 'transparent', border: 'none', borderBottom: activeTab === 'logs' ? '2px solid #111' : '2px solid transparent', color: activeTab === 'logs' ? '#111' : '#6b7280', fontWeight: activeTab === 'logs' ? 'bold' : '500', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s', fontFamily: 'Montserrat, sans-serif' }}
+          style={{ padding: '12px 24px', background: 'transparent', border: 'none', borderBottom: activeTab === 'logs' ? '2px solid #111' : '2px solid transparent', color: activeTab === 'logs' ? '#111' : '#6b7280', fontWeight: activeTab === 'logs' ? 'bold' : '500', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s' }}
         >
           Riwayat Pemotongan (Logs)
         </button>
@@ -411,7 +411,7 @@ const AdminInventory = () => {
 
       <div className="premium-card" style={{ padding: '0', overflow: 'hidden' }}>
         {activeTab === 'inventory' && (
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontFamily: 'Montserrat, sans-serif' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ backgroundColor: 'var(--color-gray-100)', borderBottom: '2px solid var(--border-light)' }}>
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>ID BARANG</th>
@@ -526,7 +526,7 @@ const AdminInventory = () => {
               </button>
             </div>
             
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontFamily: 'Montserrat, sans-serif' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ backgroundColor: 'var(--color-gray-100)', borderBottom: '2px solid var(--border-light)' }}>
                   <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>TANGGAL</th>
@@ -696,7 +696,7 @@ const AdminInventory = () => {
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
               <button
                 onClick={cancelDelete}
-                style={{ flex: 1, padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px', color: '#374151', background: '#fff', fontFamily: 'Montserrat, sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                style={{ flex: 1, padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '8px', color: '#374151', background: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
                 onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
                 onMouseOut={(e) => e.target.style.backgroundColor = '#fff'}
               >
@@ -704,7 +704,7 @@ const AdminInventory = () => {
               </button>
               <button
                 onClick={confirmDelete}
-                style={{ flex: 1, padding: '0.75rem', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '8px', fontFamily: 'Montserrat, sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.3)' }}
+                style={{ flex: 1, padding: '0.75rem', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.3)' }}
                 onMouseOver={(e) => e.target.style.backgroundColor = '#dc2626'}
                 onMouseOut={(e) => e.target.style.backgroundColor = '#ef4444'}
               >
@@ -716,7 +716,7 @@ const AdminInventory = () => {
       )}
 
       {/* Hidden Print Element for PDF */}
-      <div id="stocktake-pdf-content" style={{ display: 'none', backgroundColor: '#ffffff', padding: '20px', color: '#000', fontFamily: 'Montserrat, sans-serif' }}>
+      <div id="stocktake-pdf-content" style={{ display: 'none', backgroundColor: '#ffffff', padding: '20px', color: '#000' }}>
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0', textTransform: 'uppercase' }}>LEMBAR PEMERIKSAAN FISIK STOK (STOCKTAKE)</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', borderBottom: '2px solid #000', paddingBottom: '10px' }}>
@@ -775,7 +775,7 @@ const AdminInventory = () => {
       </div>
 
       {/* Hidden Print Element for Logs PDF */}
-      <div id="logs-pdf-content" style={{ display: 'none', backgroundColor: '#ffffff', padding: '20px', color: '#000', fontFamily: 'Montserrat, sans-serif' }}>
+      <div id="logs-pdf-content" style={{ display: 'none', backgroundColor: '#ffffff', padding: '20px', color: '#000' }}>
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0', textTransform: 'uppercase' }}>LAPORAN AUDIT INVENTORY</h1>
           <p style={{ margin: '0 0 15px 0', color: '#4b5563' }}>Riwayat Pemotongan Stok</p>

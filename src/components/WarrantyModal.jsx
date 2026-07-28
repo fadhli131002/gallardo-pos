@@ -169,7 +169,7 @@ const WarrantyModal = ({ order, onClose }) => {
               ref={printRef}
               className="bg-white text-black px-8 py-14 mx-auto relative w-[420px] min-h-[595px] flex flex-col justify-between shrink-0 box-border shadow-md"
               style={{ 
-                fontFamily: 'Montserrat, system-ui, sans-serif'
+                
               }}
             >
             {/* 2. Header */}

@@ -302,8 +302,7 @@ const POSRetail = () => {
         borderColor: '#10b981'
       },
       padding: '2px',
-      borderRadius: '8px',
-      fontFamily: 'inherit'
+      borderRadius: '8px'
     }),
     option: (base, state) => ({
       ...base,
@@ -953,7 +952,6 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                       borderRadius: '8px',
                       outline: 'none',
                       transition: 'box-shadow 0.2s, border-color 0.2s',
-                      fontFamily: 'inherit',
                       fontSize: '14px',
                       backgroundColor: '#FFFFFF',
                       color: '#1F2937'
@@ -1161,7 +1159,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '14px', color: '#4b5563' }}>Sub Total</span>
-                    <span style={{ fontSize: '15px', fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>{formatCurrency(rawTotalPrice)}</span>
+                    <span style={{ fontSize: '15px', fontWeight: '600', color: '#111827' }}>{formatCurrency(rawTotalPrice)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -1177,10 +1175,10 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                       </select>
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {paymentState.discountType === 'nominal' && <span style={{ fontSize: '14px', fontWeight: '600', color: '#4f46e5', fontFamily: 'monospace' }}>Rp</span>}
+                      {paymentState.discountType === 'nominal' && <span style={{ fontSize: '14px', fontWeight: '600', color: '#4f46e5' }}>Rp</span>}
                       <input
                         type="text"
-                        style={{ width: paymentState.discountType === 'persen' ? '60px' : '130px', padding: '6px 10px', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '6px', color: '#171717', outline: 'none', fontSize: '14px', fontWeight: '600', textAlign: 'right', fontFamily: 'monospace', transition: 'border-color 0.2s' }}
+                        style={{ width: paymentState.discountType === 'persen' ? '60px' : '130px', padding: '6px 10px', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '6px', color: '#171717', outline: 'none', fontSize: '14px', fontWeight: '600', textAlign: 'right', transition: 'border-color 0.2s' }}
                         onFocus={e => e.target.style.borderColor = '#4f46e5'}
                         onBlur={e => e.target.style.borderColor = '#d1d5db'}
                         value={paymentState.discountValue === 0 ? '' : (paymentState.discountType === 'persen' ? paymentState.discountValue : paymentState.discountValue.toLocaleString('id-ID'))}
@@ -1193,21 +1191,21 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                         }}
                         placeholder="0"
                       />
-                      {paymentState.discountType === 'persen' && <span style={{ fontSize: '14px', fontWeight: '600', color: '#4f46e5', fontFamily: 'monospace' }}>%</span>}
+                      {paymentState.discountType === 'persen' && <span style={{ fontSize: '14px', fontWeight: '600', color: '#4f46e5' }}>%</span>}
                     </div>
                   </div>
 
                   {discountAmount > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '14px', color: '#4b5563' }}>Total Setelah Diskon</span>
-                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>{formatCurrency(totalPrice)}</span>
+                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#111827' }}>{formatCurrency(totalPrice)}</span>
                     </div>
                   )}
 
                   {paymentState.useTax && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '14px', color: '#4b5563' }}>PPN 11%</span>
-                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#ef4444', fontFamily: 'monospace' }}>+ {formatCurrency(taxAmount)}</span>
+                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#ef4444' }}>+ {formatCurrency(taxAmount)}</span>
                     </div>
                   )}
                   
@@ -1215,16 +1213,16 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>Net Total Tagihan</span>
-                    <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827', fontFamily: 'monospace' }}>{formatCurrency(netTotal)}</span>
+                    <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827' }}>{formatCurrency(netTotal)}</span>
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>Telah Dibayar</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#10b981', fontFamily: 'monospace' }}>Rp</span>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#10b981' }}>Rp</span>
                       <input
                         type="text"
-                        style={{ width: '130px', padding: '6px 10px', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '6px', color: '#171717', outline: 'none', fontSize: '14px', fontWeight: '600', textAlign: 'right', fontFamily: 'monospace', transition: 'border-color 0.2s' }}
+                        style={{ width: '130px', padding: '6px 10px', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '6px', color: '#171717', outline: 'none', fontSize: '14px', fontWeight: '600', textAlign: 'right', transition: 'border-color 0.2s' }}
                         onFocus={e => e.target.style.borderColor = '#10b981'}
                         onBlur={e => e.target.style.borderColor = '#d1d5db'}
                         value={modalPaidAmount === 0 ? '' : modalPaidAmount.toLocaleString('id-ID')}
@@ -1246,7 +1244,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fef2f2', padding: '16px', borderRadius: '12px', border: '1px solid #fecaca' }}>
                     <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#991b1b' }}>Sisa Tagihan</span>
-                    <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#b91c1c', fontFamily: 'monospace' }}>{formatCurrency(modalRemainingAmount)}</span>
+                    <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#b91c1c' }}>{formatCurrency(modalRemainingAmount)}</span>
                   </div>
                 </div>
               </div>
@@ -1327,12 +1325,12 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                                 {hasDP && (
                                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', borderBottom: '1px dashed #d1d5db', paddingBottom: '8px' }}>
                                     <span style={{ color: '#6b7280' }}>DP Awal &bull; Saat Ini</span>
-                                    <span style={{ fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>{modalPaidAmount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
+                                    <span style={{ fontWeight: '600', color: '#111827' }}>{modalPaidAmount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
                                   </div>
                                 )}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', paddingTop: hasDP ? '4px' : '0' }}>
                                   <span style={{ color: '#6b7280' }}>Pelunasan &bull; {new Date(paymentState.terminStartDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                                  <span style={{ fontWeight: '600', color: '#111827', fontFamily: 'monospace' }}>{remainingToSplit.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
+                                  <span style={{ fontWeight: '600', color: '#111827' }}>{remainingToSplit.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
                                 </div>
                               </>
                             );

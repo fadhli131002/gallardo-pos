@@ -7,7 +7,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#f9fafb' }}>
-        <div style={{ fontFamily: 'sans-serif', fontSize: '14px', color: '#6b7280' }}>Memverifikasi Sesi Auth...</div>
+        <div style={{ fontSize: '14px', color: '#6b7280' }}>Memverifikasi Sesi Auth...</div>
       </div>
     );
   }
