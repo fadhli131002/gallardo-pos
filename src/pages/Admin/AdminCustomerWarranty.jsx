@@ -1364,9 +1364,11 @@ const AdminCustomerWarranty = () => {
 
       {/* Settlement Modal */}
       {settlementOrder && (
-        <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-          <div className="modal-content premium-card" style={{ width: '90%', maxWidth: '500px', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f9fafb' }}>
+        <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '24px' }}>
+          <div className="modal-content premium-card" style={{ width: '100%', maxWidth: '500px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+            
+            {/* Header */}
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f9fafb', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ padding: '8px', backgroundColor: '#fef3c7', borderRadius: '10px', color: '#d97706' }}>
                   <CreditCard size={24} />
@@ -1409,7 +1411,6 @@ const AdminCustomerWarranty = () => {
 
               await settlePayment(settlementOrder.id, amount, formData.get('paymentMethod'), formData.get('notes'), base64Proof);
 
-              // Only deduct stock if this settlement fully pays off the remaining balance
               if (amount === settlementOrder.computedRemaining) {
                 const orderToDeduct = orders.find(o => o.id === settlementOrder.id) || settlementOrder;
                 if (orderToDeduct && orderToDeduct.items) {
@@ -1431,7 +1432,6 @@ const AdminCustomerWarranty = () => {
                         } else if (item.category === 'Kaca Film' || item.product_name?.toUpperCase().includes('KACA FILM') || item.product_name?.toUpperCase().includes('PERFORMANTE') || item.product_name?.toUpperCase().includes('DELUXE')) {
                           deductionAmount = 4;
                         }
-
                         deductStock(item.id_barang || item.inventory_id || item.id, deductionAmount * (item.qty || item.quantity || 1));
                       }
                     }
@@ -1441,9 +1441,10 @@ const AdminCustomerWarranty = () => {
 
               toast.success('Pelunasan pembayaran berhasil dicatat.');
               setSettlementOrder(null);
-            }} style={{ padding: '32px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
+            }} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              
+              {/* Scrollable Body */}
+              <div style={{ padding: '24px 32px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ padding: '16px', backgroundColor: '#fef3c7', borderRadius: '12px', border: '1px solid #fde68a' }}>
                   <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: '#b45309', fontWeight: '600' }}>Sisa Tagihan / Balance Due</p>
                   <p style={{ margin: 0, fontSize: '24px', fontWeight: 'bold', color: '#92400e' }}>
@@ -1463,6 +1464,7 @@ const AdminCustomerWarranty = () => {
                       e.target.value = raw ? Number(raw).toLocaleString('id-ID') : '';
                     }}
                     style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                    className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                   />
                 </div>
 
@@ -1473,6 +1475,7 @@ const AdminCustomerWarranty = () => {
                     name="notes"
                     placeholder="Contoh: Pembayaran Termin 1, DP Tambahan"
                     style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                    className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                   />
                 </div>
 
@@ -1482,6 +1485,7 @@ const AdminCustomerWarranty = () => {
                     name="paymentMethod"
                     required
                     style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white' }}
+                    className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                   >
                     <option value="Tunai / Cash">Tunai / Cash</option>
                     <option value="Transfer BCA">Transfer BCA</option>
@@ -1506,14 +1510,14 @@ const AdminCustomerWarranty = () => {
                   </div>
                   <p style={{ margin: '6px 0 0 0', fontSize: '12px', color: '#9ca3af' }}>Format yang didukung: JPG, PNG, PDF (Maks. 5MB)</p>
                 </div>
-
               </div>
 
-              <div style={{ marginTop: '30px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                <button type="button" onClick={() => setSettlementOrder(null)} style={{ padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: '#374151', backgroundColor: '#f3f4f6', border: '1px solid #d1d5db', cursor: 'pointer' }}>
+              {/* Fixed Footer */}
+              <div style={{ padding: '20px 32px', display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb', flexShrink: 0 }}>
+                <button type="button" onClick={() => setSettlementOrder(null)} style={{ padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #d1d5db', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#ffffff'}>
                   Batal
                 </button>
-                <button type="submit" style={{ padding: '10px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: 'white', backgroundColor: '#10b981', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button type="submit" style={{ padding: '10px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: 'white', backgroundColor: '#10b981', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#059669'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#10b981'}>
                   <CreditCard size={18} /> Konfirmasi Lunas
                 </button>
               </div>
