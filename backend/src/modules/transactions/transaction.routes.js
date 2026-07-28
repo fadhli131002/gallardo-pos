@@ -6,8 +6,8 @@ const { authenticateToken, authorizeRole } = require('../../middlewares/authMidd
 router.get('/', authenticateToken, getTransactions);
 router.post('/', authenticateToken, createTransaction);
 router.put('/:id', authenticateToken, updateTransaction);
-router.put('/:id/payment-status-manual', authenticateToken, authorizeRole(['superadmin', 'owner']), updatePaymentStatusManual);
+router.put('/:id/payment-status-manual', authenticateToken, authorizeRole(['superadmin', 'owner', 'admin']), updatePaymentStatusManual);
 router.patch('/:id/pay', authenticateToken, updatePaymentStatus);
-router.delete('/:id', authenticateToken, authorizeRole(['owner', 'superadmin']), deleteTransaction);
+router.delete('/:id', authenticateToken, authorizeRole(['owner', 'superadmin', 'admin']), deleteTransaction);
 
 module.exports = router;
