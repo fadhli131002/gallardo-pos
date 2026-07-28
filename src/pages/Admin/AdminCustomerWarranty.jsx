@@ -21,6 +21,7 @@ const AdminCustomerWarranty = () => {
   const { user, token } = useAuth();
   const outletContext = useOutletContext() || {};
   const userRole = String(outletContext.userRole || user?.role || '').toLowerCase();
+  console.log('Current userRole in AdminCustomerWarranty:', userRole);
   const userName = user?.name ?? null;
 
   const normName = (str) =>
@@ -776,7 +777,7 @@ const AdminCustomerWarranty = () => {
                                 </>
                               )}
 
-                              {(!isPenawaran) && (String(userRole).toLowerCase() === 'owner' || String(userRole).toLowerCase() === 'superadmin') && (
+                              {(!isPenawaran) && (userRole !== 'sales' && userRole !== 'sales_team') && (
                                 <>
                                   <button onClick={() => {
                                     setActiveDropdown(null);
@@ -806,7 +807,7 @@ const AdminCustomerWarranty = () => {
                                     <FileCheck size={16} color="#2563eb" /> Konversi ke Work Order
                                   </button>
 
-                                  {(String(userRole).toLowerCase() === 'owner' || String(userRole).toLowerCase() === 'superadmin') && (
+                                  {(userRole !== 'sales' && userRole !== 'sales_team') && (
                                     <button onClick={() => {
                                       setActiveDropdown(null);
                                       if (window.confirm("Apakah Anda yakin ingin membatalkan penawaran ini?")) {
