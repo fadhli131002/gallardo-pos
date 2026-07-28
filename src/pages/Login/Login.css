@@ -1,23 +1,43 @@
 .login-container-new {
   min-height: 100vh;
   width: 100vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background-color: #000000;
   position: relative;
   overflow: hidden;
 }
 
-.login-car-image {
-  position: absolute;
-  bottom: 0;
-  right: 5%;
-  width: 60vw;
-  max-width: 900px;
-  min-width: 500px;
+.login-left-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  background: transparent;
+}
+
+.login-right-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   z-index: 1;
+}
+
+.login-car-image {
+  width: 100%;
+  max-width: 900px;
+  object-fit: contain;
   pointer-events: none;
+}
+
+@media (max-width: 1024px) {
+  .login-container-new {
+    grid-template-columns: 1fr;
+  }
+  .login-right-col {
+    display: none; /* Hide car on mobile/tablet for a cleaner form */
+  }
 }
 
 .login-card-wrapper {
@@ -29,13 +49,8 @@
 }
 
 .login-glass-card {
-  background: rgba(10, 10, 10, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  background: transparent;
   padding: 3rem 2.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
@@ -46,15 +61,19 @@
 }
 
 .login-header h1 {
-  font-size: 2.25rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  margin-bottom: 0.25rem;
+  font-family: 'Inter', 'Poppins', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
   color: #ffffff;
 }
 
 .login-header p {
-  color: #a1a1aa;
+  font-family: 'Inter', 'Poppins', sans-serif;
+  font-weight: 400;
+  color: #9CA3AF;
+  font-size: 0.875rem;
 }
 
 .login-form-new {
@@ -70,30 +89,33 @@
 }
 
 .input-group label {
-  color: #71717a;
-  font-weight: 600;
+  font-family: 'Inter', 'Poppins', sans-serif;
+  color: #D1D5DB;
+  font-weight: 500;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
 }
 
 .modern-input {
   width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 0.75rem 0;
+  background-color: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
   color: #ffffff;
-  font-family: inherit;
+  font-family: 'Inter', 'Poppins', sans-serif;
   font-size: 1rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .modern-input:focus {
   outline: none;
-  border-bottom-color: #ffffff;
-  box-shadow: 0 1px 0 0 #ffffff;
+  border-color: #4F46E5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
 }
 
 .modern-input::placeholder {
-  color: #52525b;
+  color: #4b5563;
 }
 
 .password-wrapper {
@@ -127,24 +149,26 @@
 
 .modern-select {
   width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 0.75rem 0;
+  background-color: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
   color: #ffffff;
+  font-family: 'Inter', 'Poppins', sans-serif;
   font-size: 1rem;
   cursor: pointer;
   appearance: none;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .modern-select:focus {
   outline: none;
-  border-bottom-color: #ffffff;
+  border-color: #4F46E5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
 }
 
 .modern-select option {
-  background: #1a1a1a;
+  background: #111827;
   color: #ffffff;
 }
 
@@ -160,22 +184,23 @@
 }
 
 .btn-signin {
-  background: #ffffff;
-  color: #000000;
+  background: #4F46E5;
+  color: #ffffff;
   border: none;
   border-radius: 8px;
-  padding: 1rem;
-  font-size: 1rem;
-  font-weight: 700;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
   letter-spacing: 0.05em;
+  font-family: 'Inter', 'Poppins', sans-serif;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
 
 .btn-signin:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px -10px rgba(255, 255, 255, 0.3);
-  background-color: #f4f4f5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  background-color: #4338ca;
 }
 
 .btn-signin:active {

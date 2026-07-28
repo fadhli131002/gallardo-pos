@@ -18,6 +18,38 @@
   display: none;
 }
 
+/* Global Page Headers */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: 0.25rem;
+}
+
+.page-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+}
+
+/* Fix for table empty state */
+td.empty-state {
+  display: table-cell !important;
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-gray-500);
+  word-break: normal;
+  white-space: normal;
+}
+
 /* Global Modal Styles */
 .modal-overlay {
   position: fixed;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 import { Users, ShoppingBag, CheckCircle, Clock } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useOrders } from '../../context/OrderContext';
@@ -118,16 +118,22 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container animate-fade-in kreosis-layout">
       {/* HEADER */}
-      <div className="dashboard-header mb-6">
-        <h1 className="font-sans text-primary text-2xl font-bold flex items-center gap-3">
-          {userName ? `Hallo, ${userName}` : 'Hallo, Kawan'}
-          {userRole && (
-            <span className="text-xs font-normal px-2 py-1 bg-gray-100 text-gray-600 rounded-md uppercase tracking-wider">
-              {userRole === 'sales' ? 'Sales Team' : userRole === 'finance' ? 'Finance' : userRole}
-            </span>
-          )}
-        </h1>
-        <p className="text-secondary mt-1">Here is your current service overview and store traffic</p>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Dashboard Operasional</h1>
+          <p className="page-subtitle">Ringkasan aktivitas dan performa bengkel hari ini</p>
+        </div>
+        
+        {/* Right side actions - simulating Hostinger Top Nav */}
+        <div className="flex items-center gap-4 hidden sm:flex">
+          <button className="btn-secondary rounded-full flex items-center gap-2 px-4">
+            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">✨</span>
+            Tanya AI
+          </button>
+          <div className="w-10 h-10 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer">
+            <Users size={18} className="text-gray-600" />
+          </div>
+        </div>
       </div>
 
       <div className="kreosis-grid">
@@ -135,59 +141,63 @@ const Dashboard = () => {
         <div className="kreosis-left">
           
           {/* Grafik Utama (Line Chart) */}
-          <div className="glass-card kreosis-main-chart">
-            <h3 className="font-sans font-bold mb-4 text-black">Dynamics of Sales</h3>
+          <div className="premium-card kreosis-main-chart">
+            <h3 className="font-sans font-semibold mb-4 text-primary">Dynamics of Sales</h3>
             <div style={{ height: '260px' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={weeklyData} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                <AreaChart data={weeklyData} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
                   <XAxis dataKey="week" padding={{ left: 30, right: 30 }} tick={{ fontFamily: 'var(--font-sans)', fontSize: 12, fill: '#6b7280' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontFamily: 'var(--font-mono-num)', fontSize: 12, fill: '#6b7280' }} axisLine={false} tickLine={false} tickFormatter={(value) => `Rp ${(value / 1000000)}M`} />
-                  <RechartsTooltip formatter={(value) => `Rp ${value.toLocaleString('id-ID')}`} />
-                  <Line type="monotone" dataKey="revenue" stroke="#111827" strokeWidth={3} dot={{ r: 5, fill: '#111827', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} />
-                </LineChart>
+                  <YAxis tick={{ fontFamily: 'var(--font-sans)', fontSize: 12, fill: '#6b7280' }} width={80} axisLine={false} tickLine={false} tickFormatter={(value) => `Rp ${(value / 1000000)}M`} />
+                  <RechartsTooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} formatter={(value) => `Rp ${value.toLocaleString('id-ID')}`} />
+                  <Area type="monotone" dataKey="revenue" stroke="#4F46E5" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* 4 Blok Statistik */}
           <div className="kreosis-stats-grid mt-6">
-            <div className="metric-card glass-card">
-              <div className="metric-icon-small mb-3">
-                <Users size={18} />
+            <div className="metric-card">
+              <div className="metric-card-left" style={{ maxWidth: '100%' }}>
+                <h3 className="metric-card-title">Total Customer</h3>
+                <span className="metric-card-value">{totalCustomers}</span>
               </div>
-              <p className="text-secondary font-sans text-sm">Total Customer</p>
-              <h3 className="font-mono-num font-bold text-3xl mt-1 text-black">{totalCustomers}</h3>
             </div>
             
-            <div className="metric-card glass-card">
-              <div className="metric-icon-small mb-3">
-                <ShoppingBag size={18} />
+            <div className="metric-card">
+              <div className="metric-card-left" style={{ maxWidth: '100%' }}>
+                <h3 className="metric-card-title">Total Order</h3>
+                <span className="metric-card-value">{totalOrders}</span>
               </div>
-              <p className="text-secondary font-sans text-sm">Total Order</p>
-              <h3 className="font-mono-num font-bold text-3xl mt-1 text-black">{totalOrders}</h3>
             </div>
 
-            <div className="metric-card glass-card">
-              <div className="metric-icon-small mb-3">
-                <CheckCircle size={18} />
+            <div className="metric-card">
+              <div className="metric-card-left" style={{ maxWidth: '100%' }}>
+                <h3 className="metric-card-title">Transaksi Lunas</h3>
+                <span className="metric-card-value" style={{ color: '#10b981' }}>{lunasOrders}</span>
               </div>
-              <p className="text-secondary font-sans text-sm">Transaksi Lunas</p>
-              <h3 className="font-mono-num font-bold text-3xl mt-1 text-black">{lunasOrders}</h3>
             </div>
 
-            <div className="metric-card glass-card">
-              <div className="metric-icon-small mb-3">
-                <Clock size={18} />
+            <div className="metric-card">
+              <div className="metric-card-left" style={{ maxWidth: '100%' }}>
+                <h3 className="metric-card-title">Transaksi Proses</h3>
+                <span className="metric-card-value">{prosesOrders}</span>
               </div>
-              <p className="text-secondary font-sans text-sm">Transaksi Proses</p>
-              <h3 className="font-mono-num font-bold text-3xl mt-1 text-black">{prosesOrders}</h3>
             </div>
           </div>
 
           {/* Tabel Customer Terbaru */}
-          <div className="glass-card mt-6 pb-2">
-            <h3 className="font-sans font-bold mb-4 text-black px-2">Daftar Customer Terbaru</h3>
+          <div className="premium-card mt-6">
+            <div className="customer-table-header">
+              <h3 className="font-sans font-semibold text-primary">Daftar Customer Terbaru</h3>
+            </div>
             <div className="table-responsive">
               <table className="kreosis-table">
                 <thead>
@@ -253,16 +263,16 @@ const Dashboard = () => {
         {/* KOLOM KANAN (30%) */}
         <div className="kreosis-right">
           
-          <div className="glass-card kreosis-analytics-card h-full flex flex-col">
-            <h3 className="font-sans font-bold mb-4 text-black">Produk Terlaris</h3>
+          <div className="premium-card kreosis-analytics-card h-full flex flex-col">
+            <h3 className="font-sans font-semibold mb-4 text-primary">Produk Terlaris</h3>
             <div className="flex-1 min-h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topProducts} margin={{ top: 20, right: 10, left: -20, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
                   <XAxis dataKey="name" tick={{fontFamily: 'var(--font-sans)', fontSize: 11, fill: '#6b7280'}} axisLine={false} tickLine={false} interval={0} />
-                  <YAxis tick={{fontFamily: 'var(--font-mono-num)', fontSize: 11, fill: '#6b7280'}} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <RechartsTooltip cursor={{fill: '#f9fafb'}} formatter={(value) => [`${value} Unit`, 'Total Terjual']} />
-                  <Bar dataKey="sales" fill="#111827" radius={[4, 4, 0, 0]} barSize={40} />
+                  <YAxis tick={{fontFamily: 'var(--font-sans)', fontSize: 11, fill: '#6b7280'}} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <RechartsTooltip cursor={{fill: '#F3F4F6'}} formatter={(value) => [`${value} Unit`, 'Total Terjual']} />
+                  <Bar dataKey="sales" fill="var(--accent-color)" radius={[4, 4, 0, 0]} barSize={40} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

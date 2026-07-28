@@ -109,10 +109,10 @@ const AdminSalesPerformance = () => {
 
   return (
     <div className="dashboard-container animate-fade-in" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-      <div className="dashboard-header mb-6" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div className="page-header">
         <div>
-          <h1 className="text-primary text-2xl font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>Laporan Performa Penjualan Sales</h1>
-          <p className="text-secondary mt-1">Metrik evaluasi dan pelacakan transaksi tim penjualan internal</p>
+          <h1 className="page-title">Performa & Target Sales (Closing)</h1>
+          <p className="page-subtitle">Pantau pencapaian omset, komisi, dan target SPG / Sales harian.</p>
         </div>
         <button 
           onClick={handleExportPDF}
@@ -124,7 +124,7 @@ const AdminSalesPerformance = () => {
         </button>
       </div>
 
-      <div className="chart-card glass-card" style={{ padding: '24px 32px' }}>
+      <div className="chart-card premium-card" style={{ padding: '24px 32px' }}>
         <div className="flex items-center gap-2 mb-4" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
           <Trophy size={20} className="text-primary" />
           <h3 className="font-semibold" style={{ fontFamily: '"Montserrat", sans-serif' }}>Laporan Performa Penjualan Sales</h3>
@@ -183,7 +183,7 @@ const AdminSalesPerformance = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', marginTop: '32px' }}>
         
         {/* Table 1: Top Closing Sales */}
-        <div className="chart-card glass-card" style={{ padding: '24px 32px' }}>
+        <div className="chart-card premium-card" style={{ padding: '24px 32px' }}>
           <h3 className="font-bold text-lg text-black mb-4" style={{ fontFamily: '"Montserrat", sans-serif', borderBottom: '2px solid #f3f4f6', paddingBottom: '12px' }}>
             Top Closing Sales
           </h3>
@@ -219,7 +219,7 @@ const AdminSalesPerformance = () => {
         </div>
 
         {/* Table 2: Top Lokasi / Cabang */}
-        <div className="chart-card glass-card" style={{ padding: '24px 32px' }}>
+        <div className="chart-card premium-card" style={{ padding: '24px 32px' }}>
           <h3 className="font-bold text-lg text-black mb-4" style={{ fontFamily: '"Montserrat", sans-serif', borderBottom: '2px solid #f3f4f6', paddingBottom: '12px' }}>
             Top Lokasi / Cabang
           </h3>

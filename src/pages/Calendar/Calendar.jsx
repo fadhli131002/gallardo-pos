@@ -61,7 +61,7 @@ const Calendar = () => {
         <button onClick={prevMonth} className="icon-btn">
           <ChevronLeft size={24} />
         </button>
-        <h2 className="font-sans font-bold text-xl">
+        <h2 className="font-sans font-bold text-xl text-center flex-1">
           {format(currentDate, 'MMMM yyyy')}
         </h2>
         <button onClick={nextMonth} className="icon-btn">
@@ -117,7 +117,7 @@ const Calendar = () => {
         });
         const hasOrders = dayOrders.length > 0;
         const cellStyle = hasOrders && isSameMonth(day, monthStart) 
-          ? { backgroundColor: '#111', color: '#fff', borderColor: '#000' }
+          ? { backgroundColor: 'var(--accent-color)', color: '#fff', borderColor: 'var(--accent-hover)' }
           : {};
         
         days.push(
@@ -166,19 +166,21 @@ const Calendar = () => {
 
   return (
     <div className="calendar-page animate-fade-in">
-      <div className="dashboard-header mb-6">
-        <h1 className="font-sans text-primary text-2xl font-bold">Penjadwalan</h1>
-        <p className="text-secondary mt-1">Kelola antrean dan booking workshop (Anti-Tumpuk)</p>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Jadwal & Antrean Kendaraan</h1>
+          <p className="page-subtitle">Pemantauan jadwal operasional dan ketersediaan slot antrean</p>
+        </div>
       </div>
 
       <div className="calendar-layout">
-        <div className="calendar-card glass-card">
+        <div className="calendar-card premium-card">
           {renderHeader()}
           {renderDays()}
           {renderCells()}
         </div>
 
-        <div className="sidebar-orders glass-card">
+        <div className="sidebar-orders premium-card">
           <h3 className="font-sans font-semibold mb-4">Order Aktif</h3>
           <p className="text-sm text-secondary mb-4">
             Klik 'Selesaikan Pemasangan' untuk mengosongkan slot kalender.

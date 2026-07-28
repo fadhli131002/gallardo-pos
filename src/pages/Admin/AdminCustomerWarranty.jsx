@@ -310,11 +310,10 @@ const AdminCustomerWarranty = () => {
           <p style={{ color: '#6b7280' }}>Mohon tunggu sebentar, dokumen sedang disiapkan.</p>
         </div>
       )}
-      <div className="customers-page animate-fade-in print:hidden">
-      <div className="dashboard-header mb-6 flex justify-between items-start flex-wrap gap-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="customers-page animate-fade-in print:hidden">      <div className="page-header">
         <div>
-          <h1 className="font-sans text-primary text-2xl font-bold">Daftar Customer & Garansi</h1>
-          <p className="text-secondary mt-1">Kelola data pelanggan dan Sertifikat Garansi Digital</p>
+          <h1 className="page-title">Customer & Garansi</h1>
+          <p className="page-subtitle">Kelola data pelanggan dan riwayat klaim garansi produk/layanan</p>
         </div>
         
         <div className="print:hidden" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -322,8 +321,7 @@ const AdminCustomerWarranty = () => {
           {filterTransactionType === 'Retail (Grosir)' && (
             <button 
               onClick={handleExportBulkExcel}
-              style={{ backgroundColor: '#fff', color: '#059669', border: '2px solid #059669', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease', whiteSpace: 'nowrap', borderRadius: '4px', cursor: 'pointer' }}
-              className="hover:bg-green-600 hover:text-white"
+              className="btn-secondary flex items-center gap-2 px-4 py-2 rounded"
             >
               <Download size={16} />
               <span className="font-sans text-sm font-bold tracking-wide">
@@ -333,8 +331,7 @@ const AdminCustomerWarranty = () => {
           )}
           <button 
             onClick={handleExportPDF}
-            style={{ backgroundColor: '#fff', color: '#000', border: '2px solid #000', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease', whiteSpace: 'nowrap', borderRadius: '4px', cursor: 'pointer' }}
-            className="hover:bg-black hover:text-white"
+            className="btn-primary flex items-center gap-2 px-4 py-2 rounded"
           >
             <Download size={16} />
             <span className="font-sans text-sm font-bold tracking-wide">
@@ -344,8 +341,8 @@ const AdminCustomerWarranty = () => {
         </div>
       </div>
 
-      <div className="customers-list glass-card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', flexWrap: 'nowrap' }} className="print:hidden">
+      <div className="customers-list premium-card">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px', padding: '1.5rem 1.5rem 0 1.5rem', flexWrap: 'nowrap' }} className="print:hidden">
           {/* Sisi Kiri: Search Input */}
           <div style={{ position: 'relative', flex: 1, minWidth: '0' }}>
             <Search size={18} color="#9ca3af" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -672,7 +669,7 @@ const AdminCustomerWarranty = () => {
                         </button>
                         
                         {activeDropdown === order.id && (
-                          <div className="dropdown-menu glass-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '50%', transform: 'translateY(-50%)', minWidth: '220px', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', borderRadius: '12px', marginRight: '8px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
+                          <div className="dropdown-menu premium-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '50%', transform: 'translateY(-50%)', minWidth: '220px', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', borderRadius: '12px', marginRight: '8px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
                               <button onClick={() => { setActiveDropdown(null); setIsGeneratingPDF(true); setInvoiceOrder(order); setTimeout(() => handleDownloadInvoiceClick(), 500); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                 <Printer size={16} color="#4b5563" /> Cetak Invoice
                               </button>
@@ -1199,7 +1196,7 @@ const AdminCustomerWarranty = () => {
       {/* Settlement Modal */}
       {settlementOrder && (
         <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-          <div className="modal-content glass-card" style={{ width: '90%', maxWidth: '500px', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+          <div className="modal-content premium-card" style={{ width: '90%', maxWidth: '500px', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f9fafb' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ padding: '8px', backgroundColor: '#fef3c7', borderRadius: '10px', color: '#d97706' }}>

@@ -186,10 +186,10 @@ const VehicleMaster = () => {
   return (
     <>
     <div className="dashboard-container animate-fade-in">
-      <div className="dashboard-header mb-6" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <div className="page-header">
         <div>
-          <h1 className="font-sans text-primary text-2xl font-bold">Data Master & Kategori</h1>
-          <p className="text-secondary mt-1">Kelola data kendaraan dan sumber leads penjualan</p>
+          <h1 className="page-title">Data Master Kategori & Kendaraan</h1>
+          <p className="page-subtitle">Kelola master data merek, model kendaraan, dan kategori layanan.</p>
         </div>
         {activeTab === 'master' && (
           <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#111', color: '#fff', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', border: 'none', fontWeight: '600' }} onClick={() => setIsModalOpen(true)}>
@@ -236,7 +236,7 @@ const VehicleMaster = () => {
       {activeTab === 'master' && (
         <>
 
-      <div className="glass-card mb-6" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+      <div className="premium-card mb-6" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
         <Search size={20} className="text-gray-400" />
         <input 
           type="text" 
@@ -247,7 +247,7 @@ const VehicleMaster = () => {
         />
       </div>
 
-      <div className="glass-card" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+      <div className="premium-card" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
         <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
@@ -296,7 +296,7 @@ const VehicleMaster = () => {
 
       {activeTab === 'kategori' && (
         <div>
-          <div className="glass-card mb-6" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+          <div className="premium-card mb-6" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
             <input 
               type="text" 
               placeholder="Masukkan kategori baru (Contoh: GIIAS 2026, Ads Instagram)..." 
@@ -313,7 +313,7 @@ const VehicleMaster = () => {
             </button>
           </div>
 
-          <div className="glass-card" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+          <div className="premium-card" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
             <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
@@ -357,7 +357,7 @@ const VehicleMaster = () => {
 
           {activeVariantType === 'peruntukan' ? (
             <>
-              <div className="glass-card mb-6" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb', flexWrap: 'nowrap' }}>
+              <div className="premium-card mb-6" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb', flexWrap: 'nowrap' }}>
                 <div style={{ position: 'relative', flex: 1, minWidth: '0' }}>
                   <Search size={18} color="#9ca3af" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input 
@@ -386,7 +386,7 @@ const VehicleMaster = () => {
                 </button>
               </div>
 
-          <div className="glass-card" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+          <div className="premium-card" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
             <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
@@ -448,7 +448,7 @@ const VehicleMaster = () => {
           </>
           ) : (
             <>
-              <div className="glass-card mb-6" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+              <div className="premium-card mb-6" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
                 <input 
                   type="text" 
                   placeholder={`Tambahkan opsi ${activeVariantType}...`}
@@ -465,7 +465,7 @@ const VehicleMaster = () => {
                 </button>
               </div>
 
-              <div className="glass-card" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+              <div className="premium-card" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
                 <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
@@ -673,7 +673,7 @@ const VehicleMaster = () => {
         </div>
       )}
       {activeTab === 'sales' && (
-        <div className="glass-card" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+        <div className="premium-card" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
           <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #e5e7eb' }}>

@@ -40,7 +40,7 @@
   padding: 0.5rem;
   border-radius: 50%;
   transition: background-color var(--transition-fast);
-  color: var(--text-primary);
+  color: var(--accent-color);
 }
 
 .icon-btn:hover {
@@ -167,18 +167,18 @@
 }
 
 .confirm-modal-title {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-weight: 700;
   font-size: 1.25rem;
-  color: #000000;
+  color: var(--text-primary);
   margin-top: 0;
   margin-bottom: 0.75rem;
 }
 
 .confirm-modal-text {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.9rem;
-  color: #4b5563;
+  color: var(--text-secondary);
   margin-bottom: 2rem;
   line-height: 1.5;
 }
@@ -193,10 +193,10 @@
   background: transparent;
   border: none;
   padding: 0.625rem 1.25rem;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-weight: 600;
   font-size: 0.875rem;
-  color: #4b5563;
+  color: var(--text-secondary);
   cursor: pointer;
   border-radius: 6px;
   transition: background-color 0.2s;
@@ -208,10 +208,10 @@
 }
 
 .confirm-btn-confirm {
-  background-color: #000000;
+  background-color: var(--accent-color);
   border: none;
   padding: 0.625rem 1.5rem;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-sans);
   font-weight: 600;
   font-size: 0.875rem;
   color: #ffffff;
@@ -221,5 +221,5 @@
 }
 
 .confirm-btn-confirm:hover {
-  background-color: #333333;
+  background-color: var(--accent-hover);
 }

@@ -251,7 +251,7 @@ const FinanceInvoices = () => {
                       {activeDropdown === inv.invoiceId && (
                         <>
                           <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); }} />
-                          <div className="dropdown-menu glass-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '50%', transform: 'translateY(-50%)', minWidth: 'max-content', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', borderRadius: '12px', marginRight: '8px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff' }}>
+                          <div className="dropdown-menu premium-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '50%', transform: 'translateY(-50%)', minWidth: 'max-content', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', borderRadius: '12px', marginRight: '8px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff' }}>
                             <button 
                               onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setSelectedInvoice(inv); setTimeout(() => handlePrint(inv), 100); }}
                               style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '10px', padding: '10px 16px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13.5px', fontWeight: '500', color: '#374151', textAlign: 'left', whiteSpace: 'nowrap' }} 

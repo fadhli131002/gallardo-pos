@@ -85,21 +85,19 @@ const Complaints = () => {
   return (
     <div className="customers-page animate-fade-in print:hidden">
       {/* Header */}
-      <div className="dashboard-header mb-6" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="page-header">
         <div>
-          <h1 className="font-sans text-primary text-2xl font-bold flex items-center gap-3">
+          <h1 className="page-title flex items-center gap-3">
             <div style={{ padding: '8px', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '8px' }}>
               <MessageSquareWarning size={24} />
             </div>
             Data Komplain / Klaim Garansi
           </h1>
-          <p className="text-secondary mt-1">Kelola dan pantau semua komplain masuk dari pelanggan</p>
+          <p className="page-subtitle">Kelola dan pantau semua komplain masuk dari pelanggan</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          style={{ backgroundColor: '#10b981', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '600', transition: 'background-color 0.2s' }}
-          onMouseOver={e => e.currentTarget.style.backgroundColor = '#059669'}
-          onMouseOut={e => e.currentTarget.style.backgroundColor = '#10b981'}
+          className="btn-primary"
         >
           <Plus size={20} />
           Catat Komplain
@@ -107,8 +105,8 @@ const Complaints = () => {
       </div>
 
       {/* Filters */}
-      <div className="glass-card" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'nowrap' }}>
+      <div className="premium-card" style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '1.5rem', flexWrap: 'nowrap' }}>
           <div style={{ position: 'relative', flex: 1, minWidth: '0' }}>
             <Search size={18} color="#9ca3af" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
             <input 
@@ -138,7 +136,7 @@ const Complaints = () => {
       </div>
 
       {/* Table */}
-      <div className="table-responsive glass-card" style={{ overflow: 'visible', padding: 0 }}>
+      <div className="table-responsive premium-card" style={{ overflow: 'visible', padding: 0 }}>
         <table className="customers-table">
           <thead>
             <tr>

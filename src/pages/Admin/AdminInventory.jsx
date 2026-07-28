@@ -372,17 +372,17 @@ const AdminInventory = () => {
         </div>
       )}
 
-      <div className="dashboard-header mb-6" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="page-header">
         <div>
-          <h1 className="font-sans text-primary text-2xl font-bold">Inventory & Stok</h1>
-          <p className="text-secondary mt-1">Kelola data material dan ketersediaan barang bengkel</p>
+          <h1 className="page-title">Inventory & Stok</h1>
+          <p className="page-subtitle">Kelola data material dan ketersediaan barang bengkel</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn-secondary" onClick={handlePrintPDF} disabled={isPrinting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.75rem 1.5rem', backgroundColor: '#fff', color: 'var(--color-black)', border: '1px solid var(--color-black)', borderRadius: '4px', cursor: isPrinting ? 'wait' : 'pointer', fontFamily: 'Montserrat, sans-serif', fontWeight: 600, opacity: isPrinting ? 0.7 : 1 }}>
+          <button className="btn-secondary" onClick={handlePrintPDF} disabled={isPrinting} style={{ opacity: isPrinting ? 0.7 : 1 }}>
             {isPrinting ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
             {isPrinting ? 'Menyiapkan PDF...' : 'Cetak Lembar Cek Fisik'}
           </button>
-          <button className="btn-primary" onClick={() => handleOpenModal()} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.75rem 1.5rem', backgroundColor: 'var(--color-black)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Montserrat, sans-serif', fontWeight: 600 }}>
+          <button className="btn-primary" onClick={() => handleOpenModal()}>
             <Plus size={18} />
             + Tambah Stok Masuk
           </button>
@@ -404,7 +404,7 @@ const AdminInventory = () => {
         </button>
       </div>
 
-      <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
+      <div className="premium-card" style={{ padding: '0', overflow: 'hidden' }}>
         {activeTab === 'inventory' && (
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontFamily: 'Montserrat, sans-serif' }}>
           <thead>
@@ -653,7 +653,7 @@ const AdminInventory = () => {
 
               <div className="modal-footer" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                 <button type="button" onClick={handleCloseModal} className="btn-secondary">Batal</button>
-                <button type="submit" className="btn-primary" style={{ backgroundColor: 'var(--color-black)', color: '#fff' }}>
+                <button type="submit" className="btn-primary">
                   {editingItem ? 'Simpan Perubahan' : 'Tambahkan'}
                 </button>
               </div>
@@ -665,7 +665,7 @@ const AdminInventory = () => {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="modal-content glass-card relative" style={{ width: '420px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '16px', padding: '2rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+          <div className="modal-content premium-card relative" style={{ width: '420px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '16px', padding: '2rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
 
             <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
               <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -738,7 +738,7 @@ const AdminInventory = () => {
                   {item.kategori === 'Kaca Film' && item.kegelapan ? ` (Kegelapan ${item.kegelapan})` : ''}
                 </td>
                 <td style={{ border: '1px solid #000', padding: '16px 8px', textAlign: 'center', fontWeight: 'bold' }}>
-                  {item.kategori === 'Tools & Equipment'
+                  {item.kategori === 'Tools'
                     ? `${item.stokUtama} ${item.satuan}`
                     : item.kategori === 'Coating'
                       ? `${item.stokUtama} Botol (${item.stokPecahan} ml)`

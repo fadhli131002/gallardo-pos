@@ -6,7 +6,7 @@
 }
 
 .sidebar {
-  background-color: var(--bg-primary);
+  background-color: #FFFFFF;
   border-right: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
@@ -73,8 +73,9 @@
 }
 
 .nav-item.active {
-  background-color: var(--color-black);
-  color: var(--color-white);
+  background-color: #EEF2FF;
+  color: var(--accent-color);
+  font-weight: 600;
 }
 
 .sidebar-footer {
@@ -98,7 +99,58 @@
 }
 
 .content-wrapper {
-  padding: 2.5rem;
-  max-width: 1200px;
+  padding: 2rem;
+  max-width: 1600px;
   margin: 0 auto;
+}
+
+/* =========================================
+   OWNER DARK LAYOUT OVERRIDES
+   ========================================= */
+.owner-dark-layout {
+  background-color: #0B0F17;
+}
+
+.owner-dark-layout .sidebar {
+  background-color: #111827;
+  border-right-color: #1f2937;
+}
+
+.owner-dark-layout .sidebar-brand {
+  border-bottom-color: #1f2937;
+}
+
+.owner-dark-layout .brand-logo {
+  filter: brightness(0) invert(1);
+}
+
+.owner-dark-layout .sidebar-footer {
+  border-top-color: #1f2937;
+}
+
+.owner-dark-layout .nav-item {
+  color: #9ca3af;
+}
+
+.owner-dark-layout .nav-item:hover {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+.owner-dark-layout .nav-item.active {
+  background-color: #1f2937;
+  color: #818cf8; /* Light Indigo for contrast */
+}
+
+.owner-dark-layout .logout-btn {
+  color: #fb7185;
+}
+
+.owner-dark-layout .logout-btn:hover {
+  background-color: #e11d48;
+  color: #ffffff;
+}
+
+.owner-dark-layout .main-content {
+  background-color: #0B0F17;
 }

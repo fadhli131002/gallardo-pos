@@ -141,16 +141,16 @@ const CustomerRanking = () => {
 
   return (
     <div className="ranking-container">
-      <div className="ranking-header">
-        <div className="ranking-title">
-          <h1>Leaderboard & Rekap Pembelian</h1>
-          <p>Peringkat customer berdasarkan total nilai transaksi dan kuantitas produk.</p>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Leaderboard & Rekap Pembelian</h1>
+          <p className="page-subtitle">Peringkat customer berdasarkan total nilai transaksi dan kuantitas produk.</p>
         </div>
         <div className="ranking-actions">
-          <button onClick={handleExportExcel} className="btn-excel">
+          <button onClick={handleExportExcel} className="btn-primary">
             <Download size={18} /> Export Excel
           </button>
-          <button onClick={handleExportPDF} className="btn-pdf">
+          <button onClick={handleExportPDF} className="btn-secondary">
             <FileText size={18} /> Export PDF
           </button>
         </div>

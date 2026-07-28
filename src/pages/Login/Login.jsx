@@ -120,51 +120,23 @@ const Login = () => {
         )}
       </AnimatePresence>
 
-      <motion.img 
-        src={lamboImage} 
-        alt="Lamborghini Gallardo" 
-        className="login-car-image"
-        initial={{ y: 0, x: isFromLogout ? '-150vw' : 0 }}
-        animate={{
-          x: animationStage > 0 ? '-150vw' : 0,
-          y: animationStage > 0 ? 0 : [0, -3, 0]
-        }}
-        transition={{
-          x: animationStage > 0 
-            ? { duration: 0.8, ease: "easeIn" }
-            : (isFromLogout ? { duration: 0.8, ease: "easeOut" } : { duration: 0 }),
-          y: animationStage > 0 
-            ? { duration: 0 }
-            : { duration: 2, repeat: Infinity, ease: "easeInOut" }
-        }}
-      />
-
-      <div className="login-card-wrapper">
+      <div className="login-left-col">
+        <div className="login-card-wrapper">
         <motion.div 
-          className="login-glass-card"
+          className="login-premium-card"
           initial={{ opacity: 0, y: isFromLogout ? 0 : 20 }}
           animate={{ opacity: animationStage === 0 ? 1 : 0, y: animationStage === 0 ? 0 : -20 }}
           transition={{ duration: 0.8 }}
           style={{ pointerEvents: animationStage === 0 ? 'auto' : 'none' }}
         >
-          <div className="login-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1rem' }}>
-            <img 
-              src={branch === 'New Ratu' ? logoNewRatu : logoGallardo} 
-              alt={branch}
-              style={{ 
-                height: branch === 'New Ratu' ? '80px' : '40px',
-                objectFit: 'contain',
-                marginBottom: '8px',
-                filter: branch === 'Gallardo' ? 'brightness(0) invert(1)' : 'none',
-                transition: 'all 0.3s ease'
-              }} 
-            />
-            <p className="font-mono-ui text-secondary text-sm mt-2">Premium Automotive Protection</p>
+          <div className="login-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h1>GALLARDO AUTOSPORT</h1>
+            <p>Premium Automotive Protection</p>
           </div>
           
           <form className="login-form-new" onSubmit={handleLogin}>
             <div className="input-group">
-              <label htmlFor="username" className="font-mono-ui text-secondary text-xs tracking-wider">USERNAME</label>
+              <label htmlFor="username">USERNAME</label>
               <input 
                 type="text" 
                 id="username" 
@@ -177,7 +149,7 @@ const Login = () => {
             </div>
             
             <div className="input-group">
-              <label htmlFor="password" className="font-mono-ui text-secondary text-xs tracking-wider">PASSWORD</label>
+              <label htmlFor="password">PASSWORD</label>
               <div className="password-wrapper">
                 <input 
                   type={showPassword ? "text" : "password"} 
@@ -199,11 +171,11 @@ const Login = () => {
             </div>
 
             <div className="input-group">
-              <label htmlFor="role" className="font-mono-ui text-secondary text-xs tracking-wider">LOGIN AS</label>
+              <label htmlFor="role">LOGIN AS</label>
               <div className="select-wrapper">
                 <select 
                   id="role" 
-                  className="modern-select font-mono-ui"
+                  className="modern-select"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                 >
@@ -216,12 +188,12 @@ const Login = () => {
             </div>
 
             {role !== 'finance' && role !== 'owner' && (
-              <div className="input-group mt-3">
-                <label htmlFor="branch" className="font-mono-ui text-secondary text-xs tracking-wider">BRANCH</label>
+              <div className="input-group">
+                <label htmlFor="branch">BRANCH</label>
                 <div className="select-wrapper">
                 <select 
                   id="branch" 
-                  className="modern-select font-mono-ui"
+                  className="modern-select"
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
                   disabled={role === 'admin' || role === 'finance'}
@@ -246,6 +218,27 @@ const Login = () => {
             </button>
           </form>
         </motion.div>
+      </div>
+      </div>
+      <div className="login-right-col">
+        <motion.img 
+          src={lamboImage} 
+          alt="Lamborghini Gallardo" 
+          className="login-car-image"
+          initial={{ y: 0, x: isFromLogout ? '-150vw' : 0 }}
+          animate={{
+            x: animationStage > 0 ? '-150vw' : 0,
+            y: animationStage > 0 ? 0 : [0, -3, 0]
+          }}
+          transition={{
+            x: animationStage > 0 
+              ? { duration: 0.8, ease: "easeIn" }
+              : (isFromLogout ? { duration: 0.8, ease: "easeOut" } : { duration: 0 }),
+            y: animationStage > 0 
+              ? { duration: 0 }
+              : { duration: 2, repeat: Infinity, ease: "easeInOut" }
+          }}
+        />
       </div>
     </div>
   );

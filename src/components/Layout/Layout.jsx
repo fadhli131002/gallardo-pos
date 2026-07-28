@@ -27,11 +27,11 @@ const Layout = () => {
     }, 500);
   };
 
-  const NavText = ({ children, className = "font-mono-ui" }) => (
+  const NavText = ({ children, className = "font-sans font-medium" }) => (
     <motion.span
       initial={false}
       animate={{ opacity: isExpanded ? 1 : 0, width: isExpanded ? 'auto' : 0, marginLeft: isExpanded ? 16 : 0 }}
-      style={{ overflow: 'hidden', whiteSpace: 'nowrap', display: 'block' }}
+      style={{ overflow: 'hidden', whiteSpace: 'nowrap', display: 'block', minWidth: isExpanded ? 'max-content' : '0' }}
       className={className}
     >
       {children}

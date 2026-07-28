@@ -164,13 +164,15 @@ const AdminScheduling = () => {
 
   return (
     <div className="dashboard-container animate-fade-in">
-      <div className="dashboard-header mb-6">
-        <h1 className="font-sans text-primary text-2xl font-bold">Log Penjadwalan & Antrean Kendaraan</h1>
-        <p className="text-secondary mt-1">Sistem pemantauan jadwal pengerjaan dan alokasi antrean harian</p>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Log Penjadwalan & Antrean Kendaraan</h1>
+          <p className="page-subtitle">Sistem pemantauan jadwal pengerjaan dan alokasi antrean harian</p>
+        </div>
       </div>
 
       {/* Mini Calendar / Booking Slot Matrix */}
-      <div className="chart-card glass-card mb-6" style={{ padding: '24px 32px' }}>
+      <div className="chart-card premium-card mb-6" style={{ padding: '24px 32px' }}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <CalendarRange size={20} className="text-primary" />
@@ -292,7 +294,7 @@ const AdminScheduling = () => {
       </div>
 
       {/* Expanded Operational Log Table */}
-      <div className="chart-card glass-card" style={{ padding: '24px 32px' }}>
+      <div className="chart-card premium-card" style={{ padding: '24px 32px' }}>
         
         {/* BARIS PERTAMA: Header & Main Action */}
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
@@ -441,7 +443,7 @@ const AdminScheduling = () => {
                             className="fixed inset-0 z-40" 
                             onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); }}
                           />
-                          <div className="dropdown-menu glass-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '50%', transform: 'translateY(-50%)', minWidth: 'max-content', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', borderRadius: '12px', marginRight: '8px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff' }}>
+                          <div className="dropdown-menu premium-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '50%', transform: 'translateY(-50%)', minWidth: 'max-content', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', borderRadius: '12px', marginRight: '8px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff' }}>
                           <button  
                             onClick={(e) => { 
                               e.stopPropagation(); 

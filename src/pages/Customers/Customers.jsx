@@ -247,10 +247,10 @@ const Customers = () => {
 
   return (
     <div className="customers-page animate-fade-in">
-      <div className="dashboard-header mb-6 no-print flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+      <div className="page-header no-print">
         <div>
-          <h1 className="font-sans text-primary text-2xl font-bold">Daftar Customer & Garansi</h1>
-          <p className="text-secondary mt-1">Kelola data pelanggan, Invoice, dan Sertifikat Garansi Digital</p>
+          <h1 className="page-title">Daftar Customer</h1>
+          <p className="page-subtitle">Kelola data pelanggan dan riwayat transaksi</p>
         </div>
         <div className="flex gap-3" style={{ display: 'flex', gap: '12px' }}>
           <button 
@@ -268,8 +268,8 @@ const Customers = () => {
         </div>
       </div>
 
-      <div className="customers-list glass-card no-print">
-        <div className="table-toolbar flex flex-col md:flex-row gap-4 mb-6">
+      <div className="customers-list premium-card no-print">
+        <div className="table-toolbar flex flex-col md:flex-row gap-4 mb-6" style={{ padding: '1.5rem 1.5rem 0 1.5rem' }}>
           <div className="search-box flex-1" style={{ maxWidth: '100%' }}>
             <Search size={18} className="search-icon" />
             <input 

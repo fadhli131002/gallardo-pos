@@ -144,7 +144,7 @@ const POSRetail = () => {
   const combinedCatalog = inventory.map(inv => ({
       id: inv.id, // Ensure id_barang is carried over
       name: getProductName(inv),
-      category: inv.kategori === 'Coating' ? 'Coating & Chemical' : inv.kategori,
+      category: inv.kategori === 'Coating' ? 'Coating & Chemical' : inv.kategori === 'Tools' ? 'Tools & Equipment' : inv.kategori,
       type: inv.kategori === 'Kaca Film' ? 'Kaca Film' : inv.kategori === 'PPF' ? 'PPF' : inv.kategori === 'Coating' ? 'Coating' : 'Tool',
       isVariablePrice: inv.kategori === 'Kaca Film' || inv.kategori === 'PPF',
       price: 0, 
@@ -826,15 +826,15 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
   return (
     <>
       <div className="pos-page animate-fade-in">
-        <div className="dashboard-header mb-6 no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h1 className="font-sans text-primary text-2xl font-bold">POS Retail (Grosir)</h1>
-          <p className="text-secondary mt-1">Formulir Terpadu & Kasir Penjualan Grosir / Retail</p>
+        <div className="page-header no-print">
+          <div>
+            <h1 className="page-title">POS Retail (Grosir)</h1>
+            <p className="page-subtitle">Kasir khusus penjualan barang grosir tanpa layanan bengkel</p>
+          </div>
+          <button onClick={() => navigate('/')} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <X size={18} /> Tutup POS
+          </button>
         </div>
-        <button onClick={() => navigate('/')} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <X size={18} /> Tutup POS
-        </button>
-      </div>
 
       <form 
         onSubmit={handleSubmit} 
@@ -849,7 +849,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
           
 
           {/* DETAIL SUPPLIER / CUSTOMER */}
-          <div className="glass-card" style={{ padding: '24px', marginBottom: '24px' }}>
+          <div className="premium-card" style={{ padding: '24px', marginBottom: '24px' }}>
             <h3 className="font-sans font-bold text-lg mb-4 flex items-center gap-2">
               <User size={20} className="text-primary" />
               Detail Customer / Reseller
@@ -939,8 +939,8 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px' }}>
                 {/* Search Bar */}
-                <div style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
-                  <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                <div style={{ position: 'relative', width: '100%', maxWidth: '100%' }}>
+                  <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
                   <input
                     type="text"
                     placeholder="Cari nama produk atau brand..."
@@ -948,15 +948,18 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                     onChange={(e) => setProductSearchQuery(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '10px 16px 10px 40px',
-                      border: '1px solid #d1d5db',
+                      padding: '12px 16px 12px 48px',
+                      border: '1px solid #E5E7EB',
                       borderRadius: '8px',
                       outline: 'none',
                       transition: 'box-shadow 0.2s, border-color 0.2s',
-                      fontFamily: 'inherit'
+                      fontFamily: 'inherit',
+                      fontSize: '14px',
+                      backgroundColor: '#FFFFFF',
+                      color: '#1F2937'
                     }}
-                    onFocus={(e) => { e.target.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.5)'; e.target.style.borderColor = '#3b82f6'; }}
-                    onBlur={(e) => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = '#d1d5db'; }}
+                    onFocus={(e) => { e.target.style.boxShadow = '0 0 0 2px rgba(79, 70, 229, 0.2)'; e.target.style.borderColor = '#4F46E5'; }}
+                    onBlur={(e) => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = '#E5E7EB'; }}
                   />
                 </div>
 
@@ -986,25 +989,28 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                     }
 
                     return (
-                      <div key={product.id} className="product-card glass-card" onClick={() => openVariantModal(product)}>
+                      <div key={product.id} className="product-card" onClick={() => openVariantModal(product)}>
                         <div className="p-cat">{product.category}</div>
                         <div className="p-name">{product.name}</div>
-                        <div className="p-stock" style={{ marginTop: '0.5rem', color: (product.category === 'Tools & Equipment' ? product.stokUtama < 2 : product.stokUtama < 2) ? '#ef4444' : '#6b7280', fontWeight: (product.category === 'Tools & Equipment' ? product.stokUtama < 2 : product.stokUtama < 2) ? '600' : 'normal' }}>
-                          <Package size={12} style={{ display: 'inline', marginRight: '4px' }} /> 
-                          {product.trackInventory 
-                            ? (product.category === 'Tools & Equipment' 
-                              ? `Tersedia: ${product.stokUtama} ${product.satuan || ''}` 
-                              : product.category === 'Coating & Chemical'
-                                ? `Tersedia: ${product.stokUtama} Botol (${product.stokPecahan} ml)`
-                                : `Tersedia: ${product.stokUtama} Roll + ${product.stokPecahan} Meter`)
-                            : 'Tanpa Stok'}
-                        </div>
-                        {product.category === 'Kaca Film' && product.kegelapan && (
-                          <div className="p-kegelapan" style={{ marginTop: '0.25rem', color: '#6b7280', fontSize: '11px', display: 'flex', alignItems: 'center' }}>
-                            <Percent size={12} style={{ marginRight: '4px' }} />
-                            Kegelapan: {product.kegelapan}
+                        <div className="p-meta-container">
+                          <div className="p-stock" style={{ color: (product.category === 'Tools & Equipment' ? product.stokUtama < 2 : product.stokUtama < 2) ? '#ef4444' : '#6b7280', fontWeight: (product.category === 'Tools & Equipment' ? product.stokUtama < 2 : product.stokUtama < 2) ? '600' : 'normal' }}>
+                            <Package size={14} style={{ display: 'inline', marginRight: '4px', opacity: 0.7 }} /> 
+                            {product.trackInventory 
+                              ? (product.category === 'Tools & Equipment' 
+                                ? `Tersedia: ${product.stokUtama} ${product.satuan || ''}` 
+                                : product.category === 'Coating & Chemical'
+                                  ? `Tersedia: ${product.stokUtama} Botol (${product.stokPecahan} ml)`
+                                  : `Tersedia: ${product.stokUtama} Roll + ${product.stokPecahan} Meter`)
+                              : 'Tanpa Stok'}
                           </div>
-                        )}
+                          {product.category === 'Kaca Film' && product.kegelapan && (
+                            <div className="p-kegelapan">
+                              <Percent size={14} style={{ marginRight: '4px', opacity: 0.7 }} />
+                              Kegelapan: {product.kegelapan}
+                            </div>
+                          )}
+                        </div>
+                        <button className="p-action-btn">Pilih</button>
                       </div>
                     );
                   })}
@@ -1017,7 +1023,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
         {/* Sidebar Summary */}
         <div className="pos-summary-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Cart Section */}
-          <div className="cart-container glass-card" style={{ width: "100%", boxShadow: "none", backgroundColor: "rgba(255, 255, 255, 0.4)" }}>
+          <div className="cart-container premium-card" style={{ width: "100%", boxShadow: "none", backgroundColor: "rgba(255, 255, 255, 0.4)" }}>
                   <h4 className="font-sans font-semibold text-primary mb-2 flex items-center gap-2">
                     <FileText size={16} /> Keranjang Pesanan
                   </h4>
@@ -1095,7 +1101,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                   </div>
                 </div>
 
-          <div className="summary-card glass-card">
+          <div className="summary-card premium-card">
             <div className="section-header">
               <Calculator size={20} />
               <h3 className="font-sans font-semibold">Total Kalkulasi</h3>
@@ -1125,7 +1131,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
       {/* Payment Modal */}
       {showPaymentModal && (
         <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 9999, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '3rem 1rem', overflowY: 'auto' }}>
-          <div className="modal-content payment-modal glass-card p-6" style={{ width: '800px', maxWidth: '95%', position: 'relative', margin: 'auto' }}>
+          <div className="modal-content payment-modal premium-card p-6" style={{ width: '800px', maxWidth: '95%', position: 'relative', margin: 'auto' }}>
             <button className="modal-close" style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', zIndex: 100 }} onClick={() => setShowPaymentModal(false)}><X size={24} /></button>
             <div className="text-center mb-6 mt-4">
               <Wallet size={48} className="mx-auto text-primary mb-4" />

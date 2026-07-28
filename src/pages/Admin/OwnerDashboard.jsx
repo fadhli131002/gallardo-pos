@@ -15,7 +15,9 @@ import {
   ShoppingCart,
   ExternalLink,
   Calendar,
-  MoreVertical
+  MoreVertical,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -64,6 +66,22 @@ export default function OwnerDashboard() {
   
   const [activeTab, setActiveTab] = useState('finance');
   const [isLoading, setIsLoading] = useState(true);
+
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('owner-theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('owner-theme', newMode ? 'dark' : 'light');
+    window.dispatchEvent(new Event('themeChanged'));
+  };
 
   const fetchDashboardData = async () => {
     setIsLoading(true);
@@ -192,15 +210,18 @@ export default function OwnerDashboard() {
   };
 
   return (
-    <div className="owner-dashboard">
+    <div className={`owner-dashboard ${isDarkMode ? 'dark-theme' : ''}`}>
       
       {/* HEADER */}
-      <div className="dashboard-header">
+      <div className="page-header">
         <div>
-          <h1 className="dashboard-title">Ringkasan</h1>
-          <p className="dashboard-subtitle">Pantau performa bisnis dan laporan finansial secara real-time</p>
+          <h1 className="page-title">Executive Dashboard</h1>
+          <p className="page-subtitle">Ringkasan kinerja bisnis, pendapatan, dan efisiensi operasional</p>
         </div>
         <div className="header-actions">
+          <button onClick={toggleTheme} className="btn-icon theme-toggle-btn" title="Toggle Theme">
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
           <select 
             value={year} 
             onChange={(e) => setYear(e.target.value)}
@@ -271,7 +292,7 @@ export default function OwnerDashboard() {
                       </div>
                       <div className="metric-footer-row">
                         <span>Total HPP</span>
-                        <span className="metric-footer-value" style={{color: '#e11d48'}}>- {formatCurrency(summaryData.totalHPP)}</span>
+                        <span className="metric-footer-value text-rose">- {formatCurrency(summaryData.totalHPP)}</span>
                       </div>
                     </div>
                   </div>
@@ -311,7 +332,7 @@ export default function OwnerDashboard() {
                       <p className="metric-value">{formatCurrency(summaryData.totalExpense)}</p>
                     </div>
                     <div className="metric-footer">
-                      <p style={{ margin: 0, lineHeight: 1.4 }}>Seluruh pengeluaran di luar HPP (gaji, sewa, listrik, utilitas, dll).</p>
+                      <p className="metric-desc">Seluruh pengeluaran di luar HPP (gaji, sewa, listrik, utilitas, dll).</p>
                     </div>
                   </div>
 
@@ -327,7 +348,7 @@ export default function OwnerDashboard() {
                       <p className="metric-value">{formatCurrency(summaryData.totalKerugianKomplain)}</p>
                     </div>
                     <div className="metric-footer">
-                      <p style={{ margin: 0, lineHeight: 1.4 }}>Nilai finansial (modal barang) yang keluar akibat klaim gratis.</p>
+                      <p className="metric-desc">Nilai finansial (modal barang) yang keluar akibat klaim gratis.</p>
                     </div>
                   </div>
 
@@ -345,24 +366,24 @@ export default function OwnerDashboard() {
                             <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDarkMode ? '#334155' : '#f1f5f9'} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: isDarkMode ? '#9ca3af' : '#64748b', fontSize: 12}} dy={10} />
                         <YAxis 
                           axisLine={false} 
                           tickLine={false} 
-                          tick={{fill: '#64748b', fontSize: 12}}
+                          tick={{fill: isDarkMode ? '#9ca3af' : '#64748b', fontSize: 12}}
                           tickFormatter={(val) => `Rp ${val / 1000000}Jt`}
                           dx={-10}
                         />
                         <Tooltip 
                           formatter={(value) => formatCurrency(value)}
-                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                          contentStyle={{ borderRadius: '12px', border: `1px solid ${isDarkMode ? '#334155' : '#e2e8f0'}`, backgroundColor: isDarkMode ? '#1e293b' : '#ffffff', color: isDarkMode ? '#f9fafb' : '#0f172a', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                         />
                         <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
                         <Area type="monotone" dataKey="labaBersih" name="Laba Bersih" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorLaba)" />
                         <Line type="monotone" dataKey="expense" name="Total Beban" stroke="#94a3b8" strokeWidth={2} dot={false} strokeDasharray="5 5" />
                         <Line type="monotone" dataKey="hpp" name="Total HPP" stroke="#cbd5e1" strokeWidth={2} dot={false} strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="omset" name="Total Omset" stroke="#334155" strokeWidth={2} dot={false} />
+                        <Line type="monotone" dataKey="omset" name="Total Omset" stroke={isDarkMode ? '#f9fafb' : '#334155'} strokeWidth={2} dot={false} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -459,63 +480,63 @@ export default function OwnerDashboard() {
               <div className="ops-grid">
                 
                 {/* ORDER & COMPLAINTS */}
-                <div className="table-card" style={{ gridColumn: '1 / -1', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                  <div style={{ flex: '1', minWidth: '200px', padding: '20px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="table-card ops-summary-container">
+                  <div className="ops-summary-card">
+                    <h3 className="ops-summary-title">
                       <Package size={16} /> Status Order / Transaksi
                     </h3>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '14px', color: '#334155' }}>Selesai / Lunas</span>
-                      <span style={{ fontWeight: '600', color: '#0f172a' }}>{summaryData.orderStats?.lunas || 0}</span>
+                    <div className="ops-summary-row">
+                      <span className="ops-summary-label">Selesai / Lunas</span>
+                      <span className="ops-summary-value">{summaryData.orderStats?.lunas || 0}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: '14px', color: '#334155' }}>Proses / Pending</span>
-                      <span style={{ fontWeight: '600', color: '#0f172a' }}>{summaryData.orderStats?.pending || 0}</span>
+                    <div className="ops-summary-row">
+                      <span className="ops-summary-label">Proses / Pending</span>
+                      <span className="ops-summary-value">{summaryData.orderStats?.pending || 0}</span>
                     </div>
                     {summaryData.orderStats?.pendingIds && summaryData.orderStats.pendingIds.length > 0 && (
-                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '12px', textAlign: 'right', backgroundColor: '#ffffff', padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                      <div className="ops-summary-pending-ids">
                         ID: {summaryData.orderStats.pendingIds.join(', ')}
                       </div>
                     )}
                   </div>
 
-                  <div style={{ flex: '1', minWidth: '200px', padding: '20px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className="ops-summary-card">
+                    <h3 className="ops-summary-title">
                       <ShieldAlert size={16} /> Statistik Komplain
                     </h3>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '14px', color: '#334155' }}>Total Komplain</span>
-                      <span style={{ fontWeight: '600', color: '#0f172a' }}>{summaryData.complaintStats?.total || 0}</span>
+                    <div className="ops-summary-row">
+                      <span className="ops-summary-label">Total Komplain</span>
+                      <span className="ops-summary-value">{summaryData.complaintStats?.total || 0}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '14px', color: '#334155' }}>Terselesaikan</span>
-                      <span style={{ fontWeight: '600', color: '#10b981' }}>{summaryData.complaintStats?.resolved || 0}</span>
+                    <div className="ops-summary-row">
+                      <span className="ops-summary-label">Terselesaikan</span>
+                      <span className="ops-summary-value text-emerald">{summaryData.complaintStats?.resolved || 0}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: '14px', color: '#334155' }}>Sedang Proses</span>
-                      <span style={{ fontWeight: '600', color: '#e11d48' }}>{summaryData.complaintStats?.pending || 0}</span>
+                    <div className="ops-summary-row">
+                      <span className="ops-summary-label">Sedang Proses</span>
+                      <span className="ops-summary-value text-rose">{summaryData.complaintStats?.pending || 0}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* SALES */}
                 <div className="table-card">
-                  <h2 className="table-title" style={{ marginBottom: '20px' }}>
-                    <Award size={20} color="#64748b" /> Leaderboard Sales Terbaik
+                  <h2 className="table-title mb-20">
+                    <Award size={20} className="icon-muted" /> Leaderboard Sales Terbaik
                   </h2>
                   <div>
                     {(!summaryData.topSales || summaryData.topSales.length === 0) ? (
-                      <p style={{ color: '#94a3b8', fontSize: '14px', textAlign: 'center', padding: '20px 0' }}>Belum ada data sales.</p>
+                      <p className="empty-state-text">Belum ada data sales.</p>
                     ) : (
                       summaryData.topSales.map((sales, index) => (
                         <div key={index} className="list-item">
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div className="list-item-left">
                             <div className={`rank-badge ${index === 0 ? 'rank-1' : 'rank-other'}`}>
                               {index + 1}
                             </div>
-                            <span style={{ fontWeight: '500', color: '#0f172a', fontSize: '14px' }}>{sales.name}</span>
+                            <span className="list-item-name">{sales.name}</span>
                           </div>
-                          <span style={{ fontWeight: '600', color: '#0f172a', fontSize: '14px' }}>{formatCurrency(sales.omset)}</span>
+                          <span className="list-item-val">{formatCurrency(sales.omset)}</span>
                         </div>
                       ))
                     )}
@@ -524,17 +545,17 @@ export default function OwnerDashboard() {
 
                 {/* CUSTOMERS */}
                 <div className="table-card">
-                  <h2 className="table-title" style={{ marginBottom: '20px' }}>
-                    <Users size={20} color="#64748b" /> Top Customer (Workshop)
+                  <h2 className="table-title mb-20">
+                    <Users size={20} className="icon-muted" /> Top Customer (Workshop)
                   </h2>
                   <div>
                     {(!summaryData.topCustomers || summaryData.topCustomers.length === 0) ? (
-                      <p style={{ color: '#94a3b8', fontSize: '14px', textAlign: 'center', padding: '20px 0' }}>Belum ada data customer.</p>
+                      <p className="empty-state-text">Belum ada data customer.</p>
                     ) : (
                       summaryData.topCustomers.map((cust, index) => (
                         <div key={index} className="list-item">
-                          <span style={{ fontWeight: '500', color: '#0f172a', fontSize: '14px' }}>{cust.name}</span>
-                          <span style={{ fontWeight: '600', color: '#0f172a', fontSize: '14px' }}>{formatCurrency(cust.omset)}</span>
+                          <span className="list-item-name">{cust.name}</span>
+                          <span className="list-item-val">{formatCurrency(cust.omset)}</span>
                         </div>
                       ))
                     )}
@@ -543,17 +564,17 @@ export default function OwnerDashboard() {
 
                 {/* RETAIL */}
                 <div className="table-card">
-                  <h2 className="table-title" style={{ marginBottom: '20px' }}>
-                    <ShoppingCart size={20} color="#64748b" /> Top Retail / Grosir
+                  <h2 className="table-title mb-20">
+                    <ShoppingCart size={20} className="icon-muted" /> Top Retail / Grosir
                   </h2>
                   <div>
                     {(!summaryData.topRetail || summaryData.topRetail.length === 0) ? (
-                      <p style={{ color: '#94a3b8', fontSize: '14px', textAlign: 'center', padding: '20px 0' }}>Belum ada data retail/grosir.</p>
+                      <p className="empty-state-text">Belum ada data retail/grosir.</p>
                     ) : (
                       summaryData.topRetail.map((retail, index) => (
                         <div key={index} className="list-item">
-                          <span style={{ fontWeight: '500', color: '#0f172a', fontSize: '14px' }}>{retail.name}</span>
-                          <span style={{ fontWeight: '600', color: '#0f172a', fontSize: '14px' }}>{formatCurrency(retail.omset)}</span>
+                          <span className="list-item-name">{retail.name}</span>
+                          <span className="list-item-val">{formatCurrency(retail.omset)}</span>
                         </div>
                       ))
                     )}
@@ -563,22 +584,7 @@ export default function OwnerDashboard() {
               </div>
             )}
             
-            {/* Banner Upgrade Example */}
-            <div className="upgrade-banner">
-              <div className="banner-content">
-                <div className="banner-icon">
-                  <Calendar size={24} color="#6366f1" />
-                </div>
-                <div>
-                  <h4 className="banner-title">Upgrade ke Laporan Tahunan Otomatis</h4>
-                  <p className="banner-desc">Data aman setiap saat dengan backup dan pemulihan data instan.</p>
-                </div>
-              </div>
-              <div className="banner-action">
-                <span className="banner-price">Rp208.900 <span style={{color: '#64748b', fontWeight: 'normal', fontSize: '13px'}}>/bln</span></span>
-                <button className="btn-primary" style={{ padding: '6px 16px', borderRadius: '20px' }}>Upgrade</button>
-              </div>
-            </div>
+            {/* Banner Removed per user request */}
 
         </div>
       )}

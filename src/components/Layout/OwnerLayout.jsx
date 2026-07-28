@@ -11,8 +11,23 @@ import { useAuth } from '../../context/AuthContext';
 const OwnerLayout = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [userBranch, setUserBranch] = useState('Global');
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
   const { user, logout: authLogout, loading } = useAuth();
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('owner-theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+    }
+    
+    const handleThemeChange = () => {
+      setIsDarkMode(localStorage.getItem('owner-theme') === 'dark');
+    };
+    
+    window.addEventListener('themeChanged', handleThemeChange);
+    return () => window.removeEventListener('themeChanged', handleThemeChange);
+  }, []);
 
   useEffect(() => {
     if (loading) return;
@@ -46,7 +61,7 @@ const OwnerLayout = () => {
   );
 
   return (
-    <div className="layout-container animate-fade-in">
+    <div className={`layout-container animate-fade-in ${isDarkMode ? 'owner-dark-layout' : ''}`}>
       {/* Sidebar */}
       <motion.aside 
         className="sidebar"
@@ -58,11 +73,12 @@ const OwnerLayout = () => {
       >
         <div className="sidebar-brand" style={{ padding: isExpanded ? '2rem 1.5rem' : '2rem 0', alignItems: 'center', justifyContent: 'center' }}>
           <img 
+             className="brand-logo"
              src={userBranch === 'New Ratu' ? logoNewRatu : logoGallardo} 
              alt="Brand"
              style={{ 
-               width: isExpanded ? '100px' : '40px', 
-               height: 'auto', 
+               width: isExpanded ? '160px' : '40px', 
+               height: isExpanded ? 'auto' : '40px', 
                objectFit: 'contain',
                transition: 'all 0.3s ease'
              }} 
@@ -97,7 +113,7 @@ const OwnerLayout = () => {
         </div>
       </motion.aside>
 
-      <main className="main-content bg-secondary">
+      <main className={`main-content ${isDarkMode ? '' : 'bg-secondary'}`}>
         <div className="content-wrapper">
           <Outlet context={{ userRole: user?.role, userBranch }} />
         </div>
