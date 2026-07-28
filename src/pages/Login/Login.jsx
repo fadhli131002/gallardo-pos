@@ -29,7 +29,7 @@ const Login = () => {
   }, []);
 
   useEffect(() => {
-    if (role === 'admin') {
+    if (role === 'admin' || role === 'superadmin') {
       setBranch('Gallardo');
     } else if (role === 'finance') {
       setBranch('Global');
@@ -59,7 +59,9 @@ const Login = () => {
         const roleNames = {
           'sales': 'Sales Team',
           'finance': 'Finance / Accounting',
-          'admin': 'Administrator'
+          'admin': 'Administrator',
+          'superadmin': 'Super Administrator',
+          'owner': 'Business Owner'
         };
         toast.error(`Akun ini tidak memiliki hak akses sebagai ${roleNames[role] || role}`);
         setIsAuthenticating(false);
@@ -68,7 +70,7 @@ const Login = () => {
 
       // Success - Clear old session & store via AuthContext
       authLogin(data.data.token, data.data.user);
-      sessionStorage.setItem('userBranch', data.data.user.role === 'admin' ? 'Gallardo' : branch);
+      sessionStorage.setItem('userBranch', (data.data.user.role === 'admin' || data.data.user.role === 'superadmin') ? 'Gallardo' : branch);
 
       const loggedInRole = data.data.user.role;
       setAnimationStage(1);
@@ -77,9 +79,8 @@ const Login = () => {
       setTimeout(() => {
         setAnimationStage(2);
 
-        // Execute Routing: Hold loading screen for a brief 500ms before redirecting
         setTimeout(() => {
-          if (loggedInRole === 'admin') {
+          if (loggedInRole === 'admin' || loggedInRole === 'superadmin') {
             navigate('/admin/workspace');
           } else if (loggedInRole === 'finance') {
             navigate('/finance/dashboard');
@@ -182,6 +183,7 @@ const Login = () => {
                     <option value="sales">Sales Team</option>
                     <option value="finance">Finance / Accounting</option>
                     <option value="admin">Administrator</option>
+                    <option value="superadmin">Super Administrator</option>
                     <option value="owner">Business Owner</option>
                   </select>
                 </div>
@@ -196,8 +198,8 @@ const Login = () => {
                       className="modern-select"
                       value={branch}
                       onChange={(e) => setBranch(e.target.value)}
-                      disabled={role === 'admin' || role === 'finance'}
-                      style={{ opacity: (role === 'admin' || role === 'finance') ? 0.7 : 1, cursor: (role === 'admin' || role === 'finance') ? 'not-allowed' : 'pointer', display: role === 'finance' ? 'none' : 'block' }}
+                      disabled={role === 'admin' || role === 'superadmin' || role === 'finance'}
+                      style={{ opacity: (role === 'admin' || role === 'superadmin' || role === 'finance') ? 0.7 : 1, cursor: (role === 'admin' || role === 'superadmin' || role === 'finance') ? 'not-allowed' : 'pointer', display: role === 'finance' ? 'none' : 'block' }}
                     >
                       <option value="Gallardo">Gallardo</option>
                       {role === 'sales' && <option value="New Ratu">New Ratu</option>}
