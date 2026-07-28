@@ -20,8 +20,8 @@ import { useAuth } from '../../context/AuthContext';
 const AdminCustomerWarranty = () => {
   const { user, token } = useAuth();
   const outletContext = useOutletContext() || {};
-  const userRole = String(outletContext.userRole || user?.role || '').toLowerCase();
-  console.log('Current userRole in AdminCustomerWarranty:', userRole);
+  const userRole = String(outletContext.userRole || user?.role || '').toLowerCase().trim();
+  console.log('Current userRole in AdminCustomerWarranty:', `"${userRole}"`);
   const userName = user?.name ?? null;
 
   const normName = (str) =>
@@ -674,7 +674,27 @@ const AdminCustomerWarranty = () => {
                           </button>
 
                           {activeDropdown === order.id && (
-                            <div className="dropdown-menu premium-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '50%', transform: 'translateY(-50%)', minWidth: '220px', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', borderRadius: '12px', marginRight: '8px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
+                            <div className="dropdown-menu premium-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '50%', transform: 'translateY(-50%)', minWidth: '220px', maxHeight: '350px', overflowY: 'auto', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', borderRadius: '12px', marginRight: '8px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
+                              {(!isPenawaran) && (userRole.includes('superadmin') || userRole.includes('owner') || userRole.includes('admin')) && (
+                                <>
+                                  <button onClick={() => {
+                                    setActiveDropdown(null);
+                                    setManualPaymentOrder(order);
+                                    setShowManualPaymentModal(true);
+                                  }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#10b981', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#ecfdf5'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                    <CreditCard size={16} color="#10b981" /> Ubah Status Pembayaran
+                                  </button>
+                                  <button onClick={() => {
+                                    setActiveDropdown(null);
+                                    setDeleteRetailOrder(order);
+                                    setDeleteConfirmText('');
+                                    setShowDeleteRetailModal(true);
+                                  }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#ef4444', transition: 'all 0.2s', marginBottom: '8px', borderBottom: '1px solid #f3f4f6' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef2f2'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                    <Trash2 size={16} color="#ef4444" /> Hapus Data Transaksi
+                                  </button>
+                                </>
+                              )}
+
                               <button onClick={() => { setActiveDropdown(null); setIsGeneratingPDF(true); setInvoiceOrder(order); setTimeout(() => handleDownloadInvoiceClick(), 500); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                 <Printer size={16} color="#4b5563" /> Cetak Invoice
                               </button>
@@ -777,25 +797,6 @@ const AdminCustomerWarranty = () => {
                                 </>
                               )}
 
-                              {(!isPenawaran) && (userRole === 'superadmin' || userRole === 'owner') && (
-                                <>
-                                  <button onClick={() => {
-                                    setActiveDropdown(null);
-                                    setManualPaymentOrder(order);
-                                    setShowManualPaymentModal(true);
-                                  }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#10b981', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#ecfdf5'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                    <CreditCard size={16} color="#10b981" /> Ubah Status Pembayaran
-                                  </button>
-                                  <button onClick={() => {
-                                    setActiveDropdown(null);
-                                    setDeleteRetailOrder(order);
-                                    setDeleteConfirmText('');
-                                    setShowDeleteRetailModal(true);
-                                  }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#ef4444', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef2f2'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                    <Trash2 size={16} color="#ef4444" /> Hapus Data Transaksi
-                                  </button>
-                                </>
-                              )}
 
                               {isPenawaran && (
                                 <>
@@ -807,7 +808,7 @@ const AdminCustomerWarranty = () => {
                                     <FileCheck size={16} color="#2563eb" /> Konversi ke Work Order
                                   </button>
 
-                                  {(userRole === 'superadmin' || userRole === 'owner') && (
+                                  {(userRole.includes('superadmin') || userRole.includes('owner') || userRole.includes('admin')) && (
                                     <button onClick={() => {
                                       setActiveDropdown(null);
                                       if (window.confirm("Apakah Anda yakin ingin membatalkan penawaran ini?")) {
