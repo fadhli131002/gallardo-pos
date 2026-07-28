@@ -785,13 +785,14 @@ const AdminCustomerWarranty = () => {
                                     <CreditCard size={16} color="#10b981" /> Ubah Status Pembayaran
                                   </button>
                                   <button onClick={() => {
-                                  setActiveDropdown(null);
-                                  setDeleteRetailOrder(order);
-                                  setDeleteConfirmText('');
-                                  setShowDeleteRetailModal(true);
-                                }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#ef4444', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef2f2'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                  <Trash2 size={16} color="#ef4444" /> Hapus Data Transaksi
-                                </button>
+                                    setActiveDropdown(null);
+                                    setDeleteRetailOrder(order);
+                                    setDeleteConfirmText('');
+                                    setShowDeleteRetailModal(true);
+                                  }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#ef4444', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef2f2'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                    <Trash2 size={16} color="#ef4444" /> Hapus Data Transaksi
+                                  </button>
+                                </>
                               )}
 
                               {isPenawaran && (
