@@ -498,8 +498,8 @@ const AdminCustomerWarranty = () => {
                             style={{ cursor: 'pointer', width: '16px', height: '16px', marginRight: '4px', accentColor: '#10b981' }}
                           />
                         )}
-                        <span className="badge" style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', fontWeight: 'bold', backgroundColor: order.paymentType === 'Lunas' ? '#10b981' : (order.paymentType === 'DP 50%' || order.paidAmount > 0) ? '#f59e0b' : '#ef4444', color: 'white', border: 'none' }}>
-                          {order.paymentType === 'Lunas' ? 'LUNAS' : (order.paymentType === 'DP 50%' || order.paidAmount > 0) ? 'DP / SEBAGIAN' : 'BELUM BAYAR'}
+                        <span className="badge" style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', fontWeight: 'bold', backgroundColor: (isLunas || remaining <= 0) ? '#10b981' : remaining >= order.totalPrice ? '#ef4444' : '#f59e0b', color: 'white', border: 'none' }}>
+                          {(isLunas || remaining <= 0) ? 'LUNAS' : remaining >= order.totalPrice ? 'BELUM BAYAR' : 'DP / SEBAGIAN'}
                         </span>
                         <span className="badge" style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', backgroundColor: statusBg, color: statusColor, border: `1px solid ${statusBorder}`, fontWeight: 'bold' }}>
                           {displayStatus}
@@ -578,14 +578,31 @@ const AdminCustomerWarranty = () => {
                       {/* Order Total Summary */}
                       <div style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', lineHeight: '1.6' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#4b5563' }}>
-                            <span>Subtotal</span>
-                            <span>{formatCurrency(order.totalPrice)}</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#4b5563' }}>
-                            <span>PPN & Pembulatan</span>
-                            <span>Rp 0</span>
-                          </div>
+                          {(() => {
+                            const computedSub = order.subTotal || (order.items || []).reduce((sum, it) => sum + ((it.finalPrice || it.price || 0) * (it.qty || 1)), 0) || order.totalPrice;
+                            let computedTax = order.taxAmount || 0;
+                            if (!order.taxAmount && order.totalPrice > computedSub) {
+                                computedTax = order.totalPrice - computedSub + (order.discountAmount || 0);
+                            }
+                            return (
+                              <>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#4b5563' }}>
+                                  <span>Subtotal</span>
+                                  <span>{formatCurrency(computedSub)}</span>
+                                </div>
+                                {(order.discountAmount > 0) && (
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ef4444' }}>
+                                    <span>Diskon</span>
+                                    <span>- {formatCurrency(order.discountAmount)}</span>
+                                  </div>
+                                )}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#4b5563' }}>
+                                  <span>PPN & Pembulatan</span>
+                                  <span>{formatCurrency(computedTax)}</span>
+                                </div>
+                              </>
+                            );
+                          })()}
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #e5e7eb', fontWeight: 'bold' }}>
                             <span className="text-primary">Grandtotal</span>
                             <span className="text-primary">{formatCurrency(order.totalPrice)}</span>
