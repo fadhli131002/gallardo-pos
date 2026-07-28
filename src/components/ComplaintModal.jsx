@@ -15,7 +15,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
     description: '',
     status: 'Pending',
   });
-  
+
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -73,14 +73,14 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
       // since the user wants to search all. orders contains the main transactions.
       let allOrders = [];
       if (Array.isArray(orders)) {
-         orders.forEach(o => {
-            allOrders.push(o);
-            if (o.historyMaintenance && Array.isArray(o.historyMaintenance)) {
-               allOrders = allOrders.concat(o.historyMaintenance);
-            }
-         });
+        orders.forEach(o => {
+          allOrders.push(o);
+          if (o.historyMaintenance && Array.isArray(o.historyMaintenance)) {
+            allOrders = allOrders.concat(o.historyMaintenance);
+          }
+        });
       }
-      
+
       const options = allOrders.map(t => ({
         value: t.dbId,
         label: `[${t.id}] - ${t.customerName || 'Umum'} - ${t.plateNumber || '-'} (${t.carBrand || ''} ${t.carModel || ''})`,
@@ -154,7 +154,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
         }))));
       }
 
-      const response = await fetch('http://localhost:5000/api/complaints', {
+      const response = await fetch('http://31.97.51.101/api/complaints', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -165,9 +165,9 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
       if (!response.ok) {
         let errMsg = 'Gagal mencatat komplain';
         try {
-           const errData = await response.json();
-           errMsg = errData.error || errData.message || errMsg;
-        } catch(e) {}
+          const errData = await response.json();
+          errMsg = errData.error || errData.message || errMsg;
+        } catch (e) { }
         throw new Error(errMsg);
       }
 
@@ -206,7 +206,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
                 <p style={{ margin: 0, fontSize: '13px', color: '#6b7280' }}>Form input klaim garansi atau keluhan pelanggan</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={onClose}
               style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '4px' }}
             >
@@ -217,10 +217,10 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
           {/* Form */}
           <div style={{ padding: '24px', overflowY: 'auto' }}>
             <form id="complaintForm" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              
+
               {/* Transaction Selection */}
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', fontFamily: 'var(--font-mono-ui)' }}>Data Transaksi / Pelanggan <span style={{color: '#ef4444'}}>*</span></label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', fontFamily: 'var(--font-mono-ui)' }}>Data Transaksi / Pelanggan <span style={{ color: '#ef4444' }}>*</span></label>
                 {transactionData ? (
                   <div style={{ padding: '12px', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
                     <p style={{ margin: '0 0 4px', fontWeight: '600', color: '#1f2937' }}>{transactionData.customer_name} - {transactionData.plate_number}</p>
@@ -230,7 +230,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
                   <Select
                     options={transactions}
                     value={transactions.find(t => t.value === formData.transaction_id) || null}
-                    onChange={(selected) => setFormData({...formData, transaction_id: selected ? selected.value : ''})}
+                    onChange={(selected) => setFormData({ ...formData, transaction_id: selected ? selected.value : '' })}
                     placeholder={isFetchingTransactions ? "Loading..." : "Cari/Pilih Transaksi Pelanggan..."}
                     isSearchable
                     isLoading={isFetchingTransactions}
@@ -249,11 +249,11 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
 
               {/* Problem Type */}
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', fontFamily: 'var(--font-mono-ui)' }}>Jenis Kendala <span style={{color: '#ef4444'}}>*</span></label>
-                <select 
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', fontFamily: 'var(--font-mono-ui)' }}>Jenis Kendala <span style={{ color: '#ef4444' }}>*</span></label>
+                <select
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#fff', color: '#111827', fontSize: '14px', outline: 'none' }}
                   value={formData.problem_type}
-                  onChange={(e) => setFormData({...formData, problem_type: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, problem_type: e.target.value })}
                   required
                 >
                   <option value="">Pilih Jenis Kendala...</option>
@@ -268,12 +268,12 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
               {/* Description */}
               <div className="form-group">
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', fontFamily: 'var(--font-mono-ui)' }}>Deskripsi Catatan</label>
-                <textarea 
+                <textarea
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#fff', color: '#111827', fontSize: '14px', outline: 'none', resize: 'vertical' }}
                   rows="3"
                   placeholder="Ceritakan detail kendala yang dialami..."
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 ></textarea>
               </div>
 
@@ -310,7 +310,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
                           />
                         </div>
                         <div style={{ width: '120px', display: 'flex', alignItems: 'center' }}>
-                          <input 
+                          <input
                             type="number"
                             min="0.1"
                             step="0.1"
@@ -338,8 +338,8 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
 
               {/* Photo Upload */}
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', fontFamily: 'var(--font-mono-ui)' }}>Foto Bukti Kerusakan <span style={{color: '#ef4444'}}>*</span></label>
-                
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', fontFamily: 'var(--font-mono-ui)' }}>Foto Bukti Kerusakan <span style={{ color: '#ef4444' }}>*</span></label>
+
                 <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center', borderRadius: '8px', border: '2px dashed #d1d5db', padding: '24px', position: 'relative', backgroundColor: '#f9fafb', cursor: 'pointer', transition: 'background-color 0.2s' }}
                   onClick={() => document.getElementById('file-upload').click()}
                   onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'}
@@ -348,7 +348,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
                   {preview ? (
                     <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
                       <img src={preview} alt="Preview" style={{ maxHeight: '192px', objectFit: 'contain', borderRadius: '6px' }} />
-                      <button 
+                      <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();

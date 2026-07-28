@@ -18,7 +18,7 @@ const POSRetail = () => {
   const navigate = useNavigate();
   const { userBranch } = useOutletContext() || { userBranch: 'Gallardo' };
   const { user, token } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     location: userBranch,
     supplierName: '',
@@ -49,10 +49,10 @@ const POSRetail = () => {
   const [selectedProductForModal, setSelectedProductForModal] = useState(null);
   const [modalVariantState, setModalVariantState] = useState({ satuanBeli: 'Roll', meteranQty: 1, catatan: '' });
   const fileInputRef = useRef(null);
-  
+
   const [paymentState, setPaymentState] = useState({
     method: 'QRIS',
-    type: 'Tanpa DP', 
+    type: 'Tanpa DP',
     dpAmount: 0,
     spgName: '',
     billType: 'Reseller (Pembelian Roll)',
@@ -93,7 +93,7 @@ const POSRetail = () => {
     const unique = getUniqueCustomers();
     const value = formData.supplierName || '';
     if (value.trim().length > 0) {
-      const filtered = unique.filter(c => 
+      const filtered = unique.filter(c =>
         c.name.toLowerCase().includes(value.toLowerCase())
       );
       setSuggestions(filtered);
@@ -142,19 +142,19 @@ const POSRetail = () => {
   };
 
   const combinedCatalog = inventory.map(inv => ({
-      id: inv.id, // Ensure id_barang is carried over
-      name: getProductName(inv),
-      category: inv.kategori === 'Coating' ? 'Coating & Chemical' : inv.kategori === 'Tools' ? 'Tools & Equipment' : inv.kategori,
-      type: inv.kategori === 'Kaca Film' ? 'Kaca Film' : inv.kategori === 'PPF' ? 'PPF' : inv.kategori === 'Coating' ? 'Coating' : 'Tool',
-      isVariablePrice: inv.kategori === 'Kaca Film' || inv.kategori === 'PPF',
-      price: 0, 
-      stokUtama: inv.stokUtama,
-      stokPecahan: inv.stokPecahan,
-      konversi: inv.konversi || 1,
-      satuan: inv.satuan,
-      trackInventory: true,
-      warrantyMonths: inv.kategori === 'PPF' ? 60 : inv.kategori === 'Kaca Film' ? 60 : inv.kategori === 'Coating' ? 36 : 0,
-      kegelapan: inv.kegelapan
+    id: inv.id, // Ensure id_barang is carried over
+    name: getProductName(inv),
+    category: inv.kategori === 'Coating' ? 'Coating & Chemical' : inv.kategori === 'Tools' ? 'Tools & Equipment' : inv.kategori,
+    type: inv.kategori === 'Kaca Film' ? 'Kaca Film' : inv.kategori === 'PPF' ? 'PPF' : inv.kategori === 'Coating' ? 'Coating' : 'Tool',
+    isVariablePrice: inv.kategori === 'Kaca Film' || inv.kategori === 'PPF',
+    price: 0,
+    stokUtama: inv.stokUtama,
+    stokPecahan: inv.stokPecahan,
+    konversi: inv.konversi || 1,
+    satuan: inv.satuan,
+    trackInventory: true,
+    warrantyMonths: inv.kategori === 'PPF' ? 60 : inv.kategori === 'Kaca Film' ? 60 : inv.kategori === 'Coating' ? 36 : 0,
+    kegelapan: inv.kegelapan
   }));
 
   // Category Tabs
@@ -193,14 +193,14 @@ const POSRetail = () => {
 
   const handleAddToCartFromModal = () => {
     if (!selectedProductForModal) return;
-    
+
     const isMeteran = modalVariantState.satuanBeli === 'Meteran (Ecer)';
     const qty = isMeteran ? (modalVariantState.meteranQty || 1) : 1;
     const variantSuffix = isMeteran ? `${qty} Meter` : `1 Roll`;
 
     const finalName = `${selectedProductForModal.name} (${variantSuffix})`;
     const finalId = `${selectedProductForModal.id}-${isMeteran ? 'meter' : 'roll'}`;
-    
+
     const productToAdd = {
       ...selectedProductForModal,
       id: finalId, // Frontend unique ID for cart
@@ -213,7 +213,7 @@ const POSRetail = () => {
       qty: isMeteran ? qty : 1, // Set initial qty based on selection
       catatan: modalVariantState.catatan || ''
     };
-    
+
     addToCart(productToAdd);
     setShowVariantModal(false);
     setSelectedProductForModal(null);
@@ -231,11 +231,11 @@ const POSRetail = () => {
         if (product.category === 'Kaca Film') konversi = 30;
         else if (product.category === 'PPF') konversi = 15;
         const totalBaseStock = (product.stokUtama * konversi) + (product.stokPecahan || 0);
-        
+
         const quantityInBaseUnits = product.isMeteran ? newTotalQty : (newTotalQty * konversi);
         if (quantityInBaseUnits > totalBaseStock) {
-           toast.warning(`Stok ${product.baseName || product.name} tidak mencukupi! Sisa: ${product.stokUtama} Roll + ${product.stokPecahan || 0} Meter.`);
-           return prev;
+          toast.warning(`Stok ${product.baseName || product.name} tidak mencukupi! Sisa: ${product.stokUtama} Roll + ${product.stokPecahan || 0} Meter.`);
+          return prev;
         }
       }
 
@@ -250,17 +250,17 @@ const POSRetail = () => {
     setCartItems(prev => prev.map(item => {
       if (item.id === id) {
         const newQty = Math.max(1, item.qty + delta);
-        
+
         if (item.category !== 'Jasa & Maintenance') {
           let konversi = item.konversi || 1;
           if (item.category === 'Kaca Film') konversi = 30;
           else if (item.category === 'PPF') konversi = 15;
           const totalBaseStock = (item.stokUtama * konversi) + (item.stokPecahan || 0);
-          
+
           const quantityInBaseUnits = item.isMeteran ? newQty : (newQty * konversi);
           if (quantityInBaseUnits > totalBaseStock) {
-             toast.warning(`Stok ${item.baseName || item.name} tidak mencukupi!`);
-             return item;
+            toast.warning(`Stok ${item.baseName || item.name} tidak mencukupi!`);
+            return item;
           }
         }
 
@@ -270,7 +270,7 @@ const POSRetail = () => {
     }));
   };
 
-  
+
   const updateCartPrice = (id, newPrice) => {
     setCartItems(prev => prev.map(item => {
       if (item.id === id) {
@@ -324,7 +324,7 @@ const POSRetail = () => {
       setFormData(prev => ({ ...prev, supplierName: value, customerName: value }));
       const unique = getUniqueCustomers();
       if (value.trim().length > 0) {
-        const filtered = unique.filter(c => 
+        const filtered = unique.filter(c =>
           c.name.toLowerCase().includes(value.toLowerCase())
         );
         setSuggestions(filtered);
@@ -339,11 +339,11 @@ const POSRetail = () => {
   };
 
   const handleBrandSelectChange = (selectedOption) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      carBrand: selectedOption ? selectedOption.value : '', 
-      carModel: '', 
-      carSize: '' 
+    setFormData(prev => ({
+      ...prev,
+      carBrand: selectedOption ? selectedOption.value : '',
+      carModel: '',
+      carSize: ''
     }));
   };
 
@@ -353,9 +353,9 @@ const POSRetail = () => {
       setSearchStatus('Silakan masukkan kata kunci pencarian yang valid.');
       return;
     }
-    
-    const foundOrder = orders.find(o => 
-      (o.customerHp && o.customerHp.toLowerCase().includes(query)) || 
+
+    const foundOrder = orders.find(o =>
+      (o.customerHp && o.customerHp.toLowerCase().includes(query)) ||
       (o.chassisNumber && o.chassisNumber !== '-' && o.chassisNumber.toLowerCase().includes(query))
     );
 
@@ -369,7 +369,7 @@ const POSRetail = () => {
         customerCity: foundOrder.customerCity || '',
         customerProvince: foundOrder.customerProvince || '',
         customerZip: foundOrder.customerZip || '',
-        
+
       }));
       setSearchStatus('Data Pelanggan Ditemukan & Berhasil Diisi Otomatis!');
     } else {
@@ -393,8 +393,8 @@ const POSRetail = () => {
     setBasePrice(total);
   }, [cartItems, formData.carSize]);
 
-  const isMaintenanceOrKomplain = cartItems.some(item => 
-    item.category === 'Jasa & Maintenance' || 
+  const isMaintenanceOrKomplain = cartItems.some(item =>
+    item.category === 'Jasa & Maintenance' ||
     (item.product_name && (item.product_name.toLowerCase().includes('maintenance') || item.product_name.toLowerCase().includes('komplain')))
   );
 
@@ -483,7 +483,7 @@ const POSRetail = () => {
         let originalPrice = item.price;
         const finalPrice = item.priceOverride !== undefined && item.priceOverride !== '' ? Number(item.priceOverride) : originalPrice;
         const isCustomPrice = finalPrice !== originalPrice;
-        
+
         return {
           ...item,
           finalPrice: finalPrice,
@@ -505,14 +505,14 @@ const POSRetail = () => {
 
       const currentYear = new Date().getFullYear();
       const currentYearRetailOrders = orders.filter(o => o.id && o.id.startsWith(`RTL-${currentYear}-`));
-      
+
       let nextSequence = 1;
       if (currentYearRetailOrders.length > 0) {
         const sequences = currentYearRetailOrders.map(o => {
           const parts = o.id.split('-');
           return parts.length === 3 ? parseInt(parts[2], 10) : 0;
         }).filter(n => !isNaN(n));
-        
+
         if (sequences.length > 0) {
           nextSequence = Math.max(...sequences) + 1;
         }
@@ -523,7 +523,7 @@ const POSRetail = () => {
       const newOrder = {
         id: generatedInvoiceId,
         ...formData,
-        items: finalizedCartItems, 
+        items: finalizedCartItems,
         service: serviceName,
         serviceType: serviceType,
         coatingSeries: coatingSeries,
@@ -546,7 +546,7 @@ const POSRetail = () => {
           const hasDP = modalPaidAmount > 0;
           const remainingAmount = netTotal - modalPaidAmount;
           const schedule = [];
-          
+
           if (hasDP) {
             schedule.push({
               terminIndex: 1,
@@ -568,7 +568,7 @@ const POSRetail = () => {
       };
 
       const deductResult = processInventoryDeduction(newOrder);
-      
+
       if (!deductResult.success) {
         toast.error(`Gagal menyimpan transaksi: ${deductResult.message}`);
         return; // prevent checkout
@@ -586,24 +586,24 @@ const POSRetail = () => {
           || (user?.name ? user.name.replace(/\s*sales\s*/gi, '').trim() : null);
 
         const apiPayload = {
-          type:              'RETAIL',
-          customer_name:     formData.supplierName || formData.customerName || 'Pelanggan Umum (Tanpa Nama)',
-          customer_phone:    formData.customerHp || '-',
-          total_amount:      netTotal,
-          discount:          discountAmount,
-          sisa_tagihan:      (netTotal === 0) ? 0 : Math.max(0, netTotal - modalPaidAmount),
+          type: 'RETAIL',
+          customer_name: formData.supplierName || formData.customerName || 'Pelanggan Umum (Tanpa Nama)',
+          customer_phone: formData.customerHp || '-',
+          total_amount: netTotal,
+          discount: discountAmount,
+          sisa_tagihan: (netTotal === 0) ? 0 : Math.max(0, netTotal - modalPaidAmount),
           status_pembayaran: (netTotal === 0 || modalPaidAmount >= netTotal) ? 'Lunas' : 'Belum Bayar',
-          event:             salesEventName || null,
-          payment_type:      newOrder.paymentType,
-          payment_method:    newOrder.paymentMethod,
-          termin_schedule:   newOrder.terminSchedule,
-          notes:             newOrder.notes,
+          event: salesEventName || null,
+          payment_type: newOrder.paymentType,
+          payment_method: newOrder.paymentMethod,
+          termin_schedule: newOrder.terminSchedule,
+          notes: newOrder.notes,
           // items — untuk log nama produk di TransactionItem
           items: finalizedCartItems.map(item => ({
             product_name: item.name,
             product_note: item.notes || '',
-            price:        item.finalPrice,
-            quantity:     item.qty
+            price: item.finalPrice,
+            quantity: item.qty
           })),
           // inventory_items — untuk memotong stok di tabel Inventory (backend)
           inventory_items: finalizedCartItems
@@ -614,19 +614,19 @@ const POSRetail = () => {
               let konversi = invObj ? (invObj.konversi || 1) : 1;
               if (invObj && invObj.kategori === 'Kaca Film') konversi = 30;
               else if (invObj && invObj.kategori === 'PPF') konversi = 15;
-              const quantityInBaseUnits = item.isMeteran 
-                ? item.qty 
+              const quantityInBaseUnits = item.isMeteran
+                ? item.qty
                 : (item.qty * konversi);
 
               return {
                 inventory_id: invId,
-                quantity:     quantityInBaseUnits
+                quantity: quantityInBaseUnits
               };
             })
         };
 
         const authToken = token;
-        const response = await fetch('http://localhost:5000/api/transactions', {
+        const response = await fetch('http://31.97.51.101/api/transactions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -650,7 +650,7 @@ const POSRetail = () => {
           } else {
             addOrder(newOrder);
           }
-          
+
           // Ambil ID asli dari database jika ada untuk invoice
           if (resJson.data && resJson.data.id) {
             const isRetail = newOrder.billType === 'Retail (Grosir)' || newOrder.type === 'RETAIL';
@@ -659,7 +659,7 @@ const POSRetail = () => {
             const yy = String(dateObj.getFullYear()).slice(-2);
             const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
             const seqNum = String(resJson.data.id).padStart(4, '0');
-            newOrder.id = `${prefix}/${yy}${mm}001${seqNum}`; 
+            newOrder.id = `${prefix}/${yy}${mm}001${seqNum}`;
           }
         }
 
@@ -671,9 +671,9 @@ const POSRetail = () => {
         console.error('Error saat menghubungi API transactions:', err);
         toast.error('Koneksi ke server gagal. Transaksi disimpan lokal saja.');
       }
-      
+
       toast.success('Transaksi berhasil disimpan & stok telah diperbarui!');
-      
+
       // 1. State Reset
       setCartItems([]);
       setFormData({
@@ -687,19 +687,19 @@ const POSRetail = () => {
         carColor: '',
         carSize: 'Medium'
       });
-      setPaymentState({ 
-        method: 'QRIS', 
-        type: 'Lunas', 
-        dpAmount: 0, 
-        spgName: '', 
-        billType: 'Reseller (Pembelian Roll)', 
-        useTax: false, 
-        paymentProof: null, 
-        paymentProofName: '', 
-        terminCount: '', 
-        terminNotes: '' 
+      setPaymentState({
+        method: 'QRIS',
+        type: 'Lunas',
+        dpAmount: 0,
+        spgName: '',
+        billType: 'Reseller (Pembelian Roll)',
+        useTax: false,
+        paymentProof: null,
+        paymentProofName: '',
+        terminCount: '',
+        terminNotes: ''
       });
-      
+
       // 2. Strictly Closing
       console.log("Transaksi sukses, menutup modal...");
       setShowPaymentModal(false);
@@ -719,7 +719,7 @@ const POSRetail = () => {
 
   const handleShareWA = async () => {
     if (!invoiceData) return;
-    
+
     const text = `*GALLARDO AUTO SPORT - OFFICIAL INVOICE*
 -----------------------------------
 *NO INVOICE:* ${invoiceData.id}
@@ -750,7 +750,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
     try {
       const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
       const file = new File([pdfBlob], dynamicFileName, { type: 'application/pdf' });
-      
+
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
@@ -772,13 +772,13 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
 
   const handlePrintPDF = async () => {
     if (!invoiceData) return;
-    
+
     setIsPrintingInvoice(true);
-    
+
     const idOrder = invoiceData.id;
     const safeCustomerName = (invoiceData.customerName || 'Customer').replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     const dynamicFileName = `Invoice_${idOrder}_${safeCustomerName}.pdf`;
-    
+
     const element = document.getElementById('invoice-content-to-print');
     if (!element) {
       setIsPrintingInvoice(false);
@@ -801,9 +801,9 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
       setIsPrintingInvoice(false);
     }
   };
-  const closeInvoiceAndReset = () => { 
-    setShowInvoiceModal(false); 
-    setInvoiceData(null); 
+  const closeInvoiceAndReset = () => {
+    setShowInvoiceModal(false);
+    setInvoiceData(null);
     setCartItems([]);
     setFormData({
       location: userBranch, carBrand: '', sunroofQty: 0, sunroofPrice: 0, carModel: '', carSize: '', carColor: '', plateNumber: '', engineNumber: '', chassisNumber: '', installationDate: new Date().toISOString().split('T')[0], installationTime: '09:00', notes: '', customerName: '', customerHp: '', customerEmail: '', customerAddress: '', customerCity: '', customerProvince: '', customerZip: '',
@@ -836,107 +836,107 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
           </button>
         </div>
 
-      <form 
-        onSubmit={handleSubmit} 
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-            e.preventDefault();
-          }
-        }}
-        className="pos-layout"
-      >
-        <div className="pos-forms-container">
-          
+        <form
+          onSubmit={handleSubmit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+              e.preventDefault();
+            }
+          }}
+          className="pos-layout"
+        >
+          <div className="pos-forms-container">
 
-          {/* DETAIL SUPPLIER / CUSTOMER */}
-          <div className="premium-card" style={{ padding: '24px', marginBottom: '24px' }}>
-            <h3 className="font-sans font-bold text-lg mb-4 flex items-center gap-2">
-              <User size={20} className="text-primary" />
-              Detail Customer / Reseller
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div style={{ gridColumn: '1 / -1', position: 'relative' }} ref={customerSearchRef}>
-                <label className="font-sans text-sm font-semibold mb-2 block">Pilih / Cari Customer</label>
-                <input 
-                  type="text" 
-                  name="supplierName" 
-                  placeholder="Ketik nama Reseller / Toko / Customer..." 
-                  className="input-field w-full"
-                  value={formData.supplierName}
-                  onChange={handleInputChange}
-                  onFocus={handleCustomerInputFocus}
-                  autoComplete="off"
-                />
-                {showSuggestions && suggestions.length > 0 && (
-                  <div 
-                    style={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      right: 0,
-                      backgroundColor: 'white',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                      zIndex: 1000,
-                      maxHeight: '220px',
-                      overflowY: 'auto',
-                      marginTop: '4px'
-                    }}
-                  >
-                    {suggestions.map((c, idx) => (
-                      <div 
-                        key={idx}
-                        onClick={() => handleSelectCustomer(c)}
-                        style={{
-                          padding: '10px 16px',
-                          cursor: 'pointer',
-                          borderBottom: idx < suggestions.length - 1 ? '1px solid #f3f4f6' : 'none',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '2px',
-                          textAlign: 'left'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <span style={{ fontWeight: '600', fontSize: '13px', color: '#1f2937' }}>{c.name}</span>
-                        <span style={{ fontSize: '11px', color: '#6b7280' }}>
-                          WA: {c.hp || '-'} {c.address ? `| Alamat: ${c.address}` : ''}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              <div>
-                <label className="font-sans text-sm font-semibold mb-2 block">No. WhatsApp</label>
-                <input type="text" name="customerHp" placeholder="08..." className="input-field w-full" value={formData.customerHp} onChange={handleInputChange} />
-              </div>
-              
-              <div>
-                <label className="font-sans text-sm font-semibold mb-2 block">Alamat (Opsional)</label>
-                <input type="text" name="customerAddress" placeholder="Alamat lengkap..." className="input-field w-full" value={formData.customerAddress} onChange={handleInputChange} />
-              </div>
 
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label className="font-sans text-sm font-semibold mb-2 block">Catatan Pesanan Khusus</label>
-                <textarea 
-                  name="notes" 
-                  placeholder="Contoh: Minta cetak banner, packing kayu, dll" 
-                  className="input-field w-full"
-                  rows="3"
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                ></textarea>
+            {/* DETAIL SUPPLIER / CUSTOMER */}
+            <div className="premium-card" style={{ padding: '24px', marginBottom: '24px' }}>
+              <h3 className="font-sans font-bold text-lg mb-4 flex items-center gap-2">
+                <User size={20} className="text-primary" />
+                Detail Customer / Reseller
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ gridColumn: '1 / -1', position: 'relative' }} ref={customerSearchRef}>
+                  <label className="font-sans text-sm font-semibold mb-2 block">Pilih / Cari Customer</label>
+                  <input
+                    type="text"
+                    name="supplierName"
+                    placeholder="Ketik nama Reseller / Toko / Customer..."
+                    className="input-field w-full"
+                    value={formData.supplierName}
+                    onChange={handleInputChange}
+                    onFocus={handleCustomerInputFocus}
+                    autoComplete="off"
+                  />
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        backgroundColor: 'white',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        zIndex: 1000,
+                        maxHeight: '220px',
+                        overflowY: 'auto',
+                        marginTop: '4px'
+                      }}
+                    >
+                      {suggestions.map((c, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => handleSelectCustomer(c)}
+                          style={{
+                            padding: '10px 16px',
+                            cursor: 'pointer',
+                            borderBottom: idx < suggestions.length - 1 ? '1px solid #f3f4f6' : 'none',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '2px',
+                            textAlign: 'left'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <span style={{ fontWeight: '600', fontSize: '13px', color: '#1f2937' }}>{c.name}</span>
+                          <span style={{ fontSize: '11px', color: '#6b7280' }}>
+                            WA: {c.hp || '-'} {c.address ? `| Alamat: ${c.address}` : ''}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="font-sans text-sm font-semibold mb-2 block">No. WhatsApp</label>
+                  <input type="text" name="customerHp" placeholder="08..." className="input-field w-full" value={formData.customerHp} onChange={handleInputChange} />
+                </div>
+
+                <div>
+                  <label className="font-sans text-sm font-semibold mb-2 block">Alamat (Opsional)</label>
+                  <input type="text" name="customerAddress" placeholder="Alamat lengkap..." className="input-field w-full" value={formData.customerAddress} onChange={handleInputChange} />
+                </div>
+
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label className="font-sans text-sm font-semibold mb-2 block">Catatan Pesanan Khusus</label>
+                  <textarea
+                    name="notes"
+                    placeholder="Contoh: Minta cetak banner, packing kayu, dll"
+                    className="input-field w-full"
+                    rows="3"
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                  ></textarea>
+                </div>
               </div>
             </div>
-          </div>
             {/* Product Selection */}
             <div className="pos-products-section mt-6">
               <h4 className="font-sans font-semibold text-primary mb-2">Katalog Layanan & Produk</h4>
-              
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px' }}>
                 {/* Search Bar */}
                 <div style={{ position: 'relative', width: '100%', maxWidth: '100%' }}>
@@ -966,9 +966,9 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 {/* Tabs */}
                 <div className="category-tabs" style={{ marginBottom: 0 }}>
                   {CATEGORIES.map(cat => (
-                    <button 
+                    <button
                       type="button"
-                      key={cat} 
+                      key={cat}
                       className={`category-tab ${activeCategory === cat ? 'active' : ''}`}
                       onClick={() => setActiveCategory(cat)}
                     >
@@ -994,10 +994,10 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                         <div className="p-name">{product.name}</div>
                         <div className="p-meta-container">
                           <div className="p-stock" style={{ color: (product.category === 'Tools & Equipment' ? product.stokUtama < 2 : product.stokUtama < 2) ? '#ef4444' : '#6b7280', fontWeight: (product.category === 'Tools & Equipment' ? product.stokUtama < 2 : product.stokUtama < 2) ? '600' : 'normal' }}>
-                            <Package size={14} style={{ display: 'inline', marginRight: '4px', opacity: 0.7 }} /> 
-                            {product.trackInventory 
-                              ? (product.category === 'Tools & Equipment' 
-                                ? `Tersedia: ${product.stokUtama} ${product.satuan || ''}` 
+                            <Package size={14} style={{ display: 'inline', marginRight: '4px', opacity: 0.7 }} />
+                            {product.trackInventory
+                              ? (product.category === 'Tools & Equipment'
+                                ? `Tersedia: ${product.stokUtama} ${product.satuan || ''}`
                                 : product.category === 'Coating & Chemical'
                                   ? `Tersedia: ${product.stokUtama} Botol (${product.stokPecahan} ml)`
                                   : `Tersedia: ${product.stokUtama} Roll + ${product.stokPecahan} Meter`)
@@ -1017,115 +1017,115 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 </div>
               </div>
             </div>
-            
-        </div>
 
-        {/* Sidebar Summary */}
-        <div className="pos-summary-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Cart Section */}
-          <div className="cart-container premium-card" style={{ width: "100%", boxShadow: "none", backgroundColor: "rgba(255, 255, 255, 0.4)" }}>
-                  <h4 className="font-sans font-semibold text-primary mb-2 flex items-center gap-2">
-                    <FileText size={16} /> Keranjang Pesanan
-                  </h4>
-                  
-                  {cartItems.length === 0 ? (
-                    <div className="text-center py-6 text-gray-400 text-sm">
-                      Keranjang kosong.<br/>Klik produk untuk menambahkan.
-                    </div>
-                  ) : (
-                    <div className="cart-items">
-                      {cartItems.map(item => {
-                        let itemPrice = item.price;
-                        // No car size multiplier for Retail
-        itemPrice = item.price;
-                        const finalPrice = item.priceOverride !== undefined && item.priceOverride !== '' ? item.priceOverride : itemPrice;
-                        return (
-                          <div key={item.id} className="cart-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.5rem' }}>
-                            <div className="cart-item-name" style={{ lineHeight: '1.4' }}>{item.name}</div>
-                            
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                              <div className="cart-item-price">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                  <span style={{ fontSize: '12px', color: '#6b7280' }}>Rp</span>
-                                  <input 
-                                    type="text" 
-                                    className="input-field" 
-                                    style={{ padding: '2px 8px', fontSize: '14px', width: '110px', height: '28px', backgroundColor: 'rgba(255,255,255,0.8)' }}
-                                    value={
-                                      (item.priceOverride !== undefined ? item.priceOverride : itemPrice) === '' 
-                                      ? '' 
-                                      : Number(item.priceOverride !== undefined ? item.priceOverride : itemPrice).toLocaleString('id-ID')
-                                    } 
-                                    onChange={(e) => {
-                                      const rawValue = e.target.value.replace(/\D/g, '');
-                                      setCartItems(prev => prev.map(ci => {
-                                        if (ci.id === item.id) {
-                                          return { ...ci, priceOverride: rawValue === '' ? '' : Number(rawValue) };
-                                        }
-                                        return ci;
-                                      }));
-                                    }}
-                                    onBlur={(e) => {
-                                      if (e.target.value === '') {
-                                        setCartItems(prev => prev.map(ci => {
-                                          if (ci.id === item.id) {
-                                            return { ...ci, priceOverride: itemPrice };
-                                          }
-                                          return ci;
-                                        }));
+          </div>
+
+          {/* Sidebar Summary */}
+          <div className="pos-summary-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Cart Section */}
+            <div className="cart-container premium-card" style={{ width: "100%", boxShadow: "none", backgroundColor: "rgba(255, 255, 255, 0.4)" }}>
+              <h4 className="font-sans font-semibold text-primary mb-2 flex items-center gap-2">
+                <FileText size={16} /> Keranjang Pesanan
+              </h4>
+
+              {cartItems.length === 0 ? (
+                <div className="text-center py-6 text-gray-400 text-sm">
+                  Keranjang kosong.<br />Klik produk untuk menambahkan.
+                </div>
+              ) : (
+                <div className="cart-items">
+                  {cartItems.map(item => {
+                    let itemPrice = item.price;
+                    // No car size multiplier for Retail
+                    itemPrice = item.price;
+                    const finalPrice = item.priceOverride !== undefined && item.priceOverride !== '' ? item.priceOverride : itemPrice;
+                    return (
+                      <div key={item.id} className="cart-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.5rem' }}>
+                        <div className="cart-item-name" style={{ lineHeight: '1.4' }}>{item.name}</div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                          <div className="cart-item-price">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ fontSize: '12px', color: '#6b7280' }}>Rp</span>
+                              <input
+                                type="text"
+                                className="input-field"
+                                style={{ padding: '2px 8px', fontSize: '14px', width: '110px', height: '28px', backgroundColor: 'rgba(255,255,255,0.8)' }}
+                                value={
+                                  (item.priceOverride !== undefined ? item.priceOverride : itemPrice) === ''
+                                    ? ''
+                                    : Number(item.priceOverride !== undefined ? item.priceOverride : itemPrice).toLocaleString('id-ID')
+                                }
+                                onChange={(e) => {
+                                  const rawValue = e.target.value.replace(/\D/g, '');
+                                  setCartItems(prev => prev.map(ci => {
+                                    if (ci.id === item.id) {
+                                      return { ...ci, priceOverride: rawValue === '' ? '' : Number(rawValue) };
+                                    }
+                                    return ci;
+                                  }));
+                                }}
+                                onBlur={(e) => {
+                                  if (e.target.value === '') {
+                                    setCartItems(prev => prev.map(ci => {
+                                      if (ci.id === item.id) {
+                                        return { ...ci, priceOverride: itemPrice };
                                       }
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                              <div className="cart-item-actions">
-                                <button type="button" className="qty-btn" onClick={() => removeFromCart(item.id)}>
-                                  <Trash2 size={12} className="text-red-500" />
-                                </button>
-                                <button type="button" className="qty-btn" onClick={() => updateCartQty(item.id, -1)}><Minus size={12}/></button>
-                                <span className="font-sans font-semibold text-sm w-4 text-center">{item.qty}</span>
-                                <button type="button" className="qty-btn" onClick={() => updateCartQty(item.id, 1)}><Plus size={12}/></button>
-                              </div>
+                                      return ci;
+                                    }));
+                                  }
+                                }}
+                              />
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  <div className="cart-summary">
-                    <div className="cart-total-row">
-                      <span>Subtotal</span>
-                      <span>{formatCurrency(basePrice)}</span>
-                    </div>
-                  </div>
+                          <div className="cart-item-actions">
+                            <button type="button" className="qty-btn" onClick={() => removeFromCart(item.id)}>
+                              <Trash2 size={12} className="text-red-500" />
+                            </button>
+                            <button type="button" className="qty-btn" onClick={() => updateCartQty(item.id, -1)}><Minus size={12} /></button>
+                            <span className="font-sans font-semibold text-sm w-4 text-center">{item.qty}</span>
+                            <button type="button" className="qty-btn" onClick={() => updateCartQty(item.id, 1)}><Plus size={12} /></button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+              )}
 
-          <div className="summary-card premium-card">
-            <div className="section-header">
-              <Calculator size={20} />
-              <h3 className="font-sans font-semibold">Total Kalkulasi</h3>
-            </div>
-            <div className="summary-details mt-4">
-              <div className="summary-row">
-                <span className="text-secondary">Base Layanan</span>
-                <span className="font-sans font-medium">{formatCurrency(basePrice)}</span>
+              <div className="cart-summary">
+                <div className="cart-total-row">
+                  <span>Subtotal</span>
+                  <span>{formatCurrency(basePrice)}</span>
+                </div>
               </div>
             </div>
-            <div className="total-divider"></div>
-            <div className="total-row">
-              <span className="font-sans text-secondary">Sub Total</span>
-              <span className="font-mono-num text-xl font-bold">{formatCurrency(totalPrice)}</span>
+
+            <div className="summary-card premium-card">
+              <div className="section-header">
+                <Calculator size={20} />
+                <h3 className="font-sans font-semibold">Total Kalkulasi</h3>
+              </div>
+              <div className="summary-details mt-4">
+                <div className="summary-row">
+                  <span className="text-secondary">Base Layanan</span>
+                  <span className="font-sans font-medium">{formatCurrency(basePrice)}</span>
+                </div>
+              </div>
+              <div className="total-divider"></div>
+              <div className="total-row">
+                <span className="font-sans text-secondary">Sub Total</span>
+                <span className="font-mono-num text-xl font-bold">{formatCurrency(totalPrice)}</span>
+              </div>
+              <button type="submit" className="btn-primary w-full mt-6" disabled={cartItems.length === 0} style={{ marginBottom: '0.5rem' }}>
+                Lanjut ke Pembayaran
+              </button>
+              {cartItems.length === 0 && (
+                <p className="text-xs text-secondary text-center px-2 pt-2" style={{ lineHeight: '1.5' }}>Pilih minimal 1 produk untuk melanjutkan pembayaran.</p>
+              )}
             </div>
-            <button type="submit" className="btn-primary w-full mt-6" disabled={cartItems.length === 0} style={{ marginBottom: '0.5rem' }}>
-              Lanjut ke Pembayaran
-            </button>
-            {cartItems.length === 0 && (
-              <p className="text-xs text-secondary text-center px-2 pt-2" style={{ lineHeight: '1.5' }}>Pilih minimal 1 produk untuk melanjutkan pembayaran.</p>
-            )}
           </div>
-        </div>
-      </form>
+        </form>
       </div>
 
       {/* Payment Modal */}
@@ -1140,7 +1140,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
 
             <div className="form-grid border-b border-gray-200 pb-6 mb-6">
               <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-                <input type="checkbox" id="pajak" checked={paymentState.useTax} onChange={e => setPaymentState(prev => ({...prev, useTax: e.target.checked}))} style={{ width: '20px', height: '20px', cursor: 'pointer' }} />
+                <input type="checkbox" id="pajak" checked={paymentState.useTax} onChange={e => setPaymentState(prev => ({ ...prev, useTax: e.target.checked }))} style={{ width: '20px', height: '20px', cursor: 'pointer' }} />
                 <label htmlFor="pajak" className="font-sans font-semibold cursor-pointer" style={{ marginBottom: 0 }}>Tambahkan Faktur Pajak (PPN 11%)</label>
               </div>
             </div>
@@ -1153,7 +1153,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
               <div className="summary-row mb-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   Diskon
-                  <select 
+                  <select
                     value={paymentState.discountType}
                     onChange={(e) => setPaymentState(prev => ({ ...prev, discountType: e.target.value, discountValue: 0 }))}
                     style={{ backgroundColor: 'transparent', border: '1px solid #4b5563', borderRadius: '4px', color: '#fff', padding: '2px 4px', fontSize: '12px', outline: 'none' }}
@@ -1164,7 +1164,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   {paymentState.discountType === 'nominal' && <span className="font-mono-num font-semibold text-white">Rp</span>}
-                  <input 
+                  <input
                     type="text"
                     className="font-mono-num font-semibold text-white text-right"
                     style={{ width: paymentState.discountType === 'persen' ? '60px' : '130px', padding: '4px 8px', backgroundColor: 'transparent', border: '1px solid #4b5563', borderRadius: '4px', color: '#ffffff', outline: 'none' }}
@@ -1201,19 +1201,19 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 <span className="font-semibold">Telah Dibayar</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span className="font-mono-num font-semibold text-white">Rp</span>
-                  <input 
+                  <input
                     type="text"
                     className="font-mono-num font-semibold text-white text-right"
                     style={{ width: '130px', padding: '4px 8px', backgroundColor: 'transparent', border: '1px solid #4b5563', borderRadius: '4px', color: '#ffffff' }}
                     value={modalPaidAmount === 0 ? '' : modalPaidAmount.toLocaleString('id-ID')}
                     onChange={(e) => {
-                       const rawValue = e.target.value.replace(/\D/g, '');
-                       const val = parseInt(rawValue, 10) || 0;
-                       setPaymentState(prev => ({
-                          ...prev,
-                          type: prev.type === 'Kredit Dagang' && val < netTotal ? 'Kredit Dagang' : (val === netTotal ? 'Lunas' : (val === 0 ? 'Tanpa DP' : 'DP Custom')),
-                          dpAmount: val
-                       }));
+                      const rawValue = e.target.value.replace(/\D/g, '');
+                      const val = parseInt(rawValue, 10) || 0;
+                      setPaymentState(prev => ({
+                        ...prev,
+                        type: prev.type === 'Kredit Dagang' && val < netTotal ? 'Kredit Dagang' : (val === netTotal ? 'Lunas' : (val === 0 ? 'Tanpa DP' : 'DP Custom')),
+                        dpAmount: val
+                      }));
                     }}
                     placeholder="0"
                   />
@@ -1229,31 +1229,31 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
               <label className="font-mono-ui text-sm text-secondary mb-2 block">Tipe Pembayaran</label>
               <div className="radio-group">
                 <label className={`radio-card ${paymentState.type === 'Lunas' ? 'active' : ''}`}>
-                  <input type="radio" checked={paymentState.type === 'Lunas'} onChange={() => setPaymentState(prev => ({...prev, type: 'Lunas'}))} className="hidden-radio" />
+                  <input type="radio" checked={paymentState.type === 'Lunas'} onChange={() => setPaymentState(prev => ({ ...prev, type: 'Lunas' }))} className="hidden-radio" />
                   <div className="radio-content">
                     <span className="font-sans font-semibold">Lunas</span>
                   </div>
                 </label>
                 <label className={`radio-card ${paymentState.type === 'Kredit Dagang' ? 'active' : ''}`}>
-                  <input type="radio" checked={paymentState.type === 'Kredit Dagang'} onChange={() => setPaymentState(prev => ({...prev, type: 'Kredit Dagang', dpAmount: 0}))} className="hidden-radio" />
+                  <input type="radio" checked={paymentState.type === 'Kredit Dagang'} onChange={() => setPaymentState(prev => ({ ...prev, type: 'Kredit Dagang', dpAmount: 0 }))} className="hidden-radio" />
                   <div className="radio-content">
                     <span className="font-sans font-semibold">Kredit Dagang (Credit Term)</span>
                   </div>
                 </label>
                 <label className={`radio-card ${paymentState.type === 'DP 50%' ? 'active' : ''}`}>
-                  <input type="radio" checked={paymentState.type === 'DP 50%'} onChange={() => setPaymentState(prev => ({...prev, type: 'DP 50%', dpAmount: netTotal / 2}))} className="hidden-radio" />
+                  <input type="radio" checked={paymentState.type === 'DP 50%'} onChange={() => setPaymentState(prev => ({ ...prev, type: 'DP 50%', dpAmount: netTotal / 2 }))} className="hidden-radio" />
                   <div className="radio-content">
                     <span className="font-sans font-semibold">DP 50%</span>
                   </div>
                 </label>
                 <label className={`radio-card ${paymentState.type === 'DP Custom' ? 'active' : ''}`}>
-                  <input type="radio" checked={paymentState.type === 'DP Custom'} onChange={() => setPaymentState(prev => ({...prev, type: 'DP Custom', dpAmount: 0}))} className="hidden-radio" />
+                  <input type="radio" checked={paymentState.type === 'DP Custom'} onChange={() => setPaymentState(prev => ({ ...prev, type: 'DP Custom', dpAmount: 0 }))} className="hidden-radio" />
                   <div className="radio-content">
                     <span className="font-sans font-semibold">DP Custom</span>
                   </div>
                 </label>
                 <label className={`radio-card ${paymentState.type === 'Tanpa DP' ? 'active' : ''}`}>
-                  <input type="radio" checked={paymentState.type === 'Tanpa DP'} onChange={() => setPaymentState(prev => ({...prev, type: 'Tanpa DP', dpAmount: 0}))} className="hidden-radio" />
+                  <input type="radio" checked={paymentState.type === 'Tanpa DP'} onChange={() => setPaymentState(prev => ({ ...prev, type: 'Tanpa DP', dpAmount: 0 }))} className="hidden-radio" />
                   <div className="radio-content">
                     <span className="font-sans font-semibold">Tanpa DP</span>
                   </div>
@@ -1261,7 +1261,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
               </div>
               {paymentState.type === 'DP Custom' && (
                 <div className="mt-3">
-                  <input type="number" className="input-field" value={paymentState.dpAmount || ''} onChange={e => setPaymentState(prev => ({...prev, dpAmount: parseInt(e.target.value) || 0}))} placeholder="Nominal DP (Rp)" />
+                  <input type="number" className="input-field" value={paymentState.dpAmount || ''} onChange={e => setPaymentState(prev => ({ ...prev, dpAmount: parseInt(e.target.value) || 0 }))} placeholder="Nominal DP (Rp)" />
                 </div>
               )}
               {paymentState.type === 'Kredit Dagang' && (
@@ -1269,10 +1269,10 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '12px' }}>
                     <div>
                       <label className="font-mono-ui text-xs text-secondary mb-1 block">Tanggal Jatuh Tempo (Batas Akhir Pelunasan)</label>
-                      <input type="date" className="input-field w-full" value={paymentState.terminStartDate || ''} onChange={e => setPaymentState(prev => ({...prev, terminStartDate: e.target.value}))} />
+                      <input type="date" className="input-field w-full" value={paymentState.terminStartDate || ''} onChange={e => setPaymentState(prev => ({ ...prev, terminStartDate: e.target.value }))} />
                     </div>
                   </div>
-                  
+
                   {paymentState.terminStartDate && (
                     <div className="mt-3 p-3" style={{ backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '6px', border: '1px solid #374151' }}>
                       <label className="font-mono-ui text-xs text-white mb-2 block font-semibold">Preview Jadwal Pembayaran</label>
@@ -1305,12 +1305,12 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
 
             <div className="form-group mb-6">
               <label className="font-mono-ui text-sm text-secondary mb-2 block">Metode Pembayaran</label>
-              <div className="radio-group" style={{gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px'}}>
+              <div className="radio-group" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
                 {['Penagihan', 'QRIS', 'Cash', 'Debit', 'Kartu Kredit', 'Transfer Bank', 'Online Shop', 'Free of Charge', 'Penawaran'].map(m => {
                   const isDisabled = modalPaidAmount === 0 && m !== 'Penagihan';
                   return (
                     <label key={m} className={`radio-card ${paymentState.method === m ? 'active' : ''} ${isDisabled ? 'cursor-not-allowed' : ''}`} style={isDisabled ? { opacity: 0.4, pointerEvents: 'none', filter: 'grayscale(100%)' } : {}}>
-                      <input type="radio" disabled={isDisabled} checked={paymentState.method === m} onChange={() => setPaymentState(prev => ({...prev, method: m}))} className="hidden-radio" />
+                      <input type="radio" disabled={isDisabled} checked={paymentState.method === m} onChange={() => setPaymentState(prev => ({ ...prev, method: m }))} className="hidden-radio" />
                       <div className="radio-content items-center text-center p-2">
                         <span className="font-sans font-semibold" style={{ fontSize: '13px' }}>{m}</span>
                       </div>
@@ -1322,10 +1322,10 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
 
             <div className="form-group mb-6">
               <label className="font-mono-ui text-sm text-secondary mb-2 block">Upload file</label>
-              
+
               {!paymentState.paymentProofName ? (
                 <>
-                  <div 
+                  <div
                     className={`upload-dropzone ${isDragging ? 'dragging' : ''}`}
                     onClick={() => fileInputRef.current?.click()}
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -1369,10 +1369,10 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                       <p style={{ color: '#9ca3af', fontSize: '12px', margin: 0 }}>File ready</p>
                       <div style={{ height: '4px', backgroundColor: '#10b981', width: '100%', borderRadius: '2px', marginTop: '8px' }}></div>
                     </div>
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setPaymentState(prev => ({...prev, paymentProof: null, paymentProofName: ''}));
+                        setPaymentState(prev => ({ ...prev, paymentProof: null, paymentProofName: '' }));
                       }}
                       style={{ background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}
                     >
@@ -1384,7 +1384,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem' }}>
-              <button 
+              <button
                 type="button"
                 className="btn-batal"
                 onClick={() => setShowPaymentModal(false)}
@@ -1393,13 +1393,13 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
               >
                 Batal
               </button>
-              <button 
+              <button
                 type="button"
                 className="btn-konfirmasi"
                 onClick={handleConfirmPayment}
                 disabled={isSubmitting}
-                style={{ 
-                  opacity: isSubmitting ? 0.7 : 1, 
+                style={{
+                  opacity: isSubmitting ? 0.7 : 1,
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -1432,13 +1432,13 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
             </div>
 
             <div className="invoice-actions no-print p-4 md:p-6 border-t bg-gray-50 rounded-b-lg flex flex-wrap gap-4">
-              <button 
-                className="flex-1 flex justify-center items-center gap-2" 
-                style={{ backgroundColor: '#f3f4f6', color: '#111', padding: '10px', borderRadius: '8px', fontWeight: 'bold', minWidth: '140px', cursor: isPrintingInvoice ? 'wait' : 'pointer', opacity: isPrintingInvoice ? 0.7 : 1 }} 
+              <button
+                className="flex-1 flex justify-center items-center gap-2"
+                style={{ backgroundColor: '#f3f4f6', color: '#111', padding: '10px', borderRadius: '8px', fontWeight: 'bold', minWidth: '140px', cursor: isPrintingInvoice ? 'wait' : 'pointer', opacity: isPrintingInvoice ? 0.7 : 1 }}
                 onClick={handlePrintPDF}
                 disabled={isPrintingInvoice}
               >
-                {isPrintingInvoice ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />} 
+                {isPrintingInvoice ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
                 {isPrintingInvoice ? 'Mencetak...' : 'Cetak Invoice'}
               </button>
               <button className="flex-1 flex justify-center items-center gap-2" style={{ backgroundColor: '#25D366', color: '#fff', padding: '10px', borderRadius: '8px', fontWeight: 'bold', minWidth: '140px' }} onClick={handleShareWA}>
@@ -1456,18 +1456,18 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
       {showVariantModal && selectedProductForModal && (
         <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
           <div className="modal-content animate-fade-in" style={{ position: 'relative', backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', width: '100%', maxWidth: '700px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            
+
             <div style={{ flexShrink: 0, padding: '24px', borderBottom: '1px solid #e5e7eb', backgroundColor: '#ffffff' }}>
               <h2 className="font-sans font-bold mb-1" style={{ color: '#111', fontSize: '1.75rem', margin: 0 }}>{selectedProductForModal.name}</h2>
               <p className="text-sm m-0 mt-1" style={{ color: '#6b7280', fontSize: '1rem', margin: 0, marginTop: '4px' }}>Silakan pilih opsi sebanyak yang Anda butuhkan, Anda dapat mengubahnya nanti di keranjang.</p>
             </div>
-            
+
             <div style={{ flex: 1, padding: '24px', overflowY: 'auto', backgroundColor: '#ffffff' }}>
               <div style={{ marginBottom: '24px' }}>
                 <label className="font-sans text-sm font-bold mb-3 block" style={{ color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px', display: 'block' }}>SATUAN PEMBELIAN</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                   {['Roll', 'Meteran (Ecer)'].map(val => (
-                    <div key={val} onClick={() => setModalVariantState(prev => ({...prev, satuanBeli: val}))}
+                    <div key={val} onClick={() => setModalVariantState(prev => ({ ...prev, satuanBeli: val }))}
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', border: modalVariantState.satuanBeli === val ? '2px solid #6366f1' : '1px solid #e5e7eb', backgroundColor: modalVariantState.satuanBeli === val ? '#eef2ff' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s' }}
                     >
                       <span style={{ fontWeight: 'bold', color: modalVariantState.satuanBeli === val ? '#3730a3' : '#111', fontSize: '15px' }}>{val === 'Roll' ? 'Beli per Roll' : 'Beli Meteran (Ecer)'}</span>
@@ -1484,7 +1484,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                     type="number"
                     min="1"
                     value={modalVariantState.meteranQty}
-                    onChange={(e) => setModalVariantState(prev => ({...prev, meteranQty: parseInt(e.target.value) || 1}))}
+                    onChange={(e) => setModalVariantState(prev => ({ ...prev, meteranQty: parseInt(e.target.value) || 1 }))}
                     style={{ width: '100%', padding: '12px 16px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '16px' }}
                     placeholder="Contoh: 5"
                   />
@@ -1493,32 +1493,32 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
 
               <div style={{ marginBottom: '24px' }}>
                 <label className="font-sans text-sm font-bold mb-3 block" style={{ color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', display: 'block' }}>Catatan Produk (Opsional)</label>
-                <textarea 
+                <textarea
                   placeholder="Contoh: Harap hati-hati pada bagian tertentu..."
                   value={modalVariantState.catatan || ''}
-                  onChange={(e) => setModalVariantState(prev => ({...prev, catatan: e.target.value}))}
+                  onChange={(e) => setModalVariantState(prev => ({ ...prev, catatan: e.target.value }))}
                   style={{ width: '100%', minHeight: '80px', padding: '12px', borderRadius: '12px', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb', color: '#111', fontSize: '14px', resize: 'vertical' }}
                 />
               </div>
             </div>
 
             <div style={{ flexShrink: 0, padding: '16px 24px', borderTop: '1px solid #e5e7eb', display: 'flex', justifyItems: 'center', justifyContent: 'flex-end', gap: '12px', backgroundColor: '#f9fafb' }}>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 style={{ padding: '10px 20px', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #d1d5db', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
                 onClick={() => setShowVariantModal(false)}
               >
                 Batal
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 style={{ padding: '10px 20px', color: '#ffffff', backgroundColor: '#2563eb', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
                 onClick={handleAddToCartFromModal}
               >
                 Lanjutkan &gt;
               </button>
             </div>
-            
+
           </div>
         </div>
       )}

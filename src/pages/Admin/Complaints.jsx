@@ -14,7 +14,7 @@ const Complaints = () => {
     setIsLoading(true);
     try {
       const token = sessionStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/complaints', {
+      const response = await fetch('http://31.97.51.101/api/complaints', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -40,7 +40,7 @@ const Complaints = () => {
   const updateStatus = async (id, newStatus) => {
     try {
       const token = sessionStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/complaints/${id}/status`, {
+      const response = await fetch(`http://31.97.51.101/api/complaints/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -74,8 +74,8 @@ const Complaints = () => {
   };
 
   const filteredComplaints = complaints.filter(c => {
-    const matchSearch = 
-      c.transaction?.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchSearch =
+      c.transaction?.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.transaction?.plate_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.problem_type.toLowerCase().includes(searchTerm.toLowerCase());
     const matchStatus = statusFilter === 'Semua Status' || statusFilter === 'All' || c.status === statusFilter;
@@ -95,7 +95,7 @@ const Complaints = () => {
           </h1>
           <p className="page-subtitle">Kelola dan pantau semua komplain masuk dari pelanggan</p>
         </div>
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)}
           className="btn-primary"
         >
@@ -109,9 +109,9 @@ const Complaints = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '1.5rem', flexWrap: 'nowrap' }}>
           <div style={{ position: 'relative', flex: 1, minWidth: '0' }}>
             <Search size={18} color="#9ca3af" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
-            <input 
-              type="text" 
-              placeholder="Cari nama pelanggan, plat, atau kendala..." 
+            <input
+              type="text"
+              placeholder="Cari nama pelanggan, plat, atau kendala..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ width: '100%', height: '42px', padding: '0 16px 0 44px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', boxSizing: 'border-box' }}
@@ -120,7 +120,7 @@ const Complaints = () => {
           <div style={{ display: 'flex', itemsCenter: 'center', gap: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
               <Filter size={18} />
-              <select 
+              <select
                 style={{ padding: '0 16px', height: '42px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'var(--font-sans)', outline: 'none', backgroundColor: '#f9fafb', cursor: 'pointer' }}
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -196,10 +196,10 @@ const Complaints = () => {
                   </td>
                   <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                     {complaint.proof_photo ? (
-                      <a href={`http://localhost:5000${complaint.proof_photo}`} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
-                        <img 
-                          src={`http://localhost:5000${complaint.proof_photo}`} 
-                          alt="Bukti" 
+                      <a href={`http://31.97.51.101${complaint.proof_photo}`} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
+                        <img
+                          src={`http://31.97.51.101${complaint.proof_photo}`}
+                          alt="Bukti"
                           style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e5e7eb', transition: 'transform 0.2s' }}
                           onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
                           onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -231,9 +231,9 @@ const Complaints = () => {
       </div>
 
       {/* Modal */}
-      <ComplaintModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <ComplaintModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSuccess={fetchComplaints}
       />
     </div>

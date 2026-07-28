@@ -17,7 +17,7 @@ const CustomerRanking = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  
+
   const tableRef = useRef(null);
   const { orders } = useOrders();
 
@@ -52,15 +52,15 @@ const CustomerRanking = () => {
       const params = new URLSearchParams();
       if (yearFilter) params.append('year', yearFilter);
       if (transactionTypeFilter !== 'Semua Transaksi') params.append('type', transactionTypeFilter);
-      
-      const url = `http://localhost:5000/api/analytics/customer-ranking?${params.toString()}`;
+
+      const url = `http://31.97.51.101/api/analytics/customer-ranking?${params.toString()}`;
 
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status} (Mungkin server belum direstart)`);
       }
@@ -83,8 +83,8 @@ const CustomerRanking = () => {
     fetchRankings();
   }, [yearFilter, transactionTypeFilter, token]);
 
-  const filteredRankings = rankings.filter(r => 
-    r.customerName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filteredRankings = rankings.filter(r =>
+    r.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.customerPhone.includes(searchQuery)
   );
 
@@ -93,7 +93,7 @@ const CustomerRanking = () => {
       toast.error('Tidak ada data untuk diekspor');
       return;
     }
-    
+
     const exportData = filteredRankings.map(r => ({
       'Peringkat': r.rank,
       'Nama Customer / Reseller': r.customerName,
@@ -115,18 +115,18 @@ const CustomerRanking = () => {
       toast.error('Tidak ada data untuk diekspor');
       return;
     }
-    
+
     const element = tableRef.current;
     const opt = {
-      margin:       1,
-      filename:     `Customer_Ranking_${yearFilter || 'All_Time'}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2 },
-      jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+      margin: 1,
+      filename: `Customer_Ranking_${yearFilter || 'All_Time'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
     };
 
     html2pdf().set(opt).from(element).save().then(() => {
-       toast.success('Berhasil mengekspor ke PDF');
+      toast.success('Berhasil mengekspor ke PDF');
     });
   };
 
@@ -159,8 +159,8 @@ const CustomerRanking = () => {
       <div className="ranking-card">
         <div className="ranking-toolbar">
           <div className="search-box">
-            <Search size={18} color="#9ca3af" style={{marginRight: '8px'}} />
-            <input 
+            <Search size={18} color="#9ca3af" style={{ marginRight: '8px' }} />
+            <input
               type="text"
               placeholder="Cari nama atau nomor WA..."
               value={searchQuery}
@@ -170,7 +170,7 @@ const CustomerRanking = () => {
           <div className="filter-box" style={{ display: 'flex', gap: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <label>Jenis Transaksi:</label>
-              <select 
+              <select
                 value={transactionTypeFilter}
                 onChange={(e) => setTransactionTypeFilter(e.target.value)}
               >
@@ -181,7 +181,7 @@ const CustomerRanking = () => {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <label>Tahun:</label>
-              <select 
+              <select
                 value={yearFilter}
                 onChange={(e) => setYearFilter(e.target.value)}
               >
@@ -201,12 +201,12 @@ const CustomerRanking = () => {
             <table className="ranking-table">
               <thead>
                 <tr>
-                  <th style={{textAlign: 'center', width: '80px'}}>Peringkat</th>
+                  <th style={{ textAlign: 'center', width: '80px' }}>Peringkat</th>
                   <th>Nama Customer</th>
                   <th>No. WhatsApp</th>
-                  <th style={{textAlign: 'center'}}>Total Roll</th>
-                  <th style={{textAlign: 'right'}}>Total Pembelian</th>
-                  <th style={{textAlign: 'center', width: '100px'}}>Aksi</th>
+                  <th style={{ textAlign: 'center' }}>Total Roll</th>
+                  <th style={{ textAlign: 'right' }}>Total Pembelian</th>
+                  <th style={{ textAlign: 'center', width: '100px' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -223,8 +223,8 @@ const CustomerRanking = () => {
                         {getRankIcon(r.rank)}
                       </td>
                       <td className="customer-info">
-                        <div 
-                          className="name" 
+                        <div
+                          className="name"
                           style={{ cursor: 'pointer', color: '#2563eb', textDecoration: 'underline' }}
                           onClick={() => { setSelectedCustomer(r); setShowHistoryModal(true); }}
                         >
@@ -235,7 +235,7 @@ const CustomerRanking = () => {
                       <td className="phone-text">
                         {r.customerPhone}
                       </td>
-                      <td style={{textAlign: 'center'}}>
+                      <td style={{ textAlign: 'center' }}>
                         <span className="roll-badge">
                           {r.totalRoll}
                         </span>
@@ -243,9 +243,9 @@ const CustomerRanking = () => {
                       <td className="omzet-text">
                         {r.totalOmzet.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}
                       </td>
-                      <td style={{textAlign: 'center'}}>
-                        <button 
-                          onClick={() => { setSelectedCustomer(r); setShowHistoryModal(true); }} 
+                      <td style={{ textAlign: 'center' }}>
+                        <button
+                          onClick={() => { setSelectedCustomer(r); setShowHistoryModal(true); }}
                           className="btn-detail"
                           style={{
                             padding: '6px 12px',
@@ -278,14 +278,14 @@ const CustomerRanking = () => {
           <div className="modal-content" style={{ backgroundColor: '#ffffff', color: '#1f2937', maxWidth: '700px', width: '100%', borderRadius: '12px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb', paddingBottom: '12px', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>Riwayat Transaksi: {selectedCustomer.customerName}</h3>
-              <button 
-                onClick={() => { setShowHistoryModal(false); setSelectedCustomer(null); }} 
+              <button
+                onClick={() => { setShowHistoryModal(false); setSelectedCustomer(null); }}
                 style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9ca3af' }}
               >
                 <X size={20} />
               </button>
             </div>
-            
+
             <div style={{ marginBottom: '16px', fontSize: '14px', color: '#4b5563' }}>
               <div><strong>No. WhatsApp:</strong> {selectedCustomer.customerPhone}</div>
               <div><strong>Total Pembelian:</strong> {selectedCustomer.totalOmzet.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</div>
@@ -340,9 +340,9 @@ const CustomerRanking = () => {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
-              <button 
-                onClick={() => { setShowHistoryModal(false); setSelectedCustomer(null); }} 
-                className="btn-excel" 
+              <button
+                onClick={() => { setShowHistoryModal(false); setSelectedCustomer(null); }}
+                className="btn-excel"
                 style={{ padding: '8px 16px', backgroundColor: '#4b5563', color: '#ffffff', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
               >
                 Tutup

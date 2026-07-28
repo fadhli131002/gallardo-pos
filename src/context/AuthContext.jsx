@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const verifySession = async () => {
       const storedToken = sessionStorage.getItem('token');
-      
+
       if (!storedToken) {
         sessionStorage.clear();
         setToken(null);
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const response = await fetch('http://localhost:5000/api/auth/me', {
+        const response = await fetch('http://31.97.51.101/api/auth/me', {
           headers: { 'Authorization': `Bearer ${storedToken}` }
         });
 
@@ -89,14 +89,14 @@ export const AuthProvider = ({ children }) => {
       username: userData.username,
       role: userData.role
     };
-    
+
     // Bersihkan total sisa storage lama sebelum menimpa dengan data baru
     sessionStorage.clear();
     sessionStorage.setItem('token', newToken);
     sessionStorage.setItem('userRole', normalised.role);
     sessionStorage.setItem('userName', normalised.name);
     sessionStorage.setItem('user', JSON.stringify(normalised));
-    
+
     setToken(newToken);
     setUser(normalised);
   };

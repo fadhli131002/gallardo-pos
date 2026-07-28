@@ -162,7 +162,7 @@ const POS = () => {
       if (selectedProductForModal.category === 'Kaca Film') konversi = 30;
       else if (selectedProductForModal.category === 'PPF') konversi = 15;
       const totalBase = (selectedProductForModal.stokUtama * konversi) + (selectedProductForModal.stokPecahan || 0);
-      
+
       let baseDeduct = 1;
       if (selectedProductForModal.category === 'PPF' || selectedProductForModal.name?.toUpperCase().includes('VANSGARD') || selectedProductForModal.name?.toUpperCase().includes('PPF')) {
         if (formData.carSize === 'Small' || formData.carSize === 'Medium') baseDeduct = 15;
@@ -194,7 +194,7 @@ const POS = () => {
     setCartItems(prev => {
       const existing = prev.find(item => item.id === itemToAdd.id);
       const newQty = existing ? existing.qty + 1 : 1;
-      
+
       if (itemToAdd.category !== 'Jasa & Maintenance') {
         let konversi = itemToAdd.konversi || 1;
         if (itemToAdd.category === 'Kaca Film') konversi = 30;
@@ -216,11 +216,11 @@ const POS = () => {
         const requiredStock = baseDeduct * newQty;
 
         if (itemToAdd.category === 'Tools & Equipment' && newQty > (itemToAdd.stokUtama || 0)) {
-           toast.warning(`Stok ${itemToAdd.name} tidak mencukupi!`);
-           return prev;
+          toast.warning(`Stok ${itemToAdd.name} tidak mencukupi!`);
+          return prev;
         } else if (requiredStock > totalBase && itemToAdd.category !== 'Tools & Equipment') {
-           toast.warning(`Stok ${itemToAdd.name} tidak mencukupi! Dibutuhkan: ${requiredStock} satuan dasar, Tersedia: ${totalBase} satuan dasar.`);
-           return prev;
+          toast.warning(`Stok ${itemToAdd.name} tidak mencukupi! Dibutuhkan: ${requiredStock} satuan dasar, Tersedia: ${totalBase} satuan dasar.`);
+          return prev;
         }
       }
 
@@ -235,13 +235,13 @@ const POS = () => {
     setCartItems(prev => prev.map(item => {
       if (item.id === id) {
         const newQty = Math.max(1, item.qty + delta);
-        
+
         if (item.category !== 'Jasa & Maintenance') {
           let konversi = item.konversi || 1;
           if (item.category === 'Kaca Film') konversi = 30;
           else if (item.category === 'PPF') konversi = 15;
           const totalBase = (item.stokUtama * konversi) + (item.stokPecahan || 0);
-          
+
           let baseDeduct = 1;
           if (item.category === 'PPF' || item.name?.toUpperCase().includes('VANSGARD') || item.name?.toUpperCase().includes('PPF')) {
             if (formData.carSize === 'Small' || formData.carSize === 'Medium') baseDeduct = 15;
@@ -255,7 +255,7 @@ const POS = () => {
           }
 
           const requiredStock = baseDeduct * newQty;
-          
+
           if (item.category === 'Tools & Equipment' && newQty > (item.stokUtama || 0)) {
             toast.warning(`Stok ${item.name} tidak mencukupi!`);
             return item;
@@ -264,7 +264,7 @@ const POS = () => {
             return item;
           }
         }
-        
+
         return { ...item, qty: newQty };
       }
       return item;
@@ -384,8 +384,8 @@ const POS = () => {
     setBasePrice(total);
   }, [cartItems, formData.carSize]);
 
-  const isMaintenanceOrKomplain = cartItems.some(item => 
-    item.category === 'Jasa & Maintenance' || 
+  const isMaintenanceOrKomplain = cartItems.some(item =>
+    item.category === 'Jasa & Maintenance' ||
     (item.product_name && (item.product_name.toLowerCase().includes('maintenance') || item.product_name.toLowerCase().includes('komplain')))
   );
 
@@ -402,7 +402,7 @@ const POS = () => {
   else if (paymentState.type === 'Tanpa DP') modalPaidAmount = 0;
   else if (paymentState.type === 'DP Custom') modalPaidAmount = paymentState.dpAmount || 0;
   else modalPaidAmount = netTotal / 2;
-  
+
   let modalRemainingAmount = netTotal - modalPaidAmount;
 
   const nextStep = () => {
@@ -660,7 +660,7 @@ const POS = () => {
       };
 
       const authToken = token;
-      const response = await fetch('http://localhost:5000/api/transactions', {
+      const response = await fetch('http://31.97.51.101/api/transactions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -692,9 +692,9 @@ const POS = () => {
           const yy = String(dateObj.getFullYear()).slice(-2);
           const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
           const seqNum = String(resJson.data.id).padStart(4, '0');
-          newOrder.id = `${prefix}/${yy}${mm}001${seqNum}`; 
+          newOrder.id = `${prefix}/${yy}${mm}001${seqNum}`;
         }
-        
+
         // Peringatan stok menipis
         if (resJson.lowStockWarning && resJson.lowStockWarning.length > 0) {
           resJson.lowStockWarning.forEach(w => toast.warning(`⚠️ Stok menipis: ${w}`));

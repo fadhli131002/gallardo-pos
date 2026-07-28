@@ -24,7 +24,7 @@ const Dashboard = () => {
       </div>
     );
   }
-  
+
   const userName = user.name ?? null;
   const userRole = user.role ?? null;
   const isSales = userRole === 'sales';
@@ -52,7 +52,7 @@ const Dashboard = () => {
     const fetchAdminStats = async () => {
       try {
         if (!token) return;
-        const res = await fetch('http://localhost:5000/api/analytics/dashboard', {
+        const res = await fetch('http://31.97.51.101/api/analytics/dashboard', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -80,13 +80,13 @@ const Dashboard = () => {
   const salesOrders = isSales ? orders : orders;
 
   // When admin → use backend stats; when sales → compute from local orders
-  const totalCustomers   = isSales ? new Set(salesOrders.map(o => o.customerName)).size : adminStats.totalCustomers;
-  const totalOrders      = isSales ? salesOrders.length : adminStats.totalOrders;
-  const lunasOrders      = isSales ? salesOrders.filter(o => (o.paymentType||'').toLowerCase()==='lunas' || o.remainingAmount<=0).length : adminStats.lunasOrders;
-  const prosesOrders     = isSales ? Math.max(0, totalOrders - lunasOrders) : adminStats.prosesOrders;
+  const totalCustomers = isSales ? new Set(salesOrders.map(o => o.customerName)).size : adminStats.totalCustomers;
+  const totalOrders = isSales ? salesOrders.length : adminStats.totalOrders;
+  const lunasOrders = isSales ? salesOrders.filter(o => (o.paymentType || '').toLowerCase() === 'lunas' || o.remainingAmount <= 0).length : adminStats.lunasOrders;
+  const prosesOrders = isSales ? Math.max(0, totalOrders - lunasOrders) : adminStats.prosesOrders;
 
   // Weekly dynamics
-  const computedWeekly = [1,2,3,4].map(w => ({ week: `Minggu ${w}`, revenue: 0 }));
+  const computedWeekly = [1, 2, 3, 4].map(w => ({ week: `Minggu ${w}`, revenue: 0 }));
   if (isSales) {
     salesOrders.forEach(o => {
       const d = new Date(o.date);
@@ -107,7 +107,7 @@ const Dashboard = () => {
       });
     });
   }
-  const liveTop = Object.entries(productMap).map(([name, s]) => ({ name, sales: s })).sort((a,b)=>b.sales-a.sales).slice(0,5);
+  const liveTop = Object.entries(productMap).map(([name, s]) => ({ name, sales: s })).sort((a, b) => b.sales - a.sales).slice(0, 5);
   const topProducts = isSales
     ? (liveTop.length > 0 ? liveTop : [{ name: 'Kaca Film', sales: 0 }, { name: 'Coating', sales: 0 }, { name: 'PPF', sales: 0 }])
     : (adminStats?.topProducts && adminStats.topProducts.length > 0 ? adminStats.topProducts : [{ name: 'Kaca Film', sales: 0 }, { name: 'Coating', sales: 0 }, { name: 'PPF', sales: 0 }]);
@@ -123,7 +123,7 @@ const Dashboard = () => {
           <h1 className="page-title">Dashboard Operasional</h1>
           <p className="page-subtitle">Ringkasan aktivitas dan performa bengkel hari ini</p>
         </div>
-        
+
         {/* Right side actions - simulating Hostinger Top Nav */}
         <div className="flex items-center gap-4 hidden sm:flex">
           <button className="btn-secondary rounded-full flex items-center gap-2 px-4">
@@ -139,7 +139,7 @@ const Dashboard = () => {
       <div className="kreosis-grid">
         {/* KOLOM KIRI (70%) */}
         <div className="kreosis-left">
-          
+
           {/* Grafik Utama (Line Chart) */}
           <div className="premium-card kreosis-main-chart">
             <h3 className="font-sans font-semibold mb-4 text-primary">Dynamics of Sales</h3>
@@ -148,8 +148,8 @@ const Dashboard = () => {
                 <AreaChart data={weeklyData} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
@@ -170,7 +170,7 @@ const Dashboard = () => {
                 <span className="metric-card-value">{totalCustomers}</span>
               </div>
             </div>
-            
+
             <div className="metric-card">
               <div className="metric-card-left" style={{ maxWidth: '100%' }}>
                 <h3 className="metric-card-title">Total Order</h3>
@@ -213,7 +213,7 @@ const Dashboard = () => {
                   {recentOrders.map((order) => {
                     const statusVal = (order.paymentStatus || order.status || '').toUpperCase();
                     const isSuccess = statusVal === 'SELESAI' || statusVal === 'LUNAS';
-                    
+
                     return (
                       <tr key={order.id}>
                         <td>
@@ -262,16 +262,16 @@ const Dashboard = () => {
 
         {/* KOLOM KANAN (30%) */}
         <div className="kreosis-right">
-          
+
           <div className="premium-card kreosis-analytics-card h-full flex flex-col">
             <h3 className="font-sans font-semibold mb-4 text-primary">Produk Terlaris</h3>
             <div className="flex-1 min-h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topProducts} margin={{ top: 20, right: 10, left: -20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                  <XAxis dataKey="name" tick={{fontFamily: 'var(--font-sans)', fontSize: 11, fill: '#6b7280'}} axisLine={false} tickLine={false} interval={0} />
-                  <YAxis tick={{fontFamily: 'var(--font-sans)', fontSize: 11, fill: '#6b7280'}} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <RechartsTooltip cursor={{fill: '#F3F4F6'}} formatter={(value) => [`${value} Unit`, 'Total Terjual']} />
+                  <XAxis dataKey="name" tick={{ fontFamily: 'var(--font-sans)', fontSize: 11, fill: '#6b7280' }} axisLine={false} tickLine={false} interval={0} />
+                  <YAxis tick={{ fontFamily: 'var(--font-sans)', fontSize: 11, fill: '#6b7280' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <RechartsTooltip cursor={{ fill: '#F3F4F6' }} formatter={(value) => [`${value} Unit`, 'Total Terjual']} />
                   <Bar dataKey="sales" fill="var(--accent-color)" radius={[4, 4, 0, 0]} barSize={40} />
                 </BarChart>
               </ResponsiveContainer>

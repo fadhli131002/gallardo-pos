@@ -40,7 +40,7 @@ const AdminDashboard = () => {
     const fetchDashboardStats = async () => {
       try {
         if (!token) return;
-        const res = await fetch('http://localhost:5000/api/analytics/dashboard', {
+        const res = await fetch('http://31.97.51.101/api/analytics/dashboard', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -92,17 +92,17 @@ const AdminDashboard = () => {
     if (order.serviceType === 'Kaca Film') brand = order.filmBrand;
     else if (order.serviceType === 'Coating') brand = order.coatingSeries;
     else if (order.serviceType === 'PPF') brand = order.ppfSeries;
-    
+
     const key = `${order.serviceType}${brand && brand !== '-' ? ` (${brand})` : ''}`;
     brandSales[key] = (brandSales[key] || 0) + (order.totalPrice || 0);
   });
 
-  const omzetData = stats.topProducts && stats.topProducts.length > 0 
+  const omzetData = stats.topProducts && stats.topProducts.length > 0
     ? stats.topProducts.map(p => ({ name: p.name, revenue: p.sales }))
     : Object.entries(brandSales)
-        .map(([name, revenue]) => ({ name, revenue }))
-        .sort((a, b) => b.revenue - a.revenue)
-        .slice(0, 4);
+      .map(([name, revenue]) => ({ name, revenue }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 4);
 
   // 6. Grafik Order Mingguan
   // Distribute dynamically across 4 weeks for realistic visualization based on order array index
@@ -135,7 +135,7 @@ const AdminDashboard = () => {
       </div>
 
       <div className="metrics-grid mt-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
-        
+
         <div className="metric-card">
           <div className="metric-card-left">
             <h3 className="metric-card-title">Total Customer <ChevronRight size={14} /></h3>
@@ -177,7 +177,7 @@ const AdminDashboard = () => {
           <div className="metric-card-right">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={[{value: activeTodayCount}, {value: 5 - activeTodayCount}]} dataKey="value" innerRadius={18} outerRadius={26} startAngle={90} endAngle={-270} stroke="none">
+                <Pie data={[{ value: activeTodayCount }, { value: 5 - activeTodayCount }]} dataKey="value" innerRadius={18} outerRadius={26} startAngle={90} endAngle={-270} stroke="none">
                   <Cell fill={activeTodayCount >= 4 ? '#ef4444' : '#4F46E5'} />
                   <Cell fill="#f3f4f6" />
                 </Pie>
@@ -195,7 +195,7 @@ const AdminDashboard = () => {
           <div className="metric-card-right">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={[{value: percentage}, {value: 100 - percentage}]} dataKey="value" innerRadius={18} outerRadius={26} startAngle={90} endAngle={-270} stroke="none">
+                <Pie data={[{ value: percentage }, { value: 100 - percentage }]} dataKey="value" innerRadius={18} outerRadius={26} startAngle={90} endAngle={-270} stroke="none">
                   <Cell fill="#4F46E5" />
                   <Cell fill="#f3f4f6" />
                 </Pie>
@@ -208,11 +208,11 @@ const AdminDashboard = () => {
           <div className="metric-card-left" style={{ maxWidth: '100%' }}>
             <h3 className="metric-card-title">Status Stok <ChevronRight size={14} /></h3>
             {lowStockCount > 0 ? (
-               <span className="metric-card-value" style={{ color: '#ef4444' }}>
-                 {lowStockCount} Menipis
-               </span>
+              <span className="metric-card-value" style={{ color: '#ef4444' }}>
+                {lowStockCount} Menipis
+              </span>
             ) : (
-               <span className="metric-card-value" style={{ color: '#10b981' }}>Aman</span>
+              <span className="metric-card-value" style={{ color: '#10b981' }}>Aman</span>
             )}
             <span className="metric-card-sub">
               {lowStockCount > 0 ? 'Segera lakukan restock material' : 'Semua ketersediaan stok material aman'}
@@ -250,8 +250,8 @@ const AdminDashboard = () => {
               <AreaChart data={weeklyData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                 <defs>
                   <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
