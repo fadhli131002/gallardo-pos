@@ -886,7 +886,7 @@ const AdminCustomerWarranty = () => {
                       if (String(deleteRetailOrder.id).startsWith('RTL-DB-')) {
                         const dbId = deleteRetailOrder.id.replace('RTL-DB-', '');
                         // token is already obtained from useAuth() at component level
-                        const response = await fetch(`http://31.97.51.101/api/transactions/${dbId}`, {
+                        const response = await fetch(`${window.API_URL}/api/transactions/${dbId}`, {
                           method: 'DELETE',
                           headers: {
                             'Authorization': `Bearer ${token}`
@@ -996,10 +996,10 @@ const AdminCustomerWarranty = () => {
                               <p style={{ fontSize: '13px', color: '#881337', margin: '0 0 8px 0' }}><strong>Keterangan:</strong> {historyItem.description || '-'}</p>
                               {historyItem.proof_photo && (
                                 <img
-                                  src={historyItem.proof_photo.startsWith('http') ? historyItem.proof_photo : `http://31.97.51.101${historyItem.proof_photo}`}
+                                  src={historyItem.proof_photo.startsWith('http') ? historyItem.proof_photo : `${window.API_URL}${historyItem.proof_photo}`}
                                   alt="Bukti Komplain"
                                   style={{ maxWidth: '80px', borderRadius: '6px', cursor: 'pointer', border: '1px solid #fecaca', display: 'block' }}
-                                  onClick={() => window.open(historyItem.proof_photo.startsWith('http') ? historyItem.proof_photo : `http://31.97.51.101${historyItem.proof_photo}`, '_blank')}
+                                  onClick={() => window.open(historyItem.proof_photo.startsWith('http') ? historyItem.proof_photo : `${window.API_URL}${historyItem.proof_photo}`, '_blank')}
                                 />
                               )}
                             </div>
@@ -1117,7 +1117,7 @@ const AdminCustomerWarranty = () => {
               const cleanSisa = Number(sisaRaw.toString().replace(/\D/g, ''));
 
               try {
-                const response = await fetch(`http://31.97.51.101/api/transactions/${manualPaymentOrder.id}/payment-status-manual`, {
+                const response = await fetch(`${window.API_URL}/api/transactions/${manualPaymentOrder.id}/payment-status-manual`, {
                   method: 'PUT',
                   headers: {
                     'Content-Type': 'application/json',

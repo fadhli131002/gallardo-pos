@@ -53,7 +53,7 @@ const CustomerRanking = () => {
       if (yearFilter) params.append('year', yearFilter);
       if (transactionTypeFilter !== 'Semua Transaksi') params.append('type', transactionTypeFilter);
 
-      const url = `http://31.97.51.101/api/analytics/customer-ranking?${params.toString()}`;
+      const url = `${window.API_URL}/api/analytics/customer-ranking?${params.toString()}`;
 
       const response = await fetch(url, {
         headers: {

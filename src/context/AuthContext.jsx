@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const response = await fetch('http://31.97.51.101/api/auth/me', {
+        const response = await fetch(window.API_URL + '/api/auth/me', {
           headers: { 'Authorization': `Bearer ${storedToken}` }
         });
 

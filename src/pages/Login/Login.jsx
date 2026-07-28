@@ -41,7 +41,7 @@ const Login = () => {
     setIsAuthenticating(true);
 
     try {
-      const res = await fetch('http://31.97.51.101/api/auth/login', {
+      const res = await fetch(window.API_URL + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password, role })

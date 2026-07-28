@@ -93,7 +93,7 @@ export default function OwnerDashboard() {
       if (month) queryParams.append('month', month);
 
       // Fetch Summary
-      const sumRes = await fetch(`http://31.97.51.101/api/owner/dashboard-summary?${queryParams}`, { headers });
+      const sumRes = await fetch(`${window.API_URL}/api/owner/dashboard-summary?${queryParams}`, { headers });
       const sumJson = await sumRes.json();
 
       if (sumJson.success) {
@@ -103,19 +103,19 @@ export default function OwnerDashboard() {
       }
 
       // Fetch Chart
-      const chartRes = await fetch(`http://31.97.51.101/api/owner/profit-loss?year=${year}`, { headers });
+      const chartRes = await fetch(`${window.API_URL}/api/owner/profit-loss?year=${year}`, { headers });
       const chartJson = await chartRes.json();
       if (chartJson.success) {
         setChartData(chartJson.data);
       }
 
       // Fetch Expenses
-      const expRes = await fetch(`http://31.97.51.101/api/owner/expenses?${queryParams}`, { headers });
+      const expRes = await fetch(`${window.API_URL}/api/owner/expenses?${queryParams}`, { headers });
       const expJson = await expRes.json();
       if (expJson.success) setExpenses(expJson.data);
 
       // Fetch Purchase Orders
-      const poRes = await fetch(`http://31.97.51.101/api/owner/purchase-orders?${queryParams}`, { headers });
+      const poRes = await fetch(`${window.API_URL}/api/owner/purchase-orders?${queryParams}`, { headers });
       const poJson = await poRes.json();
       if (poJson.success) setPurchaseOrders(poJson.data);
 
@@ -135,7 +135,7 @@ export default function OwnerDashboard() {
     e.preventDefault();
     try {
       const token = sessionStorage.getItem('token');
-      const res = await fetch(`http://31.97.51.101/api/owner/expenses`, {
+      const res = await fetch(`${window.API_URL}/api/owner/expenses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ export default function OwnerDashboard() {
     e.preventDefault();
     try {
       const token = sessionStorage.getItem('token');
-      const res = await fetch(`http://31.97.51.101/api/owner/purchase-orders`, {
+      const res = await fetch(`${window.API_URL}/api/owner/purchase-orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

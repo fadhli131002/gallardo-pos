@@ -40,7 +40,7 @@ const AdminDashboard = () => {
     const fetchDashboardStats = async () => {
       try {
         if (!token) return;
-        const res = await fetch('http://31.97.51.101/api/analytics/dashboard', {
+        const res = await fetch(window.API_URL + '/api/analytics/dashboard', {
           headers: {
             'Authorization': `Bearer ${token}`
           }

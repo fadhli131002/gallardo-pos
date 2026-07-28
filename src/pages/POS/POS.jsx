@@ -660,7 +660,7 @@ const POS = () => {
       };
 
       const authToken = token;
-      const response = await fetch('http://31.97.51.101/api/transactions', {
+      const response = await fetch(window.API_URL + '/api/transactions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -154,7 +154,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionData = null, onSuccess }) 
         }))));
       }
 
-      const response = await fetch('http://31.97.51.101/api/complaints', {
+      const response = await fetch(window.API_URL + '/api/complaints', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

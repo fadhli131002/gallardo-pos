@@ -18,7 +18,7 @@ export const OrderProvider = ({ children }) => {
         return;
       }
 
-      const response = await fetch('http://31.97.51.101/api/transactions', {
+      const response = await fetch(window.API_URL + '/api/transactions', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -176,7 +176,7 @@ export const OrderProvider = ({ children }) => {
         setVehicles([]);
         return;
       }
-      const response = await fetch('http://31.97.51.101/api/vehicles', {
+      const response = await fetch(window.API_URL + '/api/vehicles', {
         headers: { 'Authorization': `Bearer ${token}` },
         cache: 'no-store'
       });
@@ -195,7 +195,7 @@ export const OrderProvider = ({ children }) => {
         setCategories([]);
         return;
       }
-      const response = await fetch('http://31.97.51.101/api/sales-categories', {
+      const response = await fetch(window.API_URL + '/api/sales-categories', {
         headers: { 'Authorization': `Bearer ${token}` },
         cache: 'no-store'
       });
@@ -212,20 +212,20 @@ export const OrderProvider = ({ children }) => {
     try {
       if (!token) return;
 
-      const resPeruntukan = await fetch('http://31.97.51.101/api/variants/peruntukan', { headers: { 'Authorization': `Bearer ${token}` }, cache: 'no-store' });
+      const resPeruntukan = await fetch(window.API_URL + '/api/variants/peruntukan', { headers: { 'Authorization': `Bearer ${token}` }, cache: 'no-store' });
       if (resPeruntukan.ok) {
         const data = await resPeruntukan.json();
         // Map database fields (name, category) to UI expected fields (nama, kategori)
         setPeruntukanItems(data.map(p => ({ id: p.id, nama: p.name, kategori: p.category })));
       }
 
-      const resPosisi = await fetch('http://31.97.51.101/api/variants/posisi', { headers: { 'Authorization': `Bearer ${token}` }, cache: 'no-store' });
+      const resPosisi = await fetch(window.API_URL + '/api/variants/posisi', { headers: { 'Authorization': `Bearer ${token}` }, cache: 'no-store' });
       if (resPosisi.ok) {
         const data = await resPosisi.json();
         setPosisiPemasangan(data);
       }
 
-      const resPartial = await fetch('http://31.97.51.101/api/variants/partial', { headers: { 'Authorization': `Bearer ${token}` }, cache: 'no-store' });
+      const resPartial = await fetch(window.API_URL + '/api/variants/partial', { headers: { 'Authorization': `Bearer ${token}` }, cache: 'no-store' });
       if (resPartial.ok) {
         const data = await resPartial.json();
         setPosisiPartial(data);
@@ -280,7 +280,7 @@ export const OrderProvider = ({ children }) => {
   // CRUD for Kaca Film variants
   const addPosisiPemasangan = async (item) => {
     try {
-      const response = await fetch('http://31.97.51.101/api/variants/posisi', {
+      const response = await fetch(window.API_URL + '/api/variants/posisi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ name: item })
@@ -290,7 +290,7 @@ export const OrderProvider = ({ children }) => {
   };
   const removePosisiPemasangan = async (id) => {
     try {
-      const response = await fetch(`http://31.97.51.101/api/variants/posisi/${id}`, {
+      const response = await fetch(`${window.API_URL}/api/variants/posisi/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -300,7 +300,7 @@ export const OrderProvider = ({ children }) => {
 
   const addPosisiPartial = async (item) => {
     try {
-      const response = await fetch('http://31.97.51.101/api/variants/partial', {
+      const response = await fetch(window.API_URL + '/api/variants/partial', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ name: item })
@@ -310,7 +310,7 @@ export const OrderProvider = ({ children }) => {
   };
   const removePosisiPartial = async (id) => {
     try {
-      const response = await fetch(`http://31.97.51.101/api/variants/partial/${id}`, {
+      const response = await fetch(`${window.API_URL}/api/variants/partial/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -320,7 +320,7 @@ export const OrderProvider = ({ children }) => {
 
   const addPeruntukan = async (peruntukan) => {
     try {
-      const response = await fetch('http://31.97.51.101/api/variants/peruntukan', {
+      const response = await fetch(window.API_URL + '/api/variants/peruntukan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ name: peruntukan.nama, category: peruntukan.kategori })
@@ -331,7 +331,7 @@ export const OrderProvider = ({ children }) => {
 
   const removePeruntukan = async (id) => {
     try {
-      const response = await fetch(`http://31.97.51.101/api/variants/peruntukan/${id}`, {
+      const response = await fetch(`${window.API_URL}/api/variants/peruntukan/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -341,7 +341,7 @@ export const OrderProvider = ({ children }) => {
 
   const updatePeruntukan = async (id, updatedItem) => {
     try {
-      const response = await fetch(`http://31.97.51.101/api/variants/peruntukan/${id}`, {
+      const response = await fetch(`${window.API_URL}/api/variants/peruntukan/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ name: updatedItem.nama, category: updatedItem.kategori })
@@ -352,7 +352,7 @@ export const OrderProvider = ({ children }) => {
 
   const addCategory = async (categoryName) => {
     try {
-      const response = await fetch('http://31.97.51.101/api/sales-categories', {
+      const response = await fetch(window.API_URL + '/api/sales-categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ name: categoryName })
@@ -368,7 +368,7 @@ export const OrderProvider = ({ children }) => {
 
   const removeCategory = async (id) => {
     try {
-      const response = await fetch(`http://31.97.51.101/api/sales-categories/${id}`, {
+      const response = await fetch(`${window.API_URL}/api/sales-categories/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -448,7 +448,7 @@ export const OrderProvider = ({ children }) => {
         // Remove undefined fields so we only send what is changed
         Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
 
-        await fetch(`http://31.97.51.101/api/transactions/${order.dbId}`, {
+        await fetch(`${window.API_URL}/api/transactions/${order.dbId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -479,7 +479,7 @@ export const OrderProvider = ({ children }) => {
 
     if (order && order.dbId) {
       try {
-        const response = await fetch(`http://31.97.51.101/api/transactions/${order.dbId}/pay`, {
+        const response = await fetch(`${window.API_URL}/api/transactions/${order.dbId}/pay`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -629,7 +629,7 @@ export const OrderProvider = ({ children }) => {
 
   const addVehicle = async (vehicleData) => {
     try {
-      const response = await fetch('http://31.97.51.101/api/vehicles', {
+      const response = await fetch(window.API_URL + '/api/vehicles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(vehicleData)
@@ -640,7 +640,7 @@ export const OrderProvider = ({ children }) => {
 
   const updateVehicle = async (id, vehicleData) => {
     try {
-      const response = await fetch(`http://31.97.51.101/api/vehicles/${id}`, {
+      const response = await fetch(`${window.API_URL}/api/vehicles/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(vehicleData)
@@ -652,7 +652,7 @@ export const OrderProvider = ({ children }) => {
   const deleteVehicle = async (id) => {
     try {
       console.log('Attempting to delete vehicle with ID:', id);
-      const response = await fetch(`http://31.97.51.101/api/vehicles/${id}`, {
+      const response = await fetch(`${window.API_URL}/api/vehicles/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

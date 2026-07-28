@@ -50,7 +50,7 @@ export const InventoryProvider = ({ children }) => {
       }
 
       // 1. Fetch inventory items
-      const res = await fetch('http://31.97.51.101/api/inventory', {
+      const res = await fetch(window.API_URL + '/api/inventory', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -74,7 +74,7 @@ export const InventoryProvider = ({ children }) => {
       }
 
       // 2. Fetch inventory logs
-      const resLogs = await fetch('http://31.97.51.101/api/inventory/logs', {
+      const resLogs = await fetch(window.API_URL + '/api/inventory/logs', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (resLogs.ok) {
@@ -163,7 +163,7 @@ export const InventoryProvider = ({ children }) => {
     try {
       setInventory((prev) => [...prev, { ...item, id: `INV-${String(prev.length + 1).padStart(3, '0')}` }]);
       if (token) {
-        await fetch('http://31.97.51.101/api/inventory', {
+        await fetch(window.API_URL + '/api/inventory', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -192,7 +192,7 @@ export const InventoryProvider = ({ children }) => {
     try {
       setInventory((prev) => prev.map((item) => (item.id === id ? { ...item, ...updatedItem } : item)));
       if (token) {
-        await fetch(`http://31.97.51.101/api/inventory/${id}`, {
+        await fetch(`${window.API_URL}/api/inventory/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -216,7 +216,7 @@ export const InventoryProvider = ({ children }) => {
     try {
       setInventory((prev) => prev.filter((item) => item.id !== id));
       if (token) {
-        await fetch(`http://31.97.51.101/api/inventory/${id}`, {
+        await fetch(`${window.API_URL}/api/inventory/${id}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`

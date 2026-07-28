@@ -14,7 +14,7 @@ const Complaints = () => {
     setIsLoading(true);
     try {
       const token = sessionStorage.getItem('token');
-      const response = await fetch('http://31.97.51.101/api/complaints', {
+      const response = await fetch(window.API_URL + '/api/complaints', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -40,7 +40,7 @@ const Complaints = () => {
   const updateStatus = async (id, newStatus) => {
     try {
       const token = sessionStorage.getItem('token');
-      const response = await fetch(`http://31.97.51.101/api/complaints/${id}/status`, {
+      const response = await fetch(`${window.API_URL}/api/complaints/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -196,9 +196,9 @@ const Complaints = () => {
                   </td>
                   <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                     {complaint.proof_photo ? (
-                      <a href={`http://31.97.51.101${complaint.proof_photo}`} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
+                      <a href={`${window.API_URL}${complaint.proof_photo}`} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
                         <img
-                          src={`http://31.97.51.101${complaint.proof_photo}`}
+                          src={`${window.API_URL}${complaint.proof_photo}`}
                           alt="Bukti"
                           style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e5e7eb', transition: 'transform 0.2s' }}
                           onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
