@@ -1145,7 +1145,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
               </div>
             </div>
 
-            <div className="payment-summary mb-6 p-4 rounded border border-gray-500" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
+            <div className="payment-summary mb-6 p-4 rounded border border-gray-200" style={{ backgroundColor: '#F3F4F6' }}>
               <div className="summary-row mb-2">
                 <span className="text-secondary">Sub Total</span>
                 <span className="font-mono-num font-semibold">{formatCurrency(rawTotalPrice)}</span>
@@ -1156,18 +1156,18 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                   <select
                     value={paymentState.discountType}
                     onChange={(e) => setPaymentState(prev => ({ ...prev, discountType: e.target.value, discountValue: 0 }))}
-                    style={{ backgroundColor: 'transparent', border: '1px solid #4b5563', borderRadius: '4px', color: '#fff', padding: '2px 4px', fontSize: '12px', outline: 'none' }}
+                    style={{ backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '4px', color: '#171717', padding: '2px 4px', fontSize: '12px', outline: 'none' }}
                   >
                     <option value="nominal" style={{ color: '#000' }}>Rp</option>
                     <option value="persen" style={{ color: '#000' }}>%</option>
                   </select>
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {paymentState.discountType === 'nominal' && <span className="font-mono-num font-semibold text-white">Rp</span>}
+                  {paymentState.discountType === 'nominal' && <span className="font-mono-num font-semibold text-primary">Rp</span>}
                   <input
                     type="text"
-                    className="font-mono-num font-semibold text-white text-right"
-                    style={{ width: paymentState.discountType === 'persen' ? '60px' : '130px', padding: '4px 8px', backgroundColor: 'transparent', border: '1px solid #4b5563', borderRadius: '4px', color: '#ffffff', outline: 'none' }}
+                    className="font-mono-num font-semibold text-primary text-right"
+                    style={{ width: paymentState.discountType === 'persen' ? '60px' : '130px', padding: '4px 8px', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '4px', color: '#171717', outline: 'none' }}
                     value={paymentState.discountValue === 0 ? '' : (paymentState.discountType === 'persen' ? paymentState.discountValue : paymentState.discountValue.toLocaleString('id-ID'))}
                     onChange={(e) => {
                       const rawValue = e.target.value.replace(/\D/g, '');
@@ -1178,7 +1178,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                     }}
                     placeholder="0"
                   />
-                  {paymentState.discountType === 'persen' && <span className="font-mono-num font-semibold text-white">%</span>}
+                  {paymentState.discountType === 'persen' && <span className="font-mono-num font-semibold text-primary">%</span>}
                 </div>
               </div>
               {discountAmount > 0 && (
@@ -1193,18 +1193,18 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                   <span className="font-mono-num font-semibold text-red-500">+ {formatCurrency(taxAmount)}</span>
                 </div>
               )}
-              <div className="summary-row pt-2 border-t border-gray-500">
+              <div className="summary-row pt-2 border-t border-gray-200">
                 <span className="font-semibold">Net Total Tagihan</span>
                 <span className="font-mono-num text-xl font-bold">{formatCurrency(netTotal)}</span>
               </div>
-              <div className="summary-row pt-2 mt-2 border-t border-gray-500" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div className="summary-row pt-2 mt-2 border-t border-gray-200" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span className="font-semibold">Telah Dibayar</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="font-mono-num font-semibold text-white">Rp</span>
+                  <span className="font-mono-num font-semibold text-primary">Rp</span>
                   <input
                     type="text"
-                    className="font-mono-num font-semibold text-white text-right"
-                    style={{ width: '130px', padding: '4px 8px', backgroundColor: 'transparent', border: '1px solid #4b5563', borderRadius: '4px', color: '#ffffff' }}
+                    className="font-mono-num font-semibold text-primary text-right"
+                    style={{ width: '130px', padding: '4px 8px', backgroundColor: '#fff', border: '1px solid #d1d5db', borderRadius: '4px', color: '#171717' }}
                     value={modalPaidAmount === 0 ? '' : modalPaidAmount.toLocaleString('id-ID')}
                     onChange={(e) => {
                       const rawValue = e.target.value.replace(/\D/g, '');

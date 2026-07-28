@@ -107,18 +107,7 @@ select.input-field {
   padding-right: 2.5rem;
 }
 
-.payment-modal {
-  padding: 2rem;
-  max-width: 480px;
-  color: #fff;
-}
 
-.payment-modal h2, 
-.payment-modal label, 
-.payment-modal span:not(.text-red-500):not(.text-green-500):not(.text-green-600), 
-.payment-modal p:not(.text-green-600) {
-  color: #fff !important;
-}
 
 .radio-group {
   display: grid;

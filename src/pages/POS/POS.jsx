@@ -1303,7 +1303,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
               </div>
             </div>
 
-            <div className="payment-summary mb-6 p-4 rounded border border-gray-500" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
+            <div className="payment-summary mb-6 p-4 rounded border border-gray-200" style={{ backgroundColor: '#F3F4F6' }}>
               <div className="summary-row mb-2">
                 <span className="text-secondary">Sub Total</span>
                 <span className="font-mono-num font-semibold">{formatCurrency(totalPrice)}</span>
@@ -1320,11 +1320,11 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                   <span className="font-mono-num font-semibold text-red-500">+ {formatCurrency(taxAmount)}</span>
                 </div>
               )}
-              <div className="summary-row pt-2 border-t border-gray-500">
+              <div className="summary-row pt-2 border-t border-gray-200">
                 <span className="font-semibold">Net Total Tagihan</span>
                 <span className="font-mono-num text-xl font-bold">{formatCurrency(netTotal)}</span>
               </div>
-              <div className="summary-row pt-2 mt-2 border-t border-gray-500">
+              <div className="summary-row pt-2 mt-2 border-t border-gray-200">
                 <span className="font-semibold">Telah Dibayar</span>
                 <span className="font-mono-num font-semibold text-green-500">{formatCurrency(modalPaidAmount)}</span>
               </div>
