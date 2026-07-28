@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Package, Plus, Edit2, Trash2, X, AlertTriangle, Printer, Loader2 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
+import { useOutletContext } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
 import { useAuth } from '../../context/AuthContext';
 import './AdminInventory.css';
 
 const AdminInventory = () => {
   const { user } = useAuth();
-  const userRole = user?.role || 'sales';
+  const outletContext = useOutletContext() || {};
+  const userRole = String(outletContext.userRole || user?.role || '').toLowerCase();
   const { inventory, inventoryLogs, addStock, updateStock, deleteStock, refreshInventoryFromApi } = useInventory();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
