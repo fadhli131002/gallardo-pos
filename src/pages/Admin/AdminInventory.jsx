@@ -9,7 +9,8 @@ import './AdminInventory.css';
 const AdminInventory = () => {
   const { user } = useAuth();
   const outletContext = useOutletContext() || {};
-  const userRole = String(outletContext.userRole || user?.role || '').toLowerCase();
+  const userRole = String(outletContext.userRole || user?.role || '').toLowerCase().trim();
+  const isSuperOrOwner = userRole && ['superadmin', 'super_admin', 'super administrator', 'owner'].includes(userRole);
   const { inventory, inventoryLogs, addStock, updateStock, deleteStock, refreshInventoryFromApi } = useInventory();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -418,7 +419,7 @@ const AdminInventory = () => {
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>JENIS LAYANAN</th>
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>BRAND & SERIES</th>
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>VARIAN / KEGELAPAN</th>
-              {(userRole === 'owner' || userRole === 'superadmin') && (
+              {(isSuperOrOwner) && (
                 <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>HARGA MODAL</th>
               )}
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>STOK TERSEDIA</th>
@@ -444,7 +445,7 @@ const AdminInventory = () => {
                       {item.kategori === 'Kaca Film' && item.kegelapan ? ` (Kegelapan ${item.kegelapan})` : ''}
                     </div>
                   </td>
-                  {(userRole === 'owner' || userRole === 'superadmin') && (
+                  {(isSuperOrOwner) && (
                     <td style={{ padding: '1rem', fontWeight: 600 }}>
                       {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_modal || 0)}
                     </td>
@@ -644,7 +645,7 @@ const AdminInventory = () => {
                     </select>
                   </div>
                   
-                  {(userRole === 'owner' || userRole === 'superadmin') && (
+                  {(isSuperOrOwner) && (
                     <div className="form-group" style={{ gridColumn: 'span 2' }}>
                       <label>Harga Modal (Rp)</label>
                       <input 

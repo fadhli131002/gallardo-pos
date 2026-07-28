@@ -21,6 +21,7 @@ const AdminCustomerWarranty = () => {
   const { user, token } = useAuth();
   const outletContext = useOutletContext() || {};
   const userRole = String(outletContext.userRole || user?.role || '').toLowerCase().trim();
+  const isSuperOrOwner = userRole && ['superadmin', 'super_admin', 'super administrator', 'owner'].includes(userRole);
   console.log('Current userRole in AdminCustomerWarranty:', `"${userRole}"`);
   const userName = user?.name ?? null;
 
@@ -675,7 +676,7 @@ const AdminCustomerWarranty = () => {
 
                           {activeDropdown === order.id && (
                             <div className="dropdown-menu premium-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '50%', transform: 'translateY(-50%)', minWidth: '220px', maxHeight: '350px', overflowY: 'auto', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', borderRadius: '12px', marginRight: '8px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
-                              {(!isPenawaran) && (userRole.includes('superadmin') || userRole.includes('owner') || userRole.includes('admin')) && (
+                              {(!isPenawaran) && isSuperOrOwner && (
                                 <>
                                   <button onClick={() => {
                                     setActiveDropdown(null);
@@ -808,7 +809,7 @@ const AdminCustomerWarranty = () => {
                                     <FileCheck size={16} color="#2563eb" /> Konversi ke Work Order
                                   </button>
 
-                                  {(userRole.includes('superadmin') || userRole.includes('owner') || userRole.includes('admin')) && (
+                                  {isSuperOrOwner && (
                                     <button onClick={() => {
                                       setActiveDropdown(null);
                                       if (window.confirm("Apakah Anda yakin ingin membatalkan penawaran ini?")) {
