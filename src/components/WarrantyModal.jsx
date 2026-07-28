@@ -290,7 +290,6 @@ const WarrantyModal = ({ order, onClose }) => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
