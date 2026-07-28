@@ -31,8 +31,8 @@ const OwnerLayout = () => {
 
   useEffect(() => {
     if (loading) return;
-    // Strict role checking: 'owner' or 'superadmin' allowed
-    if (!user || (user.role !== 'owner' && user.role !== 'superadmin')) {
+    // Strict role checking: only 'owner' allowed
+    if (!user || user.role !== 'owner') {
       navigate('/login');
     }
     const branch = sessionStorage.getItem('userBranch') || 'Global';

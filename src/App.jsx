@@ -44,9 +44,9 @@ const DashboardEntry = () => {
 
   const userRole = user.role || 'sales';
 
-  if (userRole === 'admin') {
+  if (userRole === 'admin' || userRole === 'superadmin') {
     return <Navigate to="/admin/workspace" replace />;
-  } else if (userRole === 'owner' || userRole === 'superadmin') {
+  } else if (userRole === 'owner') {
     return <Navigate to="/owner-portal/dashboard" replace />;
   } else if (userRole === 'finance') {
     return <Navigate to="/finance/dashboard" replace />;
