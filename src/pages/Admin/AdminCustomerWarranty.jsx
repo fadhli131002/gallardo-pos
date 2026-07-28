@@ -723,7 +723,7 @@ const AdminCustomerWarranty = () => {
                         <div className="dropdown-menu premium-card animate-popover" style={{ position: 'absolute', right: '0', top: 'calc(100% + 8px)', minWidth: '240px', zIndex: 999, padding: '8px', display: 'flex', flexDirection: 'column', textAlign: 'left', borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
                           
                           {/* Standard Actions */}
-                          {remaining > 0 && userRole === 'sales' && (
+                          {remaining > 0 && (userRole === 'sales' || isRetailOrder) && (
                             <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setSettlementOrder({ ...order, computedRemaining: remaining }); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#f59e0b', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef3c7'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                               <CreditCard size={16} color="#f59e0b" /> Pelunasan Pembayaran
                             </button>
