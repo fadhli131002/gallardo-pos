@@ -1117,7 +1117,7 @@ const AdminCustomerWarranty = () => {
               const cleanSisa = Number(sisaRaw.toString().replace(/\D/g, ''));
 
               try {
-                const response = await fetch(`${API_URL}/api/transactions/${manualPaymentOrder.id}/payment-status-manual`, {
+                const response = await fetch(`http://31.97.51.101/api/transactions/${manualPaymentOrder.id}/payment-status-manual`, {
                   method: 'PUT',
                   headers: {
                     'Content-Type': 'application/json',
