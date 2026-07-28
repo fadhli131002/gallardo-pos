@@ -456,7 +456,14 @@ const AdminCustomerWarranty = () => {
                 const statusBg = isPenawaran ? '#fff7ed' : (isRetailOrder ? '#f0fdf4' : (activeMaintenance ? '#fefce8' : (order.status === 'Selesai' ? '#f0fdf4' : '#f8fafc')));
                 const statusColor = isPenawaran ? '#f97316' : (isRetailOrder ? '#15803d' : (activeMaintenance ? '#b45309' : (order.status === 'Selesai' ? '#15803d' : '#475569')));
                 const statusBorder = isPenawaran ? '#fdba74' : (isRetailOrder ? '#86efac' : (activeMaintenance ? '#fde047' : (order.status === 'Selesai' ? '#86efac' : '#e2e8f0')));
-                const remaining = order.remainingAmount !== undefined ? order.remainingAmount : (order.totalPrice - (order.paidAmount || order.dpAmount || 0));
+                const isLunas = (order.paymentType || order.paymentStatus || '').toUpperCase() === 'LUNAS';
+                let remaining = order.remainingAmount !== undefined ? order.remainingAmount : (order.totalPrice - (order.paidAmount || order.dpAmount || 0));
+                
+                if (!isLunas && remaining <= 0) {
+                    remaining = Math.max(0, order.totalPrice - ((order.paymentHistory || []).reduce((sum, p) => sum + p.amount, 0) || order.paidAmount || order.dpAmount || 0));
+                    if (remaining <= 0) remaining = order.totalPrice;
+                }
+                if (isLunas) remaining = 0;
 
                 return (
                   <div key={order.id} className="premium-card" style={{ 
@@ -585,14 +592,11 @@ const AdminCustomerWarranty = () => {
                           </div>
                           {true && (
                             (() => {
-                              const isLunas = (order.paymentType || order.paymentStatus || '').toUpperCase() === 'LUNAS';
-                              const sisaTagihan = isLunas ? 0 : (order.remainingAmount !== undefined ? order.remainingAmount : Math.max(0, order.totalPrice - ((order.paymentHistory || []).reduce((sum, p) => sum + p.amount, 0) || order.paidAmount || 0)));
-
-                              if (sisaTagihan > 0) {
+                              if (remaining > 0) {
                                 return (
                                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed #e5e7eb', fontWeight: 'bold', color: '#ef4444' }}>
                                     <span>Sisa Tagihan</span>
-                                    <span>{formatCurrency(sisaTagihan)}</span>
+                                    <span>{formatCurrency(remaining)}</span>
                                   </div>
                                 );
                               }
