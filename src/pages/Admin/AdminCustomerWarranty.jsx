@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useOrders } from '../../context/OrderContext';
 import { format, addYears } from 'date-fns';
-import { Shield, ShieldAlert, X, Search, Printer, MessageCircle, Loader2, MoreVertical, FileText, Wrench, Download, CreditCard, Upload, CheckCircle, UserPen, FileCheck, Trash2, Save } from 'lucide-react';
+import { Shield, ShieldAlert, X, Search, Printer, MessageCircle, Loader2, MoreVertical, FileText, Wrench, Download, CreditCard, Upload, CheckCircle, UserPen, FileCheck, Trash2, Save, Calendar, MapPin, User, Phone } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import * as XLSX from 'xlsx';
 import { toast } from 'sonner';
@@ -422,415 +422,441 @@ const AdminCustomerWarranty = () => {
               />
             </div>
           </div>
-          <div className="table-responsive" style={{ overflow: 'visible' }}>
-            <table className="customers-table" onClick={() => setActiveDropdown(null)}>
-              <thead>
-                <tr>
-                  {filterTransactionType === 'Retail (Grosir)' && (
-                    <th className="font-sans" style={{ width: '40px', textAlign: 'center' }}>
-                      <input
-                        type="checkbox"
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedRows(filteredOrders.filter(o => o.type === 'RETAIL').map(o => o.id));
-                          } else {
-                            setSelectedRows([]);
-                          }
-                        }}
-                        checked={selectedRows.length > 0 && selectedRows.length === filteredOrders.filter(o => o.type === 'RETAIL').length}
-                        style={{ cursor: 'pointer' }}
-                      />
-                    </th>
-                  )}
-                  <th className="font-sans">POS No & Tgl</th>
-                  <th className="font-sans">Produk</th>
-                  <th className="font-sans">Total</th>
-                  <th className="font-sans">Mobil</th>
-                  <th className="font-sans">Customer</th>
-                  <th className="font-sans text-center print:hidden">Act</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={filterTransactionType === 'Retail (Grosir)' ? "7" : "6"} className="text-center text-tertiary py-4">Belum ada data customer</td>
-                  </tr>
-                ) : (
-                  filteredOrders.map((order) => {
-                    const isRetailOrder = order.type === 'RETAIL';
-                    const activeMaintenance = (order.historyMaintenance || []).find(h => h.workStatus === 'Proses' || h.workStatus === 'Aktif');
-                    const isPenawaran = order.billType === 'Penawaran' || order.salesCategory === 'Penawaran';
+          <div className="orders-list-container font-sans" style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '0 1.5rem 1.5rem 1.5rem' }} onClick={() => setActiveDropdown(null)}>
+            {filterTransactionType === 'Retail (Grosir)' && (
+              <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <input
+                  type="checkbox"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedRows(filteredOrders.filter(o => o.type === 'RETAIL').map(o => o.id));
+                    } else {
+                      setSelectedRows([]);
+                    }
+                  }}
+                  checked={selectedRows.length > 0 && selectedRows.length === filteredOrders.filter(o => o.type === 'RETAIL').length}
+                  style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#10b981' }}
+                  id="selectAllRetail"
+                />
+                <label htmlFor="selectAllRetail" className="text-sm font-semibold text-secondary cursor-pointer">Pilih Semua Transaksi Retail</label>
+              </div>
+            )}
 
-                    const displayStatus = isPenawaran ? 'Penawaran' : (isRetailOrder ? 'Selesai' : (activeMaintenance ? 'Maintenance (Proses)' : (order.status === 'Selesai' ? 'Selesai' : 'Proses')));
-                    const statusBg = isPenawaran ? '#f97316' : (isRetailOrder ? '#d1fae5' : (activeMaintenance ? '#fef3c7' : (order.status === 'Selesai' ? '#d1fae5' : '#f3f4f6')));
-                    const statusColor = isPenawaran ? '#ffffff' : (isRetailOrder ? '#059669' : (activeMaintenance ? '#d97706' : (order.status === 'Selesai' ? '#059669' : '#4b5563')));
-                    const statusBorder = isPenawaran ? '#f97316' : (isRetailOrder ? '#34d399' : (activeMaintenance ? '#fcd34d' : (order.status === 'Selesai' ? '#34d399' : '#e5e7eb')));
-                    const remaining = order.remainingAmount !== undefined ? order.remainingAmount : (order.totalPrice - (order.paidAmount || order.dpAmount || 0));
+            {filteredOrders.length === 0 ? (
+              <div className="premium-card text-center text-tertiary" style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e5e7eb', padding: '48px 24px', fontSize: '14px', fontWeight: '500' }}>
+                Belum ada data customer
+              </div>
+            ) : (
+              filteredOrders.map((order) => {
+                const isRetailOrder = order.type === 'RETAIL';
+                const activeMaintenance = (order.historyMaintenance || []).find(h => h.workStatus === 'Proses' || h.workStatus === 'Aktif');
+                const isPenawaran = order.billType === 'Penawaran' || order.salesCategory === 'Penawaran';
 
-                    return (
-                      <tr key={order.id} style={{ verticalAlign: 'top', backgroundColor: selectedRows.includes(order.id) ? '#f0fdf4' : 'transparent' }}>
-                        {filterTransactionType === 'Retail (Grosir)' && (
-                          <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                            {isRetailOrder && (
-                              <input
-                                type="checkbox"
-                                checked={selectedRows.includes(order.id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedRows(prev => [...prev, order.id]);
-                                  } else {
-                                    setSelectedRows(prev => prev.filter(id => id !== order.id));
-                                  }
-                                }}
-                                style={{ cursor: 'pointer' }}
-                              />
-                            )}
-                          </td>
+                const displayStatus = isPenawaran ? 'Penawaran' : (isRetailOrder ? 'Selesai' : (activeMaintenance ? 'Maintenance (Proses)' : (order.status === 'Selesai' ? 'Selesai' : 'Proses')));
+                const statusBg = isPenawaran ? '#fff7ed' : (isRetailOrder ? '#f0fdf4' : (activeMaintenance ? '#fefce8' : (order.status === 'Selesai' ? '#f0fdf4' : '#f8fafc')));
+                const statusColor = isPenawaran ? '#f97316' : (isRetailOrder ? '#15803d' : (activeMaintenance ? '#b45309' : (order.status === 'Selesai' ? '#15803d' : '#475569')));
+                const statusBorder = isPenawaran ? '#fdba74' : (isRetailOrder ? '#86efac' : (activeMaintenance ? '#fde047' : (order.status === 'Selesai' ? '#86efac' : '#e2e8f0')));
+                const remaining = order.remainingAmount !== undefined ? order.remainingAmount : (order.totalPrice - (order.paidAmount || order.dpAmount || 0));
+
+                return (
+                  <div key={order.id} className="premium-card" style={{ 
+                    backgroundColor: selectedRows.includes(order.id) ? '#f0fdf4' : '#ffffff', 
+                    border: selectedRows.includes(order.id) ? '1px solid #86efac' : '1px solid #e5e7eb', 
+                    borderRadius: '12px', 
+                    padding: '24px', 
+                    display: 'grid', 
+                    gridTemplateColumns: 'minmax(200px, 1.5fr) minmax(280px, 3fr) minmax(250px, 2fr) auto', 
+                    gap: '24px', 
+                    alignItems: 'start', 
+                    position: 'relative', 
+                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
+                    transition: 'all 0.2s'
+                  }}>
+                    
+                    {/* COL 1: POS & Status */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        {filterTransactionType === 'Retail (Grosir)' && isRetailOrder && (
+                          <input
+                            type="checkbox"
+                            checked={selectedRows.includes(order.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedRows(prev => [...prev, order.id]);
+                              } else {
+                                setSelectedRows(prev => prev.filter(id => id !== order.id));
+                              }
+                            }}
+                            style={{ cursor: 'pointer', width: '16px', height: '16px', marginRight: '4px', accentColor: '#10b981' }}
+                          />
                         )}
-                        {/* POS NO & TGL */}
-                        <td style={{ minWidth: '160px' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <span className="badge inline-block self-start" style={{
-                              fontSize: '10px',
-                              padding: '2px 6px',
-                              alignSelf: 'flex-start',
-                              fontWeight: 'bold',
-                              backgroundColor: order.paymentType === 'Lunas' ? '#10b981' : (order.paymentType === 'DP 50%' || order.paidAmount > 0) ? '#f59e0b' : '#ef4444',
-                              color: 'white',
-                              border: 'none'
-                            }}>
-                              {order.paymentType === 'Lunas' ? 'LUNAS' : (order.paymentType === 'DP 50%' || order.paidAmount > 0) ? 'DP / SEBAGIAN' : 'BELUM BAYAR'}
-                            </span>
-                            <div className="text-xs text-secondary font-mono-ui">{format(new Date(order.date), 'dd-MM-yyyy')}</div>
-                            <div className="text-xs font-semibold text-tertiary" style={{ textTransform: 'uppercase' }}>{order.location || 'GALLARDO'}</div>
-                            <div className="text-sm font-bold text-primary mt-1">{order.id.replace('ORD-', 'WRK/300260700')}</div>
-                            <span className="badge inline-block mt-1" style={{
-                              fontSize: '10px',
-                              padding: '2px 6px',
-                              backgroundColor: statusBg,
-                              color: statusColor,
-                              border: '1px solid',
-                              borderColor: statusBorder,
-                              alignSelf: 'flex-start',
-                              fontWeight: 'bold'
-                            }}>
-                              {displayStatus}
-                            </span>
-                          </div>
-                        </td>
+                        <span className="badge" style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', fontWeight: 'bold', backgroundColor: order.paymentType === 'Lunas' ? '#10b981' : (order.paymentType === 'DP 50%' || order.paidAmount > 0) ? '#f59e0b' : '#ef4444', color: 'white', border: 'none' }}>
+                          {order.paymentType === 'Lunas' ? 'LUNAS' : (order.paymentType === 'DP 50%' || order.paidAmount > 0) ? 'DP / SEBAGIAN' : 'BELUM BAYAR'}
+                        </span>
+                        <span className="badge" style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', backgroundColor: statusBg, color: statusColor, border: `1px solid ${statusBorder}`, fontWeight: 'bold' }}>
+                          {displayStatus}
+                        </span>
+                      </div>
+                      
+                      <div style={{ marginTop: '8px' }}>
+                        <div className="text-sm font-bold text-primary" style={{ letterSpacing: '0.025em' }}>{order.id.replace('ORD-', 'WRK/300260700')}</div>
+                        <div className="text-xs text-secondary font-mono-ui mt-1" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Calendar size={12} color="#9ca3af" />
+                          {format(new Date(order.date), 'dd MMM yyyy')}
+                        </div>
+                        <div className="text-xs font-semibold text-tertiary mt-2" style={{ display: 'flex', alignItems: 'center', gap: '6px', textTransform: 'uppercase' }}>
+                          <MapPin size={12} color="#9ca3af" />
+                          {order.location || 'GALLARDO'}
+                        </div>
+                      </div>
+                    </div>
 
-                        {/* PRODUK */}
-                        <td style={{ minWidth: '220px' }}>
-                          {order.items && order.items.length > 0 ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                              {(expandedRows.includes(order.id) ? order.items : order.items.slice(0, 1)).map((item, idx) => (
-                                <div key={idx} style={{ marginBottom: expandedRows.includes(order.id) ? '8px' : '0' }}>
-                                  <div className="text-sm font-bold leading-tight text-primary">{item.name} (x{item.qty || 1})</div>
-                                  <div className="text-xs text-secondary font-mono-ui mt-1" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                    <span>@{formatCurrency(item.originalPrice || item.finalPrice || item.price || 0)}</span>
-                                    {(item.originalPrice && item.finalPrice && item.originalPrice !== item.finalPrice) ? (
-                                      <span>- Disc {formatCurrency(item.originalPrice - item.finalPrice)}</span>
-                                    ) : null}
-                                    <span style={{ borderTop: '1px dashed #d1d5db', paddingTop: '2px', marginTop: '2px' }}>= {formatCurrency((item.finalPrice || item.price || 0) * (item.qty || 1))}</span>
-                                  </div>
+                    {/* COL 2: Products & Total Pricing */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      {order.items && order.items.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          {(expandedRows.includes(order.id) ? order.items : order.items.slice(0, 1)).map((item, idx) => (
+                            <div key={idx} style={{ paddingBottom: expandedRows.includes(order.id) && idx < order.items.length - 1 ? '12px' : '0', borderBottom: expandedRows.includes(order.id) && idx < order.items.length - 1 ? '1px dashed #e5e7eb' : 'none' }}>
+                              <div className="text-sm font-bold text-primary">{item.name} <span style={{ color: '#6b7280', fontWeight: 'normal' }}>(x{item.qty || 1})</span></div>
+                              <div className="text-xs text-secondary font-mono-ui mt-2" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                  <span>Harga Satuan</span>
+                                  <span>{formatCurrency(item.originalPrice || item.finalPrice || item.price || 0)}</span>
                                 </div>
-                              ))}
-                              {order.items.length > 1 && (
-                                <button
-                                  onClick={() => toggleExpand(order.id)}
-                                  style={{ fontSize: '11px', color: '#2563eb', fontWeight: '500', marginTop: '4px', textAlign: 'left', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
-                                >
-                                  {expandedRows.includes(order.id) ? 'Lebih sedikit..' : 'Selengkapnya..'}
-                                </button>
-                              )}
-                            </div>
-                          ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                              <div className="text-sm font-bold leading-tight text-primary">{order.service}</div>
-                              <div className="text-xs text-secondary font-mono-ui mt-1" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                <span>@{(order.totalPrice * 1.3).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
-                                <span>- Disc {(order.totalPrice * 0.3).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
-                                <span style={{ borderTop: '1px dashed #d1d5db', paddingTop: '2px', marginTop: '2px' }}>= {formatCurrency(order.totalPrice)}</span>
+                                {(item.originalPrice && item.finalPrice && item.originalPrice !== item.finalPrice) ? (
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ef4444' }}>
+                                    <span>Diskon</span>
+                                    <span>- {formatCurrency(item.originalPrice - item.finalPrice)}</span>
+                                  </div>
+                                ) : null}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f3f4f6', paddingTop: '4px', marginTop: '2px', fontWeight: '600', color: '#111827' }}>
+                                  <span>Total Item</span>
+                                  <span>{formatCurrency((item.finalPrice || item.price || 0) * (item.qty || 1))}</span>
+                                </div>
                               </div>
                             </div>
+                          ))}
+                          {order.items.length > 1 && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); toggleExpand(order.id); }}
+                              style={{ fontSize: '11px', color: '#2563eb', fontWeight: '600', textAlign: 'left', background: 'transparent', border: 'none', padding: '4px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', transition: 'color 0.2s' }}
+                              onMouseOver={e => e.currentTarget.style.color = '#1d4ed8'}
+                              onMouseOut={e => e.currentTarget.style.color = '#2563eb'}
+                            >
+                              {expandedRows.includes(order.id) ? 'Sembunyikan produk' : `Lihat ${order.items.length - 1} produk lainnya`}
+                            </button>
                           )}
-                        </td>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div className="text-sm font-bold text-primary">{order.service}</div>
+                          <div className="text-xs text-secondary font-mono-ui mt-2" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span>Harga Satuan</span>
+                              <span>{(order.totalPrice * 1.3).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ef4444' }}>
+                              <span>Diskon</span>
+                              <span>- {(order.totalPrice * 0.3).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f3f4f6', paddingTop: '4px', marginTop: '2px', fontWeight: '600', color: '#111827' }}>
+                              <span>Total Item</span>
+                              <span>{formatCurrency(order.totalPrice)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
-                        {/* TOTAL */}
-                        <td style={{ minWidth: '180px' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '12px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                              <span className="text-secondary">Subtotal</span>
-                              <span style={{ fontWeight: '500' }}>{formatCurrency(order.totalPrice)}</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                              <span className="text-secondary">PPN</span>
-                              <span style={{ fontWeight: '500' }}>Rp 0</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                              <span className="text-secondary">Pembulatan</span>
-                              <span style={{ fontWeight: '500' }}>Rp 0</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #e5e7eb' }}>
-                              <span className="font-bold text-primary">Grandtotal</span>
-                              <span className="font-bold text-primary">{formatCurrency(order.totalPrice)}</span>
-                            </div>
-                            {isRetailOrder && (
-                              (() => {
-                                const isLunas = (order.paymentType || order.paymentStatus || '').toUpperCase() === 'LUNAS';
-                                const sisaTagihan = isLunas
-                                  ? 0
-                                  : (order.remainingAmount !== undefined
-                                    ? order.remainingAmount
-                                    : Math.max(0, order.totalPrice - ((order.paymentHistory || []).reduce((sum, p) => sum + p.amount, 0) || order.paidAmount || 0)));
+                      {/* Order Total Summary */}
+                      <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#4b5563' }}>
+                            <span>Subtotal</span>
+                            <span>{formatCurrency(order.totalPrice)}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#4b5563' }}>
+                            <span>PPN & Pembulatan</span>
+                            <span>Rp 0</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #e5e7eb', fontWeight: 'bold' }}>
+                            <span className="text-primary">Grandtotal</span>
+                            <span className="text-primary">{formatCurrency(order.totalPrice)}</span>
+                          </div>
+                          {isRetailOrder && (
+                            (() => {
+                              const isLunas = (order.paymentType || order.paymentStatus || '').toUpperCase() === 'LUNAS';
+                              const sisaTagihan = isLunas ? 0 : (order.remainingAmount !== undefined ? order.remainingAmount : Math.max(0, order.totalPrice - ((order.paymentHistory || []).reduce((sum, p) => sum + p.amount, 0) || order.paidAmount || 0)));
 
+                              if (sisaTagihan > 0) {
                                 return (
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #e5e7eb' }}>
-                                    <span className="font-bold" style={{ color: sisaTagihan > 0 ? '#ef4444' : '#10b981' }}>Sisa Tagihan</span>
-                                    <span className="font-bold" style={{ color: sisaTagihan > 0 ? '#ef4444' : '#10b981' }}>{formatCurrency(sisaTagihan)}</span>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed #e5e7eb', fontWeight: 'bold', color: '#ef4444' }}>
+                                    <span>Sisa Tagihan</span>
+                                    <span>{formatCurrency(sisaTagihan)}</span>
                                   </div>
                                 );
-                              })()
-                            )}
-                            <span className="badge inline-block mt-2" style={{ fontSize: '10px', padding: '2px 6px', backgroundColor: '#e0e7ff', color: '#4338ca', border: '1px solid #c7d2fe', alignSelf: 'flex-start' }}>
-                              {order.billType || 'Tagihan Individu'}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* MOBIL */}
-                        <td style={{ minWidth: '200px' }}>
-                          {isRetailOrder ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                              <span className="badge inline-block" style={{ backgroundColor: '#f3e8ff', color: '#7e22ce', border: '1px solid #d8b4fe', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', alignSelf: 'flex-start' }}>Transaksi Retail / B2B</span>
-                              <div className="text-sm font-semibold text-primary">Pembelian Grosir / Non-Kendaraan</div>
-                              {order.notes && (
-                                <div className="text-xs text-secondary mt-1" style={{ fontStyle: 'italic' }}>{order.notes}</div>
-                              )}
-                            </div>
-                          ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                              <div className="text-sm font-semibold text-primary">{order.carBrand} {order.carModel}</div>
-                              <div className="text-xs font-mono-ui inline-block" style={{ padding: '2px 6px', border: '1px solid #e5e7eb', borderRadius: '4px', backgroundColor: '#f9fafb', alignSelf: 'flex-start' }}>
-                                {order.plateNumber}
-                              </div>
-                              <div className="text-sm font-bold text-black mt-1">{order.chassisNumber !== '-' ? order.chassisNumber : 'N/A'}</div>
-                              <div className="text-xs text-secondary mt-1">
-                                Event : <span style={{ fontWeight: '500' }}>{order.spgName || 'SALES INTERNAL'}</span>
-                              </div>
-                              <div className="text-xs mt-1">
-                                Status Pasang : <span style={{
-                                  fontWeight: 'bold',
-                                  backgroundColor: (() => {
-                                    const activeMaintenance = (order.historyMaintenance || []).find(h => h.status === 'Aktif' || h.status === 'OPEN' || h.status === 'Proses');
-                                    const displayStatus = activeMaintenance ? 'OPEN' : (order.status === 'Aktif' ? 'OPEN' : order.status);
-                                    return displayStatus === 'Selesai' ? '#ecfdf5' : '#eff6ff';
-                                  })(),
-                                  color: (() => {
-                                    const activeMaintenance = (order.historyMaintenance || []).find(h => h.status === 'Aktif' || h.status === 'OPEN' || h.status === 'Proses');
-                                    const displayStatus = activeMaintenance ? 'OPEN' : (order.status === 'Aktif' ? 'OPEN' : order.status);
-                                    return displayStatus === 'Selesai' ? '#059669' : '#1d4ed8';
-                                  })(),
-                                  padding: '2px 6px',
-                                  borderRadius: '4px',
-                                  border: '1px solid',
-                                  borderColor: (() => {
-                                    const activeMaintenance = (order.historyMaintenance || []).find(h => h.status === 'Aktif' || h.status === 'OPEN' || h.status === 'Proses');
-                                    const displayStatus = activeMaintenance ? 'OPEN' : (order.status === 'Aktif' ? 'OPEN' : order.status);
-                                    return displayStatus === 'Selesai' ? '#d1fae5' : '#bfdbfe';
-                                  })()
-                                }}>{(() => {
-                                  const activeMaintenance = (order.historyMaintenance || []).find(h => h.status === 'Aktif' || h.status === 'OPEN' || h.status === 'Proses');
-                                  if (activeMaintenance) return 'Maintenance (OPEN)';
-                                  return order.status === 'Aktif' ? 'OPEN' : order.status;
-                                })()}</span>
-                              </div>
-                            </div>
+                              }
+                              return null;
+                            })()
                           )}
-                        </td>
+                          <span className="badge inline-block mt-2" style={{ fontSize: '10px', padding: '2px 6px', backgroundColor: '#e0e7ff', color: '#4338ca', border: '1px solid #c7d2fe', alignSelf: 'flex-start', borderRadius: '4px' }}>
+                            {order.billType || 'Tagihan Individu'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
 
-                        {/* CUSTOMER & ACT */}
-                        <td style={{ minWidth: '160px' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <div className="font-bold text-sm text-primary">{isRetailOrder ? (order.customerName || order.supplierName) : order.customerName}</div>
-                            <div className="text-xs text-secondary font-mono-ui flex items-center gap-1" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#25D366' }}></span>
-                              {order.customerHp || '-'}
+                    {/* COL 3: Vehicle & Customer */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      {isRetailOrder ? (
+                        <div>
+                          <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-2" style={{ letterSpacing: '0.05em' }}>Informasi Pembelian</div>
+                          <span className="badge" style={{ backgroundColor: '#f3e8ff', color: '#7e22ce', border: '1px solid #d8b4fe', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', display: 'inline-block', marginBottom: '8px' }}>Transaksi Retail / B2B</span>
+                          <div className="text-sm font-semibold text-primary">Grosir / Non-Kendaraan</div>
+                          {order.notes && (
+                            <div className="text-xs text-secondary mt-2" style={{ fontStyle: 'italic', backgroundColor: '#f9fafb', padding: '8px', borderRadius: '6px' }}>{order.notes}</div>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-2" style={{ letterSpacing: '0.05em' }}>Informasi Kendaraan</div>
+                          <div className="text-sm font-bold text-primary">{order.carBrand} {order.carModel}</div>
+                          
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                            <div className="text-xs font-mono-ui font-bold" style={{ padding: '4px 8px', border: '1px solid #d1d5db', borderRadius: '6px', backgroundColor: '#ffffff', color: '#111827', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                              {order.plateNumber}
                             </div>
-                            {isRetailOrder && order.customerAddress && (
-                              <div className="text-xs text-secondary mt-1 max-w-[200px]" style={{ lineHeight: '1.4', wordBreak: 'break-word' }}>
-                                {order.customerAddress}
-                              </div>
-                            )}
+                            <div className="text-xs font-semibold text-secondary" style={{ padding: '4px 8px', backgroundColor: '#f3f4f6', borderRadius: '6px' }}>
+                              VIN: {order.chassisNumber !== '-' ? order.chassisNumber : 'N/A'}
+                            </div>
                           </div>
-                        </td>
 
-                        <td className="text-center print:hidden" style={{ position: 'relative', verticalAlign: 'middle' }}>
-                          <button
-                            className="btn-icon mx-auto"
-                            onClick={(e) => { e.stopPropagation(); setActiveDropdown(prev => prev === order.id ? null : order.id); }}
-                            style={{ padding: '8px', borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: '#ffffff' }}
-                          >
-                            <MoreVertical size={18} />
+                          <div className="text-xs mt-4" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <User size={14} color="#6b7280" />
+                              <span className="text-secondary">Sales/PIC:</span>
+                              <span style={{ fontWeight: '600', color: '#111827' }}>{order.spgName || 'SALES INTERNAL'}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Wrench size={14} color="#6b7280" />
+                              <span className="text-secondary">Pengerjaan:</span>
+                              <span style={{
+                                fontWeight: 'bold',
+                                backgroundColor: (() => {
+                                  const activeMaintenance = (order.historyMaintenance || []).find(h => h.status === 'Aktif' || h.status === 'OPEN' || h.status === 'Proses');
+                                  const displayStatus = activeMaintenance ? 'OPEN' : (order.status === 'Aktif' ? 'OPEN' : order.status);
+                                  return displayStatus === 'Selesai' ? '#ecfdf5' : '#eff6ff';
+                                })(),
+                                color: (() => {
+                                  const activeMaintenance = (order.historyMaintenance || []).find(h => h.status === 'Aktif' || h.status === 'OPEN' || h.status === 'Proses');
+                                  const displayStatus = activeMaintenance ? 'OPEN' : (order.status === 'Aktif' ? 'OPEN' : order.status);
+                                  return displayStatus === 'Selesai' ? '#059669' : '#1d4ed8';
+                                })(),
+                                padding: '2px 8px',
+                                borderRadius: '6px'
+                              }}>{(() => {
+                                const activeMaintenance = (order.historyMaintenance || []).find(h => h.status === 'Aktif' || h.status === 'OPEN' || h.status === 'Proses');
+                                if (activeMaintenance) return 'Maintenance (OPEN)';
+                                return order.status === 'Aktif' ? 'OPEN' : order.status;
+                              })()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div style={{ paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
+                        <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-2" style={{ letterSpacing: '0.05em' }}>Informasi Customer</div>
+                        <div className="font-bold text-sm text-primary mb-1">{isRetailOrder ? (order.customerName || order.supplierName) : order.customerName}</div>
+                        <div className="text-xs text-secondary font-mono-ui" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: order.customerAddress ? '6px' : '0' }}>
+                          <Phone size={12} color="#25D366" />
+                          {order.customerHp || '-'}
+                        </div>
+                        {order.customerAddress && (
+                          <div className="text-xs text-secondary" style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: '1.4' }}>
+                            <MapPin size={12} color="#9ca3af" style={{ flexShrink: 0, marginTop: '2px' }} />
+                            <span>{order.customerAddress}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* COL 4: Action Menu */}
+                    <div className="print:hidden" style={{ position: 'relative', display: 'flex', justifyContent: 'flex-end' }}>
+                      <button
+                        className="btn-icon"
+                        onClick={(e) => { e.stopPropagation(); setActiveDropdown(prev => prev === order.id ? null : order.id); }}
+                        style={{ padding: '8px', borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4b5563', transition: 'all 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
+                        onMouseOver={e => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                        onMouseOut={e => e.currentTarget.style.backgroundColor = '#ffffff'}
+                      >
+                        <MoreVertical size={20} />
+                      </button>
+
+                      {activeDropdown === order.id && (
+                        <div className="dropdown-menu premium-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '0', minWidth: '240px', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', textAlign: 'left', borderRadius: '12px', marginRight: '8px', border: '1px solid #e5e7eb', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
+                          
+                          {/* Standard Actions */}
+                          {remaining > 0 && (userRole === 'sales' || userRole === 'sales_team' || isRetailOrder) && (
+                            <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setSettlementOrder({ ...order, computedRemaining: remaining }); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#f59e0b', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef3c7'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                              <CreditCard size={16} color="#f59e0b" /> Pelunasan Pembayaran
+                            </button>
+                          )}
+
+                          <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setIsGeneratingPDF(true); setInvoiceOrder(order); setTimeout(() => handleDownloadInvoiceClick(), 500); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                            <Printer size={16} color="#4b5563" /> Cetak Invoice
                           </button>
 
-                          {activeDropdown === order.id && (
-                            <div className="dropdown-menu premium-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '50%', transform: 'translateY(-50%)', minWidth: '220px', maxHeight: '350px', overflowY: 'auto', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', borderRadius: '12px', marginRight: '8px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
-                              {(!isPenawaran) && isSuperOrOwner && (
-                                <>
-                                  <button onClick={() => {
-                                    setActiveDropdown(null);
-                                    setManualPaymentOrder(order);
-                                    setShowManualPaymentModal(true);
-                                  }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#10b981', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#ecfdf5'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                    <CreditCard size={16} color="#10b981" /> Ubah Status Pembayaran
-                                  </button>
-                                  <button onClick={() => {
-                                    setActiveDropdown(null);
-                                    setDeleteRetailOrder(order);
-                                    setDeleteConfirmText('');
-                                    setShowDeleteRetailModal(true);
-                                  }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#ef4444', transition: 'all 0.2s', marginBottom: '8px', borderBottom: '1px solid #f3f4f6' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef2f2'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                    <Trash2 size={16} color="#ef4444" /> Hapus Data Transaksi
-                                  </button>
-                                </>
-                              )}
-
-                              <button onClick={() => { setActiveDropdown(null); setIsGeneratingPDF(true); setInvoiceOrder(order); setTimeout(() => handleDownloadInvoiceClick(), 500); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                <Printer size={16} color="#4b5563" /> Cetak Invoice
-                              </button>
-
-                              <button onClick={() => {
-                                setActiveDropdown(null);
-                                setEditCustomerData({
-                                  id: order.id,
-                                  customerName: order.customerName || '',
-                                  customerHp: order.customerHp || '',
-                                  customerEmail: order.customerEmail || '',
-                                  customerAddress: order.customerAddress || '',
-                                  customerCity: order.customerCity || '',
-                                  customerProvince: order.customerProvince || '',
-                                  customerZip: order.customerZip || '',
-                                  carColor: order.carColor || '',
-                                  plateNumber: order.plateNumber || '',
-                                  chassisNumber: order.chassisNumber || '',
-                                  engineNumber: order.engineNumber || '',
-                                  installationDate: order.installationDate || '',
-                                  installationTime: order.installationTime || '',
-                                  notes: order.notes || ''
-                                });
-                                setShowEditCustomerModal(true);
-                              }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                <UserPen size={16} color="#4b5563" /> Edit Data Customer
-                              </button>
-
-                              <button onClick={() => {
-                                setActiveDropdown(null);
-                                setComplaintOrderData(order);
-                                setShowComplaintModal(true);
-                              }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                <ShieldAlert size={16} color="#4b5563" /> Catat Komplain
-                              </button>
-
-                              {!isPenawaran && (
-                                <>
-                                  {!isRetailOrder && (
-                                    <button
-                                      onClick={() => {
-                                        if (order.paymentType !== 'Lunas') {
-                                          toast.error('Tidak dapat membuka garansi. Customer belum melakukan pelunasan.');
-                                          return;
-                                        }
-                                        setActiveDropdown(null);
-                                        setSelectedOrder(order);
-                                      }}
-                                      style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: order.paymentType !== 'Lunas' ? 'not-allowed' : 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s', opacity: order.paymentType !== 'Lunas' ? 0.5 : 1 }}
-                                      onMouseOver={e => { if (order.paymentType === 'Lunas') e.currentTarget.style.backgroundColor = '#f3f4f6' }}
-                                      onMouseOut={e => { if (order.paymentType === 'Lunas') e.currentTarget.style.backgroundColor = 'transparent' }}
-                                    >
-                                      <Shield size={16} color={order.paymentType !== 'Lunas' ? "#9ca3af" : "#10b981"} /> Download Garansi
-                                    </button>
-                                  )}
-
-                                  {!isRetailOrder && (
-                                    <button onClick={() => { setActiveDropdown(null); setHistoryOrder(order); setShowHistoryModal(true); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                      <Wrench size={16} color="#4b5563" /> History Maintenance
-                                    </button>
-                                  )}
-
-                                  {(order.status !== 'Selesai' || activeMaintenance) && !isRetailOrder && (
-                                    <button onClick={() => {
-                                      setActiveDropdown(null);
-
-                                      const orderToComplete = activeMaintenance || order;
-                                      const deductResult = processInventoryDeduction(orderToComplete);
-
-                                      if (!deductResult.success) {
-                                        toast.error(deductResult.message);
-                                        return; // Prevent completion
-                                      }
-
-                                      if (deductResult.alerts && deductResult.alerts.length > 0) {
-                                        deductResult.alerts.forEach(msg => toast.warning(msg));
-                                      }
-
-                                      completeOrder(orderToComplete.id);
-                                      toast.success('Pengerjaan selesai dan log inventaris diperbarui.');
-
-                                      // Note: The hardcoded maintenance chemical deduction is now handled 
-                                      // dynamically via processInventoryDeduction if the serviceType is Coating.
-                                    }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#059669', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#d1fae5'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                      <CheckCircle size={16} color="#059669" /> Selesaikan Pengerjaan
-                                    </button>
-                                  )}
-
-                                  {remaining > 0 && (userRole === 'sales' || userRole === 'sales_team' || isRetailOrder) && (
-                                    <button onClick={() => { setActiveDropdown(null); setSettlementOrder({ ...order, computedRemaining: remaining }); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#f59e0b', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef3c7'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                      <CreditCard size={16} color="#f59e0b" /> Pelunasan Pembayaran
-                                    </button>
-                                  )}
-
-                                  {order.paymentHistory && order.paymentHistory.length > 0 && (
-                                    <button onClick={() => { setActiveDropdown(null); setHistoryPaymentOrder(order); setShowHistoryPaymentModal(true); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#6366f1', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#e0e7ff'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                      <FileText size={16} color="#6366f1" /> Lihat History Pembayaran
-                                    </button>
-                                  )}
-                                </>
-                              )}
-
-
-                              {isPenawaran && (
-                                <>
-                                  <button onClick={() => {
-                                    setActiveDropdown(null);
-                                    updateOrderOperational(order.id, { billType: 'Walk-In (Workshop)', salesCategory: 'Walk-In (Workshop)' });
-                                    toast.success('Penawaran berhasil dikonversi ke Work Order (Deal)!');
-                                  }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#2563eb', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#eff6ff'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                    <FileCheck size={16} color="#2563eb" /> Konversi ke Work Order
-                                  </button>
-
-                                  {isSuperOrOwner && (
-                                    <button onClick={() => {
-                                      setActiveDropdown(null);
-                                      if (window.confirm("Apakah Anda yakin ingin membatalkan penawaran ini?")) {
-                                        deleteOrder(order.id);
-                                        toast.success('Penawaran berhasil ditandai sebagai Closed Lost.');
-                                      }
-                                    }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '6px', fontSize: '13px', fontWeight: '500', color: '#ef4444', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef2f2'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                      <Trash2 size={16} color="#ef4444" /> Tandai Closed Lost (Batal)
-                                    </button>
-                                  )}
-                                </>
-                              )}
-                            </div>
+                          {order.paymentHistory && order.paymentHistory.length > 0 && (
+                            <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setHistoryPaymentOrder(order); setShowHistoryPaymentModal(true); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#6366f1', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#e0e7ff'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                              <FileText size={16} color="#6366f1" /> Lihat History Pembayaran
+                            </button>
                           )}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+
+                          <button onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveDropdown(null);
+                            setEditCustomerData({
+                              id: order.id,
+                              customerName: order.customerName || '',
+                              customerHp: order.customerHp || '',
+                              customerEmail: order.customerEmail || '',
+                              customerAddress: order.customerAddress || '',
+                              customerCity: order.customerCity || '',
+                              customerProvince: order.customerProvince || '',
+                              customerZip: order.customerZip || '',
+                              carColor: order.carColor || '',
+                              plateNumber: order.plateNumber || '',
+                              chassisNumber: order.chassisNumber || '',
+                              engineNumber: order.engineNumber || '',
+                              installationDate: order.installationDate || '',
+                              installationTime: order.installationTime || '',
+                              notes: order.notes || ''
+                            });
+                            setShowEditCustomerModal(true);
+                          }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                            <UserPen size={16} color="#4b5563" /> Edit Data Customer
+                          </button>
+
+                          <button onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveDropdown(null);
+                            setComplaintOrderData(order);
+                            setShowComplaintModal(true);
+                          }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                            <ShieldAlert size={16} color="#4b5563" /> Catat Komplain
+                          </button>
+
+                          {!isPenawaran && (
+                            <>
+                              {!isRetailOrder && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (order.paymentType !== 'Lunas') {
+                                      toast.error('Tidak dapat membuka garansi. Customer belum melakukan pelunasan.');
+                                      return;
+                                    }
+                                    setActiveDropdown(null);
+                                    setSelectedOrder(order);
+                                  }}
+                                  style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: order.paymentType !== 'Lunas' ? 'not-allowed' : 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s', opacity: order.paymentType !== 'Lunas' ? 0.5 : 1 }}
+                                  onMouseOver={e => { if (order.paymentType === 'Lunas') e.currentTarget.style.backgroundColor = '#f3f4f6' }}
+                                  onMouseOut={e => { if (order.paymentType === 'Lunas') e.currentTarget.style.backgroundColor = 'transparent' }}
+                                >
+                                  <Shield size={16} color={order.paymentType !== 'Lunas' ? "#9ca3af" : "#10b981"} /> Download Garansi
+                                </button>
+                              )}
+
+                              {!isRetailOrder && (
+                                <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setHistoryOrder(order); setShowHistoryModal(true); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                  <Wrench size={16} color="#4b5563" /> History Maintenance
+                                </button>
+                              )}
+
+                              {(order.status !== 'Selesai' || activeMaintenance) && !isRetailOrder && (
+                                <button onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveDropdown(null);
+
+                                  const orderToComplete = activeMaintenance || order;
+                                  const deductResult = processInventoryDeduction(orderToComplete);
+
+                                  if (!deductResult.success) {
+                                    toast.error(deductResult.message);
+                                    return;
+                                  }
+
+                                  if (deductResult.alerts && deductResult.alerts.length > 0) {
+                                    deductResult.alerts.forEach(msg => toast.warning(msg));
+                                  }
+
+                                  completeOrder(orderToComplete.id);
+                                  toast.success('Pengerjaan selesai dan log inventaris diperbarui.');
+                                }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#059669', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#d1fae5'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                  <CheckCircle size={16} color="#059669" /> Selesaikan Pengerjaan
+                                </button>
+                              )}
+                            </>
+                          )}
+
+                          {isPenawaran && (
+                            <button onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveDropdown(null);
+                              updateOrderOperational(order.id, { billType: 'Walk-In (Workshop)', salesCategory: 'Walk-In (Workshop)' });
+                              toast.success('Penawaran berhasil dikonversi ke Work Order (Deal)!');
+                            }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#2563eb', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#eff6ff'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                              <FileCheck size={16} color="#2563eb" /> Konversi ke Work Order
+                            </button>
+                          )}
+
+                          {/* Destructive Actions Separator */}
+                          {((!isPenawaran && isSuperOrOwner) || (isPenawaran && isSuperOrOwner)) && (
+                            <div style={{ height: '1px', backgroundColor: '#f3f4f6', margin: '4px 0' }}></div>
+                          )}
+
+                          {/* Destructive Actions */}
+                          {(!isPenawaran) && isSuperOrOwner && (
+                            <>
+                              <button onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveDropdown(null);
+                                setManualPaymentOrder(order);
+                                setShowManualPaymentModal(true);
+                              }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#10b981', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#ecfdf5'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                <CreditCard size={16} color="#10b981" /> Ubah Status Pembayaran
+                              </button>
+                              <button onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveDropdown(null);
+                                setDeleteRetailOrder(order);
+                                setDeleteConfirmText('');
+                                setShowDeleteRetailModal(true);
+                              }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#ef4444', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef2f2'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                <Trash2 size={16} color="#ef4444" /> Hapus Data Transaksi
+                              </button>
+                            </>
+                          )}
+
+                          {isPenawaran && isSuperOrOwner && (
+                            <button onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveDropdown(null);
+                              if (window.confirm("Apakah Anda yakin ingin membatalkan penawaran ini?")) {
+                                deleteOrder(order.id);
+                                toast.success('Penawaran berhasil ditandai sebagai Closed Lost.');
+                              }
+                            }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#ef4444', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef2f2'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                              <Trash2 size={16} color="#ef4444" /> Tandai Closed Lost (Batal)
+                            </button>
+                          )}
+
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
