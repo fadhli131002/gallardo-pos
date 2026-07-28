@@ -470,7 +470,7 @@ const AdminCustomerWarranty = () => {
                     backgroundColor: selectedRows.includes(order.id) ? '#f0fdf4' : '#ffffff', 
                     border: selectedRows.includes(order.id) ? '1px solid #86efac' : '1px solid #e5e7eb', 
                     borderRadius: '12px', 
-                    padding: '24px', 
+                    padding: '32px', 
                     display: 'grid', 
                     gridTemplateColumns: 'minmax(200px, 1.5fr) minmax(280px, 3fr) minmax(250px, 2fr) auto', 
                     gap: '24px', 
@@ -506,8 +506,8 @@ const AdminCustomerWarranty = () => {
                         </span>
                       </div>
                       
-                      <div style={{ marginTop: '8px' }}>
-                        <div className="text-sm font-bold text-primary" style={{ letterSpacing: '0.025em' }}>{order.id.replace('ORD-', 'WRK/300260700')}</div>
+                      <div style={{ marginTop: '12px' }}>
+                        <div className="text-sm font-bold text-primary" style={{ letterSpacing: '0.025em', lineHeight: '1.6' }}>{order.id.replace('ORD-', 'WRK/300260700')}</div>
                         <div className="text-xs text-secondary font-mono-ui mt-1" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <Calendar size={12} color="#9ca3af" />
                           {format(new Date(order.date), 'dd MMM yyyy')}
@@ -522,7 +522,7 @@ const AdminCustomerWarranty = () => {
                     {/* COL 2: Products & Total Pricing */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       {order.items && order.items.length > 0 ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                           {(expandedRows.includes(order.id) ? order.items : order.items.slice(0, 1)).map((item, idx) => (
                             <div key={idx} style={{ paddingBottom: expandedRows.includes(order.id) && idx < order.items.length - 1 ? '12px' : '0', borderBottom: expandedRows.includes(order.id) && idx < order.items.length - 1 ? '1px dashed #e5e7eb' : 'none' }}>
                               <div className="text-sm font-bold text-primary">{item.name} <span style={{ color: '#6b7280', fontWeight: 'normal' }}>(x{item.qty || 1})</span></div>
@@ -576,8 +576,8 @@ const AdminCustomerWarranty = () => {
                       )}
 
                       {/* Order Total Summary */}
-                      <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+                      <div style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', lineHeight: '1.6' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#4b5563' }}>
                             <span>Subtotal</span>
                             <span>{formatCurrency(order.totalPrice)}</span>
@@ -586,7 +586,7 @@ const AdminCustomerWarranty = () => {
                             <span>PPN & Pembulatan</span>
                             <span>Rp 0</span>
                           </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #e5e7eb', fontWeight: 'bold' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #e5e7eb', fontWeight: 'bold' }}>
                             <span className="text-primary">Grandtotal</span>
                             <span className="text-primary">{formatCurrency(order.totalPrice)}</span>
                           </div>
@@ -594,7 +594,7 @@ const AdminCustomerWarranty = () => {
                             (() => {
                               if (remaining > 0) {
                                 return (
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed #e5e7eb', fontWeight: 'bold', color: '#ef4444' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed #e5e7eb', fontWeight: 'bold', color: '#ef4444' }}>
                                     <span>Sisa Tagihan</span>
                                     <span>{formatCurrency(remaining)}</span>
                                   </div>
@@ -635,7 +635,7 @@ const AdminCustomerWarranty = () => {
                             </div>
                           </div>
 
-                          <div className="text-xs mt-4" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div className="text-xs mt-4" style={{ display: 'flex', flexDirection: 'column', gap: '12px', lineHeight: '1.6' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <User size={14} color="#6b7280" />
                               <span className="text-secondary">Sales/PIC:</span>
@@ -668,10 +668,10 @@ const AdminCustomerWarranty = () => {
                         </div>
                       )}
 
-                      <div style={{ paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
+                      <div style={{ paddingTop: '20px', borderTop: '1px solid #f3f4f6' }}>
                         <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-2" style={{ letterSpacing: '0.05em' }}>Informasi Customer</div>
                         <div className="font-bold text-sm text-primary mb-1">{isRetailOrder ? (order.customerName || order.supplierName) : order.customerName}</div>
-                        <div className="text-xs text-secondary font-mono-ui" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: order.customerAddress ? '6px' : '0' }}>
+                        <div className="text-xs text-secondary font-mono-ui" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: order.customerAddress ? '10px' : '0' }}>
                           <Phone size={12} color="#25D366" />
                           {order.customerHp || '-'}
                         </div>
@@ -1131,7 +1131,7 @@ const AdminCustomerWarranty = () => {
       {showManualPaymentModal && manualPaymentOrder && (
         <div className="modal-overlay animate-fade-in" onClick={() => setShowManualPaymentModal(false)} style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(2px)' }}>
           <div className="modal-content animate-fade-in" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', width: '95%', backgroundColor: '#ffffff', borderRadius: '24px', padding: '0', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden' }}>
-            <div style={{ padding: '24px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', backgroundColor: '#f8fafc' }}>
+            <div style={{ padding: '32px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', backgroundColor: '#f8fafc' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: '#111827' }}>Ubah Status Pembayaran</h3>
                 <p style={{ margin: 0, fontSize: '13px', color: '#6b7280' }}>POS No: {manualPaymentOrder.id}</p>
@@ -1173,7 +1173,7 @@ const AdminCustomerWarranty = () => {
                 console.error("Error updating manual payment status:", error);
                 toast.error(error.message);
               }
-            }} style={{ padding: '24px' }}>
+            }} style={{ padding: '32px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Tipe Pembayaran</label>
@@ -1418,7 +1418,7 @@ const AdminCustomerWarranty = () => {
 
               toast.success('Pelunasan pembayaran berhasil dicatat.');
               setSettlementOrder(null);
-            }} style={{ padding: '24px' }}>
+            }} style={{ padding: '32px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
                 <div style={{ padding: '16px', backgroundColor: '#fef3c7', borderRadius: '12px', border: '1px solid #fde68a' }}>
