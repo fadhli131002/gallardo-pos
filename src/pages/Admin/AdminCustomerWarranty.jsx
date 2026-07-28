@@ -470,7 +470,8 @@ const AdminCustomerWarranty = () => {
                     alignItems: 'start', 
                     position: 'relative', 
                     boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s',
+                    overflow: 'visible'
                   }}>
                     
                     {/* COL 1: POS & Status */}
@@ -692,7 +693,7 @@ const AdminCustomerWarranty = () => {
                       </button>
 
                       {activeDropdown === order.id && (
-                        <div className="dropdown-menu premium-card animate-fade-in" style={{ position: 'absolute', right: '100%', top: '0', minWidth: '240px', zIndex: 50, padding: '8px', display: 'flex', flexDirection: 'column', textAlign: 'left', borderRadius: '12px', marginRight: '8px', border: '1px solid #e5e7eb', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
+                        <div className="dropdown-menu premium-card animate-popover" style={{ position: 'absolute', right: '0', top: 'calc(100% + 8px)', minWidth: '240px', zIndex: 999, padding: '8px', display: 'flex', flexDirection: 'column', textAlign: 'left', borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
                           
                           {/* Standard Actions */}
                           {remaining > 0 && (userRole === 'sales' || userRole === 'sales_team' || isRetailOrder) && (
