@@ -12,8 +12,6 @@ services:
       - PORT=5000
       - DATABASE_URL=file:./dev.db
       - JWT_SECRET=supersecretkey_production_123 # Ganti dengan secret Anda yang kuat
-    volumes:
-      - ./data:/app/prisma
     ports:
       - "5000:5000"
     networks:
@@ -36,14 +34,6 @@ services:
       - ./certbot/www:/var/www/certbot
     networks:
       - gallardo-network
-
-  certbot:
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 networks:
   gallardo-network:
