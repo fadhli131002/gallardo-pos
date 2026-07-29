@@ -589,7 +589,7 @@ const AdminInventory = () => {
                       value={formData.kategori}
                       onChange={handleKategoriChange}
                       required
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white' }}
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
                       className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                     >
                       <option value="Kaca Film">Kaca Film</option>
@@ -604,7 +604,7 @@ const AdminInventory = () => {
                       value={formData.brand}
                       onChange={handleBrandChange}
                       required
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white' }}
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
                       className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                     >
                       {getAvailableBrands().map((brand) => (
@@ -619,7 +619,7 @@ const AdminInventory = () => {
                       value={formData.varian}
                       onChange={(e) => setFormData({ ...formData, varian: e.target.value })}
                       required
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white' }}
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
                       className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                     >
                       {getAvailableVariants().map((variant) => (
@@ -638,7 +638,7 @@ const AdminInventory = () => {
                           value={formData.stokUtama} 
                           onChange={(e) => setFormData({ ...formData, stokUtama: e.target.value })} 
                           required 
-                          style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                          style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', color: '#111827' }}
                           className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                         />
                       </div>
@@ -652,7 +652,7 @@ const AdminInventory = () => {
                             value={editBulk} 
                             onChange={(e) => setEditBulk(e.target.value)} 
                             required 
-                            style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                            style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', color: '#111827' }}
                             className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                           />
                         </div>
@@ -664,7 +664,7 @@ const AdminInventory = () => {
                             value={editEceran} 
                             onChange={(e) => setEditEceran(e.target.value)} 
                             required 
-                            style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                            style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', color: '#111827' }}
                             className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                           />
                         </div>
@@ -676,7 +676,7 @@ const AdminInventory = () => {
                         value={formData.satuan}
                         onChange={(e) => setFormData({ ...formData, satuan: e.target.value })}
                         required
-                        style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white' }}
+                        style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
                         className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                       >
                         <option value="Roll">Roll</option>
@@ -698,7 +698,7 @@ const AdminInventory = () => {
                           }} 
                           required 
                           placeholder="Rp 0"
-                          style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                          style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', color: '#111827' }}
                           className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                         />
                       </div>
