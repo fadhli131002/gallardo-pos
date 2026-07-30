@@ -1,0 +1,329 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
+import { format } from 'date-fns';
+import { id as localeId } from 'date-fns/locale';
+import PrintOptionsModal from './PrintOptionsModal';
+import logoGallardo from '../assets/logo-gallardo.png';
+
+const getWarrantyDetails = (itemName, installDate) => {
+  let years = 1; // Default
+  const nameStr = (itemName || '').toLowerCase();
+  
+  if (nameStr.includes('ultra') || nameStr.includes('matte')) {
+    years = 5;
+  } else if (nameStr.includes('armor') || nameStr.includes('super safe')) {
+    years = 10;
+  } else if (nameStr.includes('iron')) {
+    years = 2;
+  } else if (nameStr.includes('performante')) {
+    years = 5;
+  } else if (nameStr.includes('deluxe')) {
+    years = 7;
+  } else if (nameStr.includes('9h') || nameStr.includes('14h')) {
+    years = 3;
+  } else if (nameStr.includes('20h')) {
+    years = 5;
+  }
+  
+  const expiryDate = new Date(installDate);
+  expiryDate.setFullYear(expiryDate.getFullYear() + years);
+  
+  return { years, expiryDate };
+};
+
+export const hasWarranty = (order) => {
+  if (!order || !order.items) return false;
+  return order.items.some(item => 
+    ['PPF', 'Coating', 'Kaca Film'].includes(item.category) || 
+    ['PPF', 'Coating', 'Kaca Film'].includes(item.type)
+  );
+};
+
+const PrintWarrantyHandler = ({ isOpen, onClose, transaction }) => {
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const printRef = useRef(null);
+
+  // Reset state
+  useEffect(() => {
+    if (!isOpen) {
+      setIsGeneratingPDF(false);
+      setIsDownloading(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen || !transaction) return null;
+
+  const order = transaction;
+  const customerName = order.customerName || order.customer_name || 'TanpaNama';
+  const chassis = (order.chassisNumber && order.chassisNumber !== '-') ? order.chassisNumber : (order.engineNumber || 'TanpaRangka');
+  const productName = (order.items && order.items.length > 0) ? (order.items[0].name || order.items[0].varian) : (order.service || 'Produk');
+  const installationDateStr = order.installationDate || order.completedAt || order.updatedAt || order.date || new Date();
+  const installationDate = new Date(installationDateStr);
+  
+  const { years: badgeYears } = getWarrantyDetails(productName, installationDate);
+  const maintenanceDate = new Date(installationDate);
+  maintenanceDate.setDate(maintenanceDate.getDate() + 30);
+
+  const getDynamicFileName = () => {
+    const rawFileName = `Garansi_${customerName}_${chassis}_${productName}_${badgeYears}Tahun`;
+    return rawFileName.replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, '_');
+  };
+
+  const handleDownload = async () => {
+    const element = printRef.current;
+    if (!element) return;
+    setIsGeneratingPDF(true);
+    setIsDownloading(true);
+
+    try {
+      // 1. Buat Clone Element untuk di-capture
+      const clone = element.cloneNode(true);
+      
+      const originalScrollY = window.scrollY;
+      window.scrollTo(0, 0);
+
+      Object.assign(clone.style, {
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        zIndex: '-1',
+        margin: '0',
+        boxShadow: 'none',
+        transform: 'none',
+        visibility: 'visible' // Ensure visibility for clone
+      });
+      document.body.appendChild(clone);
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const canvas = await html2canvas(clone, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+
+      document.body.removeChild(clone);
+      window.scrollTo(0, originalScrollY);
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a6' });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      const pdfMargin = 8;
+      const safePdfWidth = pdfWidth - (pdfMargin * 2);
+      const safePdfHeight = pdfHeight - (pdfMargin * 2);
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const ratio = Math.min(safePdfWidth / imgProps.width, safePdfHeight / imgProps.height);
+
+      const finalWidth = imgProps.width * ratio;
+      const finalHeight = imgProps.height * ratio;
+
+      const marginX = (pdfWidth - finalWidth) / 2;
+      const marginY = (pdfHeight - finalHeight) / 2;
+
+      pdf.addImage(imgData, 'PNG', marginX, marginY, finalWidth, finalHeight);
+      pdf.save(getDynamicFileName() + '.pdf');
+    } catch (error) {
+      console.error("Gagal generate PDF Garansi: ", error);
+    } finally {
+      setIsGeneratingPDF(false);
+      setIsDownloading(false);
+      onClose();
+    }
+  };
+
+  const handlePrint = () => {
+    setIsGeneratingPDF(true);
+    setTimeout(() => {
+      const originalTitle = document.title;
+      document.title = getDynamicFileName();
+      
+      const style = document.createElement('style');
+      style.id = 'print-warranty-style';
+      style.innerHTML = `
+        @media print {
+          @page { size: A6 portrait; margin: 8mm; }
+          body * { visibility: hidden; }
+          #printable-warranty-wrapper, #printable-warranty-wrapper * { visibility: visible; }
+          #printable-warranty-wrapper {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      window.print();
+      
+      document.head.removeChild(style);
+      document.title = originalTitle;
+      
+      setIsGeneratingPDF(false);
+      onClose();
+    }, 500);
+  };
+
+  const handleWhatsApp = () => {
+    const hp = order.customerHp || order.customer_phone;
+    if (!hp) {
+      toast.error('Nomor telepon customer tidak tersedia!');
+      return;
+    }
+    
+    let phone = hp.replace(/\D/g, '');
+    if (phone.startsWith('0')) {
+      phone = '62' + phone.substring(1);
+    }
+
+    const brandModel = (order.carBrand || '') + ' ' + (order.carModel || '');
+    const plate = order.plateNumber || '';
+    
+    const { expiryDate } = getWarrantyDetails(productName, installationDate);
+    const validUntil = format(expiryDate, 'dd MMM yyyy', { locale: localeId });
+
+    const msg = `Halo Bapak/Ibu ${customerName}, berikut adalah informasi Garansi Digital dari Gallardo Autosport untuk kendaraan ${brandModel.trim()} (${plate}). Garansi ini berlaku hingga ${validUntil} untuk layanan/produk ${productName}. Terima kasih telah mempercayakan kendaraan Anda kepada kami!`;
+
+    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, '_blank');
+    onClose();
+  };
+
+  return (
+    <>
+      <PrintOptionsModal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Opsi Cetak Garansi"
+        transaction={order}
+        isDownloading={isDownloading}
+        onPrint={handlePrint}
+        onDownload={handleDownload}
+        onWhatsApp={handleWhatsApp}
+      />
+
+      {/* Hidden Warranty Template */}
+      <div id="printable-warranty-wrapper" style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
+        <div 
+          ref={printRef}
+          className="bg-white text-black relative w-[420px] min-h-[595px] flex flex-col justify-between shrink-0 box-border"
+          style={{ padding: '40px' }}
+        >
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <img src={logoGallardo} alt="GALLARDO AUTOSPORT" style={{ height: '40px', margin: '0 auto 16px' }} />
+            <h1 style={{ fontSize: '1.8rem', fontWeight: '300', color: '#000000', margin: '0 0 8px', letterSpacing: '2px' }}>DIGITAL WARRANTY</h1>
+            <p style={{ color: '#333333', fontSize: '0.7rem', letterSpacing: '4px', textTransform: 'uppercase', margin: 0, fontWeight: '500' }}>Certificate of Authenticity</p>
+          </div>
+
+          <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', marginBottom: '16px', width: '100%' }} />
+
+          {/* Grid Data Customer */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div>
+              <p style={{ fontSize: '0.65rem', color: '#6b7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Customer Name</p>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', margin: 0, color: '#000' }}>{customerName}</p>
+            </div>
+            <div>
+              <p style={{ fontSize: '0.65rem', color: '#6b7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Contact Number</p>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', margin: 0, color: '#000' }}>{order.customerHp || order.customer_phone || '-'}</p>
+            </div>
+          </div>
+
+          <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', marginBottom: '16px', width: '100%' }} />
+
+          {/* Grid Data Kendaraan */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div>
+              <p style={{ fontSize: '0.65rem', color: '#6b7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Vehicle Brand & Model</p>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', margin: '0 0 16px', color: '#000' }}>{order.carBrand} {order.carModel}</p>
+              
+              <p style={{ fontSize: '0.65rem', color: '#6b7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Chassis Number (VIN)</p>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', margin: 0, color: '#000' }}>{order.chassisNumber || '-'}</p>
+            </div>
+            <div>
+              <p style={{ fontSize: '0.65rem', color: '#6b7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '1px' }}>License Plate</p>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', margin: '0 0 16px', color: '#000' }}>{order.plateNumber || '-'}</p>
+              
+              <p style={{ fontSize: '0.65rem', color: '#6b7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Engine Number</p>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', margin: 0, color: '#000' }}>{order.engineNumber || '-'}</p>
+            </div>
+          </div>
+
+          <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', marginBottom: '16px', width: '100%' }} />
+
+          {/* Daftar Produk */}
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: '0.65rem', color: '#6b7280', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Products Installed & Warranty</p>
+            
+            {order.items && order.items.length > 0 ? (
+              order.items.map((item, idx) => {
+                const { expiryDate } = getWarrantyDetails(item.name || item.varian, installationDate);
+                return (
+                  <div key={idx} className="flex flex-col gap-2 mb-3">
+                    <p style={{ fontSize: '1rem', fontWeight: '600', margin: 0, color: '#000' }}>{item.name || item.varian}</p>
+                    <p style={{ fontSize: '0.8rem', color: '#333', margin: 0, fontWeight: '500' }}>Valid: {format(installationDate, 'dd MMM yyyy')} - {format(expiryDate, 'dd MMM yyyy')}</p>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="flex flex-col gap-2 mb-3">
+                <p style={{ fontSize: '1rem', fontWeight: '600', margin: 0, color: '#000' }}>{order.service || '-'}</p>
+                <p style={{ fontSize: '0.8rem', color: '#333', margin: 0, fontWeight: '500' }}>Valid: {format(installationDate, 'dd MMM yyyy')} - {format(getWarrantyDetails(order.service, installationDate).expiryDate, 'dd MMM yyyy')}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '24px' }}>
+            <div>
+              <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#000', margin: '0 0 16px' }}>Jadwal Maintenance: {format(maintenanceDate, 'dd MMMM yyyy', { locale: localeId })}</p>
+              <p style={{ fontSize: '0.65rem', color: '#6b7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Installation Date</p>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', margin: 0, color: '#000' }}>{format(installationDate, 'dd MMM yyyy')}</p>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg viewBox="0 0 130 130" width="110" height="110" style={{ backgroundColor: '#ffffff' }}>
+                <defs>
+                  <path id="topArc" d="M 65 109 A 44 44 0 0 1 65 21 A 44 44 0 0 1 65 109" />
+                  <path id="bottomArc" d="M 65 15 A 50 50 0 0 0 65 115 A 50 50 0 0 0 65 15" />
+                </defs>
+                <circle cx="65" cy="65" r="62" fill="none" stroke="#000000" strokeWidth="2" />
+                <circle cx="65" cy="65" r="56" fill="none" stroke="#000000" strokeWidth="1.2" strokeDasharray="4,3" />
+                <circle cx="65" cy="65" r="38" fill="none" stroke="#000000" strokeWidth="1.2" strokeDasharray="4,3" />
+                <text fill="#000000" fontSize="10" fontWeight="bold" fontFamily="Montserrat, Arial, sans-serif" style={{ letterSpacing: '2px' }}>
+                  <textPath href="#topArc" startOffset="50%" textAnchor="middle">GALLARDO AUTO SPORT</textPath>
+                </text>
+                <text fill="#000000" fontSize="10" fontWeight="bold" fontFamily="Montserrat, Arial, sans-serif" style={{ letterSpacing: '2px' }}>
+                  <textPath href="#bottomArc" startOffset="50%" textAnchor="middle">WARRANTY</textPath>
+                </text>
+                <text x="65" y="74" fill="#000000" fontSize="42" fontWeight="900" fontFamily="Montserrat, Arial, sans-serif" textAnchor="middle">{badgeYears}</text>
+                <text x="65" y="88" fill="#000000" fontSize="10" fontWeight="bold" fontFamily="Montserrat, Arial, sans-serif" textAnchor="middle" style={{ letterSpacing: '2px' }}>YEARS</text>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {isGeneratingPDF && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(4px)' }}>
+          <Loader2 className="animate-spin" size={48} color="#2563eb" style={{ marginBottom: '16px' }} />
+          <p className="text-sm font-medium text-gray-700">Menyiapkan Dokumen...</p>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default PrintWarrantyHandler;

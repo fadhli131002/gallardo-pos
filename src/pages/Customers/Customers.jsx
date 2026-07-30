@@ -9,7 +9,7 @@ import * as XLSX from 'xlsx';
 import logoGallardo from '../../assets/logo-gallardo.png';
 import logoNewRatu from '../../assets/logo-new-ratu.png';
 import { formatCurrency } from '../../data/mockData';
-import WarrantyModal, { hasWarranty } from '../../components/WarrantyModal';
+import PrintWarrantyHandler, { hasWarranty } from '../../components/PrintWarrantyHandler';
 import './Customers.css';
 
 const Customers = () => {
@@ -427,7 +427,7 @@ const Customers = () => {
 
       {/* Certificate Modal */}
       {selectedOrder && (
-        <WarrantyModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+        <PrintWarrantyHandler isOpen={!!selectedOrder} onClose={() => setSelectedOrder(null)} transaction={selectedOrder} />
       )}
     </div>
   );

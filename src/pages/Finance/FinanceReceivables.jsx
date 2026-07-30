@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Search, Eye, X, Image as ImageIcon, Download, ChevronLeft, ChevronRight, Filter, Plus, Printer, MoreHorizontal } from 'lucide-react';
+import { Search, Eye, X, Image as ImageIcon, Download, ChevronLeft, ChevronRight, Filter, Plus, Printer, MoreHorizontal, Shield } from 'lucide-react';
 import { formatRupiah } from '../../utils/formatRupiah';
 import { formatTransactionId } from '../../utils/formatId';
 import { exportToCSV } from '../../utils/exportCSV';
+import PrintInvoiceHandler from '../../components/PrintInvoiceHandler';
+import PrintWarrantyHandler, { hasWarranty } from '../../components/PrintWarrantyHandler';
 
 const FinanceReceivables = () => {
   const [receivables, setReceivables] = useState([]);
@@ -11,6 +13,10 @@ const FinanceReceivables = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [isPrintInvoiceOpen, setIsPrintInvoiceOpen] = useState(false);
+  const [selectedPrintInvoice, setSelectedPrintInvoice] = useState(null);
+  const [isPrintWarrantyOpen, setIsPrintWarrantyOpen] = useState(false);
+  const [selectedPrintWarranty, setSelectedPrintWarranty] = useState(null);
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -160,11 +166,21 @@ const FinanceReceivables = () => {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
+                          onClick={() => { setSelectedPrintInvoice(tx); setIsPrintInvoiceOpen(true); }}
                           title="Print Nota"
                           className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
                         >
                           <Printer className="w-4 h-4" />
                         </button>
+                        {hasWarranty(tx) && (
+                          <button
+                            onClick={() => { setSelectedPrintWarranty(tx); setIsPrintWarrantyOpen(true); }}
+                            title="Cetak Garansi"
+                            className="p-1.5 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors"
+                          >
+                            <Shield className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           title="Lainnya"
                           className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
@@ -261,6 +277,18 @@ const FinanceReceivables = () => {
           </div>
         </div>
       )}
+
+      {/* Handlers */}
+      <PrintInvoiceHandler
+        isOpen={isPrintInvoiceOpen}
+        onClose={() => setIsPrintInvoiceOpen(false)}
+        transaction={selectedPrintInvoice}
+      />
+      <PrintWarrantyHandler
+        isOpen={isPrintWarrantyOpen}
+        onClose={() => setIsPrintWarrantyOpen(false)}
+        transaction={selectedPrintWarranty}
+      />
     </div>
   );
 };
