@@ -134,9 +134,9 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <div className="metrics-grid mt-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mt-6">
 
-        <div className="metric-card">
+        <div className="metric-card lg:col-span-2">
           <div className="metric-card-left">
             <h3 className="metric-card-title">Total Customer <ChevronRight size={14} /></h3>
             <span className="metric-card-value">{uniqueCustomers.toLocaleString('id-ID')}</span>
@@ -151,7 +151,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="metric-card">
+        <div className="metric-card lg:col-span-2">
           <div className="metric-card-left">
             <h3 className="metric-card-title">Total Order <ChevronRight size={14} /></h3>
             <span className="metric-card-value">{totalOrders}</span>
@@ -166,7 +166,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="metric-card">
+        <div className="metric-card lg:col-span-2">
           <div className="metric-card-left">
             <h3 className="metric-card-title">Working Bay <ChevronRight size={14} /></h3>
             <span className="metric-card-value">{activeTodayCount}/5</span>
@@ -186,7 +186,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="metric-card">
+        <div className="metric-card lg:col-span-3">
           <div className="metric-card-left">
             <h3 className="metric-card-title">Omzet Toko <ChevronRight size={14} /></h3>
             <span className="metric-card-value" style={{ fontSize: '1.25rem' }}>Rp {totalOmzet.toLocaleString('id-ID')}</span>
@@ -204,7 +204,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="metric-card">
+        <div className="metric-card lg:col-span-3">
           <div className="metric-card-left" style={{ maxWidth: '100%' }}>
             <h3 className="metric-card-title">Status Stok <ChevronRight size={14} /></h3>
             {lowStockCount > 0 ? (

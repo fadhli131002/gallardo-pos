@@ -20,9 +20,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import FinanceLayout from './components/Layout/FinanceLayout';
 import OwnerLayout from './components/Layout/OwnerLayout';
 import FinanceDashboard from './pages/Finance/FinanceDashboard';
-import FinanceInvoices from './pages/Finance/FinanceInvoices';
-import FinanceExpenses from './pages/Finance/FinanceExpenses';
-import FinanceReports from './pages/Finance/FinanceReports';
+import FinanceReceivables from './pages/Finance/FinanceReceivables';
+import FinanceRefunds from './pages/Finance/FinanceRefunds';
+import FinanceCommissions from './pages/Finance/FinanceCommissions';
 
 import { Toaster } from 'sonner';
 
@@ -97,9 +97,9 @@ function App() {
           <Route path="/finance" element={<FinanceLayout />}>
             <Route index element={<Navigate to="/finance/dashboard" replace />} />
             <Route path="dashboard" element={<FinanceDashboard />} />
-            <Route path="invoices" element={<FinanceInvoices />} />
-            <Route path="expenses" element={<FinanceExpenses />} />
-            <Route path="reports" element={<FinanceReports />} />
+            <Route path="receivables" element={<FinanceReceivables />} />
+            <Route path="refunds" element={<FinanceRefunds />} />
+            <Route path="commissions" element={<FinanceCommissions />} />
           </Route>
         </Route>
 

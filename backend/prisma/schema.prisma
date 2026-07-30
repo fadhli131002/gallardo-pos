@@ -28,6 +28,7 @@ model Transaction {
   chassis_number    String?
   engine_number     String?
   car_year          String?
+  car_color         String?
   installation_date String?
   installation_time String?
   total_amount      Float
@@ -40,6 +41,9 @@ model Transaction {
   payment_method    String?
   termin_schedule   String?
   notes             String?
+  additional_discount Float?          @default(0)
+  refund_amount       Float?          @default(0)
+  refund_reason       String?
   created_at        DateTime          @default(now())
   updated_at        DateTime          @updatedAt
   payments          Payment[]

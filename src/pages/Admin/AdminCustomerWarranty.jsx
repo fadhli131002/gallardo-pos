@@ -46,6 +46,8 @@ const AdminCustomerWarranty = () => {
   const [manualPaymentOrder, setManualPaymentOrder] = useState(null);
   const [invoiceOrder, setInvoiceOrder] = useState(null);
   const [settlementOrder, setSettlementOrder] = useState(null);
+  const [pelunasanDiscount, setPelunasanDiscount] = useState(0);
+  const [pelunasanAmountPaid, setPelunasanAmountPaid] = useState('');
   const [showEditCustomerModal, setShowEditCustomerModal] = useState(false);
   const [editCustomerData, setEditCustomerData] = useState(null);
 
@@ -642,7 +644,7 @@ const AdminCustomerWarranty = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                           <div>
                             <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-1" style={{ letterSpacing: '0.05em' }}>Informasi Kendaraan</div>
-                            <div className="text-sm font-bold text-primary">{order.carBrand} {order.carModel}</div>
+                            <div className="text-sm font-bold text-primary">{order.carBrand} {order.carModel} {order.carColor ? `(${order.carColor})` : ''}</div>
                           </div>
                           
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -724,7 +726,7 @@ const AdminCustomerWarranty = () => {
                           
                           {/* Standard Actions */}
                           {remaining > 0 && (userRole === 'sales' || isRetailOrder) && (
-                            <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setSettlementOrder({ ...order, computedRemaining: remaining }); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#f59e0b', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef3c7'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                            <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setSettlementOrder({ ...order, computedRemaining: remaining }); setPelunasanAmountPaid(''); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#f59e0b', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef3c7'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                               <CreditCard size={16} color="#f59e0b" /> Pelunasan Pembayaran
                             </button>
                           )}
@@ -1378,7 +1380,7 @@ const AdminCustomerWarranty = () => {
                   <p style={{ margin: 0, fontSize: '13px', color: '#6b7280' }}>POS No: {settlementOrder.id}</p>
                 </div>
               </div>
-              <button onClick={() => setSettlementOrder(null)} className="icon-btn" style={{ padding: '8px', borderRadius: '50%', backgroundColor: '#f3f4f6', color: '#6b7280', border: 'none', cursor: 'pointer' }}>
+              <button onClick={() => { setSettlementOrder(null); setPelunasanDiscount(0); setPelunasanAmountPaid(''); }} className="icon-btn" style={{ padding: '8px', borderRadius: '50%', backgroundColor: '#f3f4f6', color: '#6b7280', border: 'none', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
@@ -1386,11 +1388,12 @@ const AdminCustomerWarranty = () => {
             <form onSubmit={async (e) => {
               e.preventDefault();
               const formData = new FormData(e.target);
-              const amountRaw = formData.get('amount_text') || '0';
-              const cleanAmount = Number(amountRaw.toString().replace(/\D/g, ''));
-              const amount = cleanAmount;
-              if (amount > settlementOrder.computedRemaining) {
-                alert(`Nominal pelunasan tidak boleh melebihi sisa tagihan (Rp ${settlementOrder.computedRemaining.toLocaleString('id-ID')})`);
+              // The amount logic is now handled in the backend, but we need to pass the discount.
+              const discountRaw = formData.get('additional_discount') || '0';
+              const cleanDiscount = Number(discountRaw.toString().replace(/\D/g, ''));
+              
+              if (cleanDiscount > settlementOrder.computedRemaining) {
+                alert(`Nominal diskon tidak boleh melebihi sisa tagihan (Rp ${settlementOrder.computedRemaining.toLocaleString('id-ID')})`);
                 return;
               }
 
@@ -1409,9 +1412,25 @@ const AdminCustomerWarranty = () => {
                 });
               }
 
-              await settlePayment(settlementOrder.id, amount, formData.get('paymentMethod'), formData.get('notes'), base64Proof);
+              try {
+                const actualMax = Math.max(0, settlementOrder.computedRemaining - cleanDiscount);
+                const actualAmountPaid = pelunasanAmountPaid === '' ? actualMax : Number(pelunasanAmountPaid);
 
-              if (amount === settlementOrder.computedRemaining) {
+                if (actualAmountPaid > actualMax) {
+                  alert(`Nominal pembayaran tidak boleh melebihi total tagihan (Rp ${actualMax.toLocaleString('id-ID')})`);
+                  return;
+                }
+
+                // settlePayment arguments: orderId, amountPaid, method, notes, proof, additionalDiscount
+                await settlePayment(
+                  settlementOrder.id, 
+                  actualAmountPaid, 
+                  formData.get('paymentMethod'), 
+                  formData.get('notes'), 
+                  base64Proof, 
+                  cleanDiscount
+                );
+
                 const orderToDeduct = orders.find(o => o.id === settlementOrder.id) || settlementOrder;
                 if (orderToDeduct && orderToDeduct.items) {
                   const isRetail = orderToDeduct.billType === 'Retail (Grosir)' || orderToDeduct.type === 'RETAIL';
@@ -1437,35 +1456,66 @@ const AdminCustomerWarranty = () => {
                     }
                   });
                 }
+                
+                toast.success('Pelunasan pembayaran berhasil dicatat.');
+                setSettlementOrder(null);
+                setPelunasanDiscount(0);
+                setPelunasanAmountPaid('');
+              } catch (err) {
+                toast.error(err.message || 'Gagal memproses pelunasan');
               }
-
-              toast.success('Pelunasan pembayaran berhasil dicatat.');
-              setSettlementOrder(null);
             }} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               
               {/* Scrollable Body */}
-              <div style={{ padding: '24px 32px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ padding: '16px', backgroundColor: '#fef3c7', borderRadius: '12px', border: '1px solid #fde68a' }}>
-                  <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: '#b45309', fontWeight: '600' }}>Sisa Tagihan / Balance Due</p>
+              <div style={{ padding: '20px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ padding: '14px', backgroundColor: '#fef3c7', borderRadius: '12px', border: '1px solid #fde68a' }}>
+                  <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: '#b45309', fontWeight: '600' }}>Total Transaksi Awal - DP</p>
                   <p style={{ margin: 0, fontSize: '24px', fontWeight: 'bold', color: '#92400e' }}>
                     {formatCurrency(settlementOrder.computedRemaining)}
                   </p>
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Nominal Pelunasan</label>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Diskon/Potongan Tambahan (Rp)</label>
                   <input
                     type="text"
-                    name="amount_text"
-                    required
-                    defaultValue={settlementOrder.computedRemaining.toLocaleString('id-ID')}
+                    name="additional_discount"
+                    value={pelunasanDiscount ? pelunasanDiscount.toLocaleString('id-ID') : ''}
+                    placeholder="0"
                     onChange={(e) => {
                       const raw = e.target.value.replace(/\D/g, '');
-                      e.target.value = raw ? Number(raw).toLocaleString('id-ID') : '';
+                      setPelunasanDiscount(raw ? Number(raw) : 0);
                     }}
-                    style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px', color: '#111827', backgroundColor: '#ffffff' }}
                     className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                   />
+                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>Isi jika ada pembulatan/diskon khusus saat pelunasan.</p>
+                </div>
+
+                <div style={{ padding: '14px', backgroundColor: '#f3f4f6', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>Total Yang Harus Dibayar:</span>
+                    <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827' }}>
+                      {formatCurrency(Math.max(0, settlementOrder.computedRemaining - pelunasanDiscount))}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Nominal yang Dibayar (Rp)</label>
+                  <input
+                    type="text"
+                    name="amountPaid"
+                    value={pelunasanAmountPaid !== '' ? pelunasanAmountPaid.toLocaleString('id-ID') : ''}
+                    placeholder={Math.max(0, settlementOrder.computedRemaining - pelunasanDiscount).toLocaleString('id-ID')}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\D/g, '');
+                      setPelunasanAmountPaid(raw ? Number(raw) : '');
+                    }}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px', color: '#111827', backgroundColor: '#ffffff' }}
+                    className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                  />
+                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>Kosongkan jika membayar penuh.</p>
                 </div>
 
                 <div>
@@ -1474,7 +1524,7 @@ const AdminCustomerWarranty = () => {
                     type="text"
                     name="notes"
                     placeholder="Contoh: Pembayaran Termin 1, DP Tambahan"
-                    style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px' }}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px', color: '#111827', backgroundColor: '#ffffff' }}
                     className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                   />
                 </div>
@@ -1484,13 +1534,13 @@ const AdminCustomerWarranty = () => {
                   <select
                     name="paymentMethod"
                     required
-                    style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white' }}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px', backgroundColor: '#ffffff', color: '#111827' }}
                     className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
                   >
-                    <option value="Tunai / Cash">Tunai / Cash</option>
-                    <option value="Transfer BCA">Transfer BCA</option>
-                    <option value="Transfer Mandiri">Transfer Mandiri</option>
-                    <option value="QRIS">QRIS</option>
+                    <option value="Tunai / Cash" style={{ color: '#111827' }}>Tunai / Cash</option>
+                    <option value="Transfer BCA" style={{ color: '#111827' }}>Transfer BCA</option>
+                    <option value="Transfer Mandiri" style={{ color: '#111827' }}>Transfer Mandiri</option>
+                    <option value="QRIS" style={{ color: '#111827' }}>QRIS</option>
                   </select>
                 </div>
 
@@ -1505,7 +1555,7 @@ const AdminCustomerWarranty = () => {
                       type="file"
                       accept="image/*,.pdf"
                       required={settlementOrder.billType === 'Retail (Grosir)' || settlementOrder.type === 'RETAIL'}
-                      style={{ fontSize: '14px', color: '#4b5563', width: '100%' }}
+                      style={{ fontSize: '14px', color: '#111827', width: '100%' }}
                     />
                   </div>
                   <p style={{ margin: '6px 0 0 0', fontSize: '12px', color: '#9ca3af' }}>Format yang didukung: JPG, PNG, PDF (Maks. 5MB)</p>
@@ -1513,12 +1563,12 @@ const AdminCustomerWarranty = () => {
               </div>
 
               {/* Fixed Footer */}
-              <div style={{ padding: '20px 32px', display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb', flexShrink: 0 }}>
-                <button type="button" onClick={() => setSettlementOrder(null)} style={{ padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #d1d5db', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#ffffff'}>
+              <div style={{ padding: '16px 24px', display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb', flexShrink: 0 }}>
+                <button type="button" onClick={() => { setSettlementOrder(null); setPelunasanAmountPaid(''); }} style={{ padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #d1d5db', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#ffffff'}>
                   Batal
                 </button>
                 <button type="submit" style={{ padding: '10px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: 'white', backgroundColor: '#10b981', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#059669'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#10b981'}>
-                  <CreditCard size={18} /> Konfirmasi Lunas
+                  <CreditCard size={18} /> Konfirmasi Pembayaran
                 </button>
               </div>
             </form>

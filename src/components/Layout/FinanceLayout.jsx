@@ -78,34 +78,34 @@ const FinanceLayout = () => {
             style={{ justifyContent: isExpanded ? 'flex-start' : 'center', padding: isExpanded ? '1rem 1.25rem' : '1rem 0' }}
           >
             <LayoutDashboard size={22} style={{ flexShrink: 0 }} />
-            <NavText>Dashboard</NavText>
+            <NavText>Dashboard Keuangan</NavText>
           </NavLink>
 
           <NavLink 
-            to="/finance/invoices" 
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-            style={{ justifyContent: isExpanded ? 'flex-start' : 'center', padding: isExpanded ? '1rem 1.25rem' : '1rem 0' }}
-          >
-            <Receipt size={22} style={{ flexShrink: 0 }} />
-            <NavText>Invoices</NavText>
-          </NavLink>
-
-          <NavLink 
-            to="/finance/expenses" 
+            to="/finance/receivables" 
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             style={{ justifyContent: isExpanded ? 'flex-start' : 'center', padding: isExpanded ? '1rem 1.25rem' : '1rem 0' }}
           >
             <Wallet size={22} style={{ flexShrink: 0 }} />
-            <NavText>Expenses</NavText>
+            <NavText>Piutang Pelanggan</NavText>
           </NavLink>
 
           <NavLink 
-            to="/finance/reports" 
+            to="/finance/refunds" 
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            style={{ justifyContent: isExpanded ? 'flex-start' : 'center', padding: isExpanded ? '1rem 1.25rem' : '1rem 0' }}
+          >
+            <Receipt size={22} style={{ flexShrink: 0 }} />
+            <NavText>Riwayat Refund</NavText>
+          </NavLink>
+
+          <NavLink 
+            to="/finance/commissions" 
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             style={{ justifyContent: isExpanded ? 'flex-start' : 'center', padding: isExpanded ? '1rem 1.25rem' : '1rem 0' }}
           >
             <PieChart size={22} style={{ flexShrink: 0 }} />
-            <NavText>Reports</NavText>
+            <NavText>Laporan Komisi</NavText>
           </NavLink>
         </nav>
 

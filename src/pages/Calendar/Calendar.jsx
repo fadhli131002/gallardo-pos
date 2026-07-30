@@ -102,9 +102,8 @@ const Calendar = () => {
         formattedDate = format(day, dateFormat);
         const cloneDay = day;
         
-        // Find orders for this day to display their names
         const dayOrders = filteredOrders.filter(o => {
-          if (o.status !== 'Aktif') return false;
+          if (o.status !== 'OPEN') return false;
           const start = new Date(o.date);
           start.setHours(0, 0, 0, 0);
           const end = getEndDate(o.date, o.serviceType);
@@ -116,27 +115,33 @@ const Calendar = () => {
           return check >= start && check <= end;
         });
         const hasOrders = dayOrders.length > 0;
-        const cellStyle = hasOrders && isSameMonth(day, monthStart) 
-          ? { backgroundColor: 'var(--accent-color)', color: '#fff', borderColor: 'var(--accent-hover)' }
-          : {};
+        const cellClass = hasOrders && isSameMonth(day, monthStart) 
+          ? 'cell active-day' 
+          : 'cell';
         
         days.push(
           <div
-            className={`cell ${!isSameMonth(day, monthStart) ? 'disabled' : ''}`}
-            style={cellStyle}
+            className={`${cellClass} ${!isSameMonth(day, monthStart) ? 'disabled' : ''}`}
             key={day}
           >
             <span className="number font-mono-num">{formattedDate}</span>
-            <div className="cell-content">
+            <div className="cell-content" style={{ padding: '0', width: '100%', flex: 1 }}>
               {isSameMonth(day, monthStart) && (
                 hasOrders ? (
-                  <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#fff' }}>
-                    {dayOrders.length} Mobil
-                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%', marginTop: '4px' }}>
+                    {dayOrders.map((order, idx) => (
+                      <span key={idx} className="order-chip" title={`${order.customerName} - ${order.serviceType}`}>
+                        {order.customerName}
+                      </span>
+                    ))}
+                  </div>
                 ) : (
-                  <span className="badge badge-success font-mono-ui" style={{ backgroundColor: 'transparent', border: '1px solid #e5e7eb', color: '#6b7280' }}>
-                    Tersedia
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', marginTop: '0.5rem' }}>
+                    <span className="status-indicator">
+                      <span className="status-dot"></span>
+                      Tersedia
+                    </span>
+                  </div>
                 )
               )}
             </div>
@@ -187,10 +192,22 @@ const Calendar = () => {
           </p>
           
           <div className="order-list">
-            {filteredOrders.filter(o => o.status === 'Aktif').length === 0 ? (
+            {filteredOrders.filter(o => {
+              if (o.status !== 'OPEN') return false;
+              const orderDate = new Date(o.date);
+              const mStart = startOfMonth(currentDate);
+              const mEnd = endOfMonth(currentDate);
+              return orderDate >= mStart && orderDate <= mEnd;
+            }).length === 0 ? (
               <p className="text-sm text-tertiary">Tidak ada order aktif.</p>
             ) : (
-              filteredOrders.filter(o => o.status === 'Aktif').map(order => (
+              filteredOrders.filter(o => {
+                if (o.status !== 'OPEN') return false;
+                const orderDate = new Date(o.date);
+                const mStart = startOfMonth(currentDate);
+                const mEnd = endOfMonth(currentDate);
+                return orderDate >= mStart && orderDate <= mEnd;
+              }).map(order => (
                 <div key={order.id} className="active-order-card">
                   <div className="flex justify-between">
                     <h4 className="font-sans font-semibold">{order.customerName}</h4>
@@ -198,13 +215,13 @@ const Calendar = () => {
                       {format(new Date(order.date), 'dd/MM')}
                     </span>
                   </div>
-                  <p className="text-sm text-secondary font-mono-ui mt-1">{order.service}</p>
+                  <p className="text-sm text-secondary font-mono-ui mt-1 mb-2">{order.service}</p>
                   <button 
-                    className="btn-secondary w-full mt-3 text-xs flex items-center justify-center gap-2"
+                    className="btn-resolve mt-3"
                     onClick={() => setConfirmModalOrder(order.id)}
                   >
-                    <CheckCircle2 size={16} />
-                    Selesaikan
+                    <CheckCircle2 size={16} color="#059669" />
+                    Selesaikan Pemasangan
                   </button>
                 </div>
               ))

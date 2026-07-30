@@ -13,6 +13,7 @@ const vehicleRoutes = require('./modules/vehicles/vehicle.routes');
 const salesCategoryRoutes = require('./modules/salesCategories/salesCategory.routes');
 const variantRoutes = require('./modules/variants/variant.routes');
 const ownerRoutes = require('./modules/owner/owner.routes');
+const financeRoutes = require('./modules/finance/finance.routes');
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/sales-categories', salesCategoryRoutes);
 app.use('/api/variants', variantRoutes);
 app.use('/api/owner', ownerRoutes);
+app.use('/api/finance', financeRoutes);
 
 // Error Handler
 app.use(errorHandler);

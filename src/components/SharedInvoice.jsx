@@ -155,6 +155,10 @@ export default function SharedInvoice({ order }) {
                   <td style={{ padding: '2px 0', color: '#555' }}>Tahun</td>
                   <td style={{ padding: '2px 0', fontWeight: 'bold' }}>: {(order.vehicle && order.vehicle.year) || order.carYear || order.year || order.tahun || '-'}</td>
                 </tr>
+                <tr>
+                  <td style={{ padding: '2px 0', color: '#555' }}>Warna Kendaraan</td>
+                  <td style={{ padding: '2px 0', fontWeight: 'bold' }}>: {order.carColor || order.warna || '-'}</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -223,9 +227,9 @@ export default function SharedInvoice({ order }) {
                     <td style={{ padding: '10px 8px', textAlign: 'center', color: '#555' }}>{idx + 1}.</td>
                     <td style={{ padding: '10px 8px', fontWeight: 'bold' }}>
                       {itemName}
-                      {item.catatan && (
+                      {(item.catatan || item.notes || item.product_note) && (
                         <div style={{ fontSize: '10px', color: '#6b7280', fontWeight: 'normal', marginTop: '4px' }}>
-                          Catatan: {item.catatan}
+                          Catatan: {item.catatan || item.notes || item.product_note}
                         </div>
                       )}
                     </td>

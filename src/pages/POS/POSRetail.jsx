@@ -600,7 +600,7 @@ const POSRetail = () => {
           // items — untuk log nama produk di TransactionItem
           items: finalizedCartItems.map(item => ({
             product_name: item.name,
-            product_note: item.notes || '',
+            product_note: item.catatan || item.notes || item.product_note || '',
             price: item.finalPrice,
             quantity: item.qty
           })),

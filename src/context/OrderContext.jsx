@@ -1,6 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { addDays } from 'date-fns';
 import { useAuth } from './AuthContext';
+import { formatTransactionId } from '../utils/formatId';
 
 const OrderContext = createContext();
 
@@ -58,26 +59,7 @@ export const OrderProvider = ({ children }) => {
             else if (pNameUpper.includes('COATING') || pNameUpper.includes('RANTIZ')) serviceType = 'Coating';
           }
 
-          const prefix = isRetail ? 'RTL' : 'WRK';
-          const dateObj = new Date(trx.created_at || Date.now());
-          const yy = String(dateObj.getFullYear()).slice(-2);
-          const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-
-          let prodIdStr = '001';
-          if (primaryItem) {
-            const pName = primaryItem.product_name || '';
-            if (pName.includes('Matte')) prodIdStr = '002';
-            else if (pName.includes('Armor')) prodIdStr = '003';
-            else if (pName.includes('Super Safe')) prodIdStr = '004';
-            else if (pName.includes('Color')) prodIdStr = '005';
-            else if (pName.includes('Iron Black 35')) prodIdStr = '010';
-            else if (pName.includes('Iron Black 20')) prodIdStr = '011';
-            else if (pName.includes('Iron Black 05')) prodIdStr = '012';
-            else if (pName.includes('Aplikator')) prodIdStr = '023';
-          }
-
-          const seqNum = String(index + 1).padStart(4, '0');
-          const formattedId = `${prefix}/${yy}${mm}${prodIdStr}${seqNum}`;
+          const formattedId = formatTransactionId(trx);
           const trxId = typeof trx.id === 'string' && trx.id.includes('/') ? trx.id : formattedId;
 
           const orderObj = {
@@ -87,6 +69,7 @@ export const OrderProvider = ({ children }) => {
             customerAddress: trx.customer_address || '-',
             carBrand: trx.car_brand || trx.carBrand || 'Toyota',
             carModel: trx.car_model || trx.carModel || 'Camry',
+            carColor: trx.car_color || trx.carColor || '',
             plateNumber: trx.plate_number || trx.plateNumber || 'B 1234 XYZ',
             chassisNumber: trx.chassis_number || trx.chassisNumber || '-',
             engineNumber: trx.engine_number || trx.engineNumber || '-',
@@ -138,27 +121,6 @@ export const OrderProvider = ({ children }) => {
             dbId: trx.id,
             historyMaintenance: []
           };
-
-          // Grouping logic based on chassis_number or plate_number
-          if (!isRetail) {
-            const hasIdentifier = (orderObj.chassisNumber && orderObj.chassisNumber !== '-') ||
-              (orderObj.plateNumber && orderObj.plateNumber !== 'B 1234 XYZ');
-            if (hasIdentifier) {
-              const existingIndex = groupedOrders.findIndex(o =>
-                o.customerName.toLowerCase() === orderObj.customerName.toLowerCase() &&
-                ((o.chassisNumber !== '-' && o.chassisNumber.toLowerCase() === orderObj.chassisNumber.toLowerCase()) ||
-                  (o.plateNumber !== 'B 1234 XYZ' && o.plateNumber.toLowerCase() === orderObj.plateNumber.toLowerCase()))
-              );
-
-              if (existingIndex !== -1) {
-                groupedOrders[existingIndex].historyMaintenance.push({
-                  ...orderObj,
-                  isMaintenance: true
-                });
-                return; // Skip pushing to groupedOrders array
-              }
-            }
-          }
 
           groupedOrders.push(orderObj);
         });
@@ -379,34 +341,7 @@ export const OrderProvider = ({ children }) => {
   };
 
   const addOrder = (newOrder) => {
-    setOrders((prev) => {
-      if (newOrder.chassisNumber && newOrder.chassisNumber.trim() !== '' && newOrder.chassisNumber !== '-') {
-        const existingIndex = prev.findIndex(o =>
-          o.chassisNumber && o.chassisNumber.toLowerCase() === newOrder.chassisNumber.toLowerCase()
-        );
-
-        if (existingIndex !== -1) {
-          // Add to historyMaintenance of the existing order
-          const existingOrder = prev[existingIndex];
-          const history = existingOrder.historyMaintenance ? [...existingOrder.historyMaintenance] : [];
-
-          history.push({
-            ...newOrder,
-            isMaintenance: true
-          });
-
-          const updatedOrders = [...prev];
-          updatedOrders[existingIndex] = {
-            ...existingOrder,
-            historyMaintenance: history,
-            // We do NOT overwrite the root data as per user request
-          };
-
-          return updatedOrders;
-        }
-      }
-      return [...prev, newOrder];
-    });
+    setOrders((prev) => [...prev, newOrder]);
   };
 
   const completeOrder = (orderId) => {
@@ -437,6 +372,7 @@ export const OrderProvider = ({ children }) => {
           customer_address: updates.customerAddress,
           car_brand: updates.carBrand,
           car_model: updates.carModel,
+          car_color: updates.carColor,
           plate_number: updates.plateNumber,
           chassis_number: updates.chassisNumber,
           engine_number: updates.engineNumber,
@@ -484,22 +420,22 @@ export const OrderProvider = ({ children }) => {
     }
   };
 
-  const settlePayment = async (orderId, amount, method, notes = '', paymentProof = null) => {
+  const settlePayment = async (orderId, amountPaid, method, notes = '', paymentProof = null, additionalDiscount = 0) => {
     const order = orders.find(o => o.id === orderId);
     let apiSuccess = false;
 
     if (order && order.dbId) {
       try {
-        const response = await fetch(`${window.API_URL}/api/transactions/${order.dbId}/pay`, {
-          method: 'PATCH',
+        const response = await fetch(`${window.API_URL}/api/transactions/${order.dbId}/pay-balance`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            amount: amount,
-            paid_amount: amount, // for backward compatibility if any
-            payment_method: method,
+            paymentMethod: method,
+            additionalDiscount: additionalDiscount,
+            amount_paid: amountPaid,
             notes: notes,
             payment_proof: paymentProof
           })
@@ -508,9 +444,13 @@ export const OrderProvider = ({ children }) => {
         if (response.ok) {
           apiSuccess = true;
           await refreshOrdersFromApi();
+        } else {
+          const errData = await response.json();
+          throw new Error(errData.message || 'Gagal melunasi tagihan');
         }
       } catch (e) {
         console.error('Failed to settle payment on backend:', e);
+        throw e;
       }
     }
 
@@ -522,7 +462,7 @@ export const OrderProvider = ({ children }) => {
             const newPaymentHistory = [...(o.paymentHistory || [])];
             newPaymentHistory.push({
               date: new Date().toISOString(),
-              amount: Number(amount),
+              amount: Number(amountPaid),
               method: method || o.paymentMethod || 'Tunai / Cash',
               notes: notes,
               paymentProof: paymentProof
@@ -629,6 +569,7 @@ export const OrderProvider = ({ children }) => {
           customerHp: order.customerHp,
           carBrand: order.carBrand,
           carModel: order.carModel,
+          carColor: order.carColor,
           plateNumber: order.plateNumber,
           chassisNumber: order.chassisNumber,
           location: order.location

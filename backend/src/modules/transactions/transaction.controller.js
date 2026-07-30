@@ -8,6 +8,27 @@ const prisma = require('../../config/db');
 // ──────────────────────────────────────────────
 // GET  /api/transactions
 // ──────────────────────────────────────────────
+const getTransactionById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: Number(id) },
+      include: {
+        items: true,
+        payments: true
+      }
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+
+    res.json(transaction);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getTransactions = async (req, res, next) => {
   try {
     const { role, user_id, id } = req.user || {};
@@ -71,6 +92,7 @@ const createTransaction = async (req, res, next) => {
       customer_address,
       car_brand,
       car_model,
+      car_color,
       plate_number,
       chassis_number,
       engine_number,
@@ -169,6 +191,7 @@ const createTransaction = async (req, res, next) => {
           customer_address:  customer_address || null,
           car_brand:         car_brand || null,
           car_model:         car_model || null,
+          car_color:         car_color || null,
           plate_number:      plate_number || null,
           chassis_number:    chassis_number || null,
           engine_number:     engine_number || null,
@@ -365,6 +388,7 @@ const updateTransaction = async (req, res, next) => {
       customer_address,
       car_brand,
       car_model,
+      car_color,
       plate_number,
       chassis_number,
       engine_number,
@@ -391,6 +415,7 @@ const updateTransaction = async (req, res, next) => {
         customer_address: customer_address !== undefined ? customer_address : existingTx.customer_address,
         car_brand: car_brand !== undefined ? car_brand : existingTx.car_brand,
         car_model: car_model !== undefined ? car_model : existingTx.car_model,
+        car_color: car_color !== undefined ? car_color : existingTx.car_color,
         plate_number: plate_number !== undefined ? plate_number : existingTx.plate_number,
         chassis_number: chassis_number !== undefined ? chassis_number : existingTx.chassis_number,
         engine_number: engine_number !== undefined ? engine_number : existingTx.engine_number,
@@ -441,4 +466,79 @@ const updatePaymentStatusManual = async (req, res, next) => {
   }
 };
 
-module.exports = { getTransactions, createTransaction, deleteTransaction, updatePaymentStatus, updatePaymentStatusManual, updateTransaction };
+const processPaymentBalance = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { paymentMethod, additionalDiscount, amount_paid, payment_proof, notes } = req.body;
+    const discount = Number(additionalDiscount) || 0;
+
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!transaction) return res.status(404).json({ message: 'Transaction not found' });
+    if (transaction.status_pembayaran === 'LUNAS' && transaction.sisa_tagihan <= 0) {
+      return res.status(400).json({ message: 'Tagihan sudah lunas' });
+    }
+
+    const currentSisa = transaction.sisa_tagihan;
+    const maxPayable = currentSisa - discount;
+    const actualPayment = amount_paid !== undefined ? Number(amount_paid) : maxPayable;
+
+    if (actualPayment < 0 || actualPayment > maxPayable) {
+      return res.status(400).json({ message: 'Nominal pembayaran tidak valid' });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const currentAdditional = transaction.additional_discount || 0;
+      const newSisa = maxPayable - actualPayment;
+      const isLunas = newSisa <= 0;
+
+      await tx.transaction.update({
+        where: { id: Number(id) },
+        data: {
+          sisa_tagihan: newSisa,
+          status_pembayaran: isLunas ? 'LUNAS' : 'DP',
+          payment_type: isLunas ? 'Lunas' : 'DP / Sebagian',
+          additional_discount: currentAdditional + discount
+        }
+      });
+
+      if (actualPayment > 0) {
+        await tx.payment.create({
+          data: {
+            transaction_id: Number(id),
+            amount: actualPayment,
+            method: paymentMethod || 'CASH',
+            notes: notes || (discount > 0 ? `Pelunasan dengan diskon Rp${discount}` : 'Pelunasan sisa tagihan'),
+            payment_proof: payment_proof || null
+          }
+        });
+
+        await tx.cashFlowLog.create({
+          data: {
+            type: 'IN',
+            amount: actualPayment,
+            description: `Pelunasan piutang TRX-${id} (${transaction.customer_name})`,
+            referenceId: `TRX-${id}`
+          }
+        });
+      }
+    });
+
+    res.json({ message: 'Pelunasan berhasil diproses', actualPayment });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  getTransactions,
+  getTransactionById,
+  createTransaction,
+  deleteTransaction,
+  updatePaymentStatus,
+  updatePaymentStatusManual,
+  updateTransaction,
+  processPaymentBalance
+};

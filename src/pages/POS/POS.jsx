@@ -606,6 +606,7 @@ const POS = () => {
         customer_address: formData.customerAddress || null,
         car_brand: formData.carBrand || null,
         car_model: formData.carModel || null,
+        car_color: formData.carColor || null,
         plate_number: formData.plateNumber || null,
         chassis_number: formData.chassisNumber || null,
         car_year: formData.carYear || null,
@@ -620,7 +621,7 @@ const POS = () => {
         payment_proof: paymentState.paymentProof || null,
         items: finalizedCartItems.map(item => ({
           product_name: item.name,
-          product_note: item.notes || '',
+          product_note: item.catatan || item.notes || item.product_note || '',
           price: item.finalPrice,
           quantity: item.qty || 1
         })),

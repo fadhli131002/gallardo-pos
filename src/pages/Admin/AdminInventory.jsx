@@ -42,34 +42,28 @@ const AdminInventory = () => {
   });
 
   const FILM_BRANDS = [
-    'Performante - Iron Black',
-    'Performante - Black Stone',
-    'Deluxe - Classic',
-    'Deluxe - Jet Black'
+    'Performante',
+    'Deluxe'
   ];
 
   const FILM_VARIANTS = {
-    'Performante - Iron Black': [
-      'Performante Iron Black 35',
-      'Performante Iron Black 20',
-      'Performante Iron Black 05'
+    'Performante': [
+      'Iron Black 35',
+      'Iron Black 20',
+      'Iron Black 05',
+      'Black Stone 70',
+      'Black Stone 35',
+      'Black Stone 20',
+      'Black Stone 05'
     ],
-    'Performante - Black Stone': [
-      'Performante Black Stone 70',
-      'Performante Black Stone 35',
-      'Performante Black Stone 20',
-      'Performante Black Stone 05'
-    ],
-    'Deluxe - Classic': [
-      'Deluxe Classic 35',
-      'Deluxe Classic 20',
-      'Deluxe Classic 05'
-    ],
-    'Deluxe - Jet Black': [
-      'Deluxe Jet Black 70',
-      'Deluxe Jet Black 35',
-      'Deluxe Jet Black 20',
-      'Deluxe Jet Black 05'
+    'Deluxe': [
+      'Classic 35',
+      'Classic 20',
+      'Classic 05',
+      'Jet Black 70',
+      'Jet Black 35',
+      'Jet Black 20',
+      'Jet Black 05'
     ]
   };
 

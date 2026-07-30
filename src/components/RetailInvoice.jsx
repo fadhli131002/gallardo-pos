@@ -176,7 +176,14 @@ export default function RetailInvoice({ order }) {
             return (
               <tr key={idx} className="border border-black">
                 <td className="border border-black px-2 py-1 text-left" style={{ border: '1px solid black' }}>{idBarang}</td>
-                <td className="border border-black px-2 py-1 text-left" style={{ border: '1px solid black' }}>{itemName}</td>
+                <td className="border border-black px-2 py-1 text-left" style={{ border: '1px solid black' }}>
+                  {itemName}
+                  {(item.catatan || item.notes || item.product_note) && (
+                    <div style={{ fontSize: '10px', color: '#6b7280', fontWeight: 'normal', marginTop: '2px' }}>
+                      Catatan: {item.catatan || item.notes || item.product_note}
+                    </div>
+                  )}
+                </td>
                 <td className="border border-black px-2 py-1 text-left" style={{ border: '1px solid black' }}>{displayedMeter}</td>
                 <td className="border border-black px-2 py-1 text-left" style={{ border: '1px solid black' }}>{formatCurrency(displayedPrice)}</td>
                 <td className="border border-black px-2 py-1 text-left" style={{ border: '1px solid black' }}>{formatCurrency(discount)}</td>
