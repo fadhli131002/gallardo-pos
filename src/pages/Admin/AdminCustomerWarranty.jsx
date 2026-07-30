@@ -58,6 +58,10 @@ const AdminCustomerWarranty = () => {
   const [showComplaintModal, setShowComplaintModal] = useState(false);
   const [complaintOrderData, setComplaintOrderData] = useState(null);
 
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [selectedPrintTx, setSelectedPrintTx] = useState(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const [filterStatus, setFilterStatus] = useState('Semua Status');
   const [filterTransactionType, setFilterTransactionType] = useState('Semua Transaksi');
   const [paymentFilter, setPaymentFilter] = useState('Semua Pembayaran');
@@ -206,6 +210,91 @@ const AdminCustomerWarranty = () => {
     }
   };
 
+
+  const handlePrintModal_DirectPrint = () => {
+    setIsGeneratingPDF(true);
+    setInvoiceOrder(selectedPrintTx);
+    setTimeout(() => {
+      const originalTitle = document.title;
+      document.title = getDynamicFileName(selectedPrintTx);
+      
+      const style = document.createElement('style');
+      style.id = 'print-invoice-style';
+      style.innerHTML = `
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #printable-invoice-wrapper, #printable-invoice-wrapper * {
+            visibility: visible;
+          }
+          #printable-invoice-wrapper {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      window.print();
+      
+      document.title = originalTitle;
+      const injectedStyle = document.getElementById('print-invoice-style');
+      if (injectedStyle) {
+        injectedStyle.remove();
+      }
+      setIsGeneratingPDF(false);
+      setIsPrintModalOpen(false);
+    }, 500);
+  };
+
+  const handlePrintModal_DownloadPDF = async () => {
+    setIsGeneratingPDF(true);
+    setInvoiceOrder(selectedPrintTx);
+    setIsDownloading(true);
+    
+    try {
+      // Tunggu sejenak agar komponen SharedInvoice berhasil dirender ke DOM
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await handleDownloadInvoiceClick(); 
+    } catch (error) {
+      console.error("Gagal mendownload PDF:", error);
+    } finally {
+      setIsDownloading(false);
+      setIsPrintModalOpen(false);
+    }
+  };
+
+  const handlePrintModal_WhatsApp = () => {
+    const order = selectedPrintTx;
+    if (!order.customerHp) {
+      toast.error('Nomor telepon customer tidak tersedia!');
+      return;
+    }
+    
+    let phone = order.customerHp.replace(/\D/g, '');
+    if (phone.startsWith('0')) {
+      phone = '62' + phone.substring(1);
+    }
+    
+    const remaining = (order.cart || []).reduce((sum, item) => sum + (item.price * item.quantity), 0) - (order.discount || 0) + (order.tax || 0) - (order.amountPaid || 0);
+    
+    let orderId = order.id || 'Tanpa_ID';
+    if (orderId.startsWith('ORD-')) {
+      orderId = orderId.replace('ORD-', 'WRK/300260700');
+    }
+    const cleanId = orderId.replace(/\//g, '-');
+
+    const msg = `Halo Bapak/Ibu ${order.customerName || ''}, berikut adalah rincian Invoice ${cleanId} Anda dari Gallardo Autosport. Sisa Tagihan: ${remaining > 0 ? formatCurrency(remaining) : 'Lunas'}. Terima kasih telah mempercayakan kendaraan Anda kepada kami!`;
+    
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+    setIsPrintModalOpen(false);
+  };
 
   const handleExportBulkExcel = () => {
     let ordersToExport = filteredOrders.filter(o => o.type === 'RETAIL');
@@ -731,7 +820,7 @@ const AdminCustomerWarranty = () => {
                             </button>
                           )}
 
-                          <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setIsGeneratingPDF(true); setInvoiceOrder(order); setTimeout(() => handleDownloadInvoiceClick(), 500); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                          <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setSelectedPrintTx(order); setIsPrintModalOpen(true); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                             <Printer size={16} color="#4b5563" /> Cetak Invoice
                           </button>
 
@@ -1578,7 +1667,7 @@ const AdminCustomerWarranty = () => {
 
       {/* Hidden Invoice Template for PDF Generation */}
       {invoiceOrder && (
-        <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '794px' }}>
+        <div id="printable-invoice-wrapper" style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '794px' }}>
           <SharedInvoice order={invoiceOrder} />
         </div>
       )}
@@ -1686,6 +1775,53 @@ const AdminCustomerWarranty = () => {
           // Additional logic if needed after saving complaint
         }}
       />
+
+      {/* Print Options Modal */}
+      {isPrintModalOpen && selectedPrintTx && (
+        <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="modal-content" style={{ width: '400px', maxWidth: '100%', position: 'relative', backgroundColor: '#ffffff', borderRadius: '16px', padding: '32px 24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+            
+            <button onClick={() => setIsPrintModalOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', cursor: 'pointer', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#4b5563'} onMouseOut={e => e.currentTarget.style.color = '#9ca3af'}>
+              <X size={20} />
+            </button>
+
+            <div className="text-center mb-6 mt-2">
+              <h2 className="text-[20px] font-bold text-gray-900 m-0 tracking-tight">Opsi Cetak Invoice</h2>
+            </div>
+            
+            {/* Context Badge */}
+            <div style={{ backgroundColor: '#f8fafc', borderRadius: '12px', padding: '16px', marginBottom: '24px', border: '1px solid #e2e8f0', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ fontSize: '13px', color: '#64748b' }}>ID Transaksi: <span style={{ fontFamily: 'monospace', color: '#334155', fontWeight: '600' }}>{selectedPrintTx.id}</span></div>
+              <div style={{ fontSize: '13px', color: '#64748b' }}>Pelanggan: <span style={{ color: '#0f172a', fontWeight: '700' }}>{selectedPrintTx.customerName || selectedPrintTx.supplierName || 'Tanpa Nama'}</span></div>
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              <button onClick={handlePrintModal_DirectPrint} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: 'transparent', color: '#1e293b', fontSize: '15px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease' }} onMouseOver={e => { e.currentTarget.style.backgroundColor = '#2563eb'; e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#1e293b'; }}>
+                <Printer size={20} />
+                Langsung Print
+              </button>
+              
+              <button onClick={handlePrintModal_DownloadPDF} disabled={isDownloading} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: 'transparent', color: '#1e293b', fontSize: '15px', fontWeight: '600', cursor: isDownloading ? 'not-allowed' : 'pointer', transition: 'all 0.2s ease', opacity: isDownloading ? 0.7 : 1 }} onMouseOver={e => { if(!isDownloading){ e.currentTarget.style.backgroundColor = '#2563eb'; e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#ffffff'; } }} onMouseOut={e => { if(!isDownloading){ e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#1e293b'; } }}>
+                {isDownloading ? <Loader2 size={20} className="animate-spin" /> : <Download size={20} />}
+                {isDownloading ? 'Sedang Menyiapkan PDF...' : 'Download PDF'}
+              </button>
+              
+              <button onClick={handlePrintModal_WhatsApp} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: 'transparent', color: '#1e293b', fontSize: '15px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease' }} onMouseOver={e => { e.currentTarget.style.backgroundColor = '#2563eb'; e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#1e293b'; }}>
+                <MessageCircle size={20} />
+                Kirim ke WhatsApp
+              </button>
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ marginTop: '24px', textAlign: 'center' }}>
+              <button onClick={() => setIsPrintModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '14px', fontWeight: '500', cursor: 'pointer', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#2563eb'} onMouseOut={e => e.currentTarget.style.color = '#94a3b8'}>
+                Batal
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </>
   );
 };

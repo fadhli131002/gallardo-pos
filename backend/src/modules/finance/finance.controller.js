@@ -188,8 +188,12 @@ exports.getSalesCommissions = async (req, res, next) => {
         ...(Object.keys(dateFilter).length > 0 && { created_at: dateFilter })
       },
       select: {
+        id: true,
         sales_id: true,
         total_amount: true,
+        sales_commission: true,
+        created_at: true,
+        customer_name: true,
       }
     });
 
@@ -212,18 +216,53 @@ exports.getSalesCommissions = async (req, res, next) => {
       const salesTx = transactions.filter(t => t.sales_id === salesId);
       const total_transactions = salesTx.length;
       const total_omset = salesTx.reduce((sum, t) => sum + t.total_amount, 0);
-      const estimated_commission = total_omset * COMMISSION_RATE;
+      
+      const transactions_detail = salesTx.map(t => {
+        const commission = t.sales_commission !== null ? t.sales_commission : (t.total_amount * COMMISSION_RATE);
+        return {
+          id: t.id,
+          date: t.created_at,
+          customer_name: t.customer_name,
+          total_amount: t.total_amount,
+          commission: commission,
+          is_manual: t.sales_commission !== null
+        };
+      });
+
+      const estimated_commission = transactions_detail.reduce((sum, t) => sum + t.commission, 0);
 
       return {
         sales_id: salesId,
         sales_name: userMap[salesId] || `Sales ${salesId}`,
         total_transactions,
         total_omset,
-        estimated_commission
+        estimated_commission,
+        transactions: transactions_detail
       };
     });
 
     res.json(commissions);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateCommission = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { commissionAmount } = req.body;
+
+    if (!id) return res.status(400).json({ message: 'ID Transaksi wajib diisi' });
+
+    // Allow null or number
+    const finalCommission = commissionAmount !== null && commissionAmount !== '' ? Number(commissionAmount) : null;
+
+    const updated = await prisma.transaction.update({
+      where: { id: Number(id) },
+      data: { sales_commission: finalCommission }
+    });
+
+    res.json({ message: 'Komisi berhasil diperbarui', transaction: updated });
   } catch (error) {
     next(error);
   }

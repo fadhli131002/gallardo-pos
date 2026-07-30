@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Search, Eye, X, Image as ImageIcon } from 'lucide-react';
+import { Search, Eye, X, Image as ImageIcon, Download, ChevronLeft, ChevronRight, Filter, Plus, Printer, MoreHorizontal } from 'lucide-react';
 import { formatRupiah } from '../../utils/formatRupiah';
 import { formatTransactionId } from '../../utils/formatId';
+import { exportToCSV } from '../../utils/exportCSV';
 
 const FinanceReceivables = () => {
   const [receivables, setReceivables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('Semua');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchReceivables();
@@ -33,79 +39,139 @@ const FinanceReceivables = () => {
 
   const filteredReceivables = receivables.filter(r => {
     const formattedId = formatTransactionId(r).toLowerCase();
-    return (
-      (r.customer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      formattedId.includes(searchTerm.toLowerCase())
-    );
+    const matchesSearch = (r.customer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) || formattedId.includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'Semua' || r.status_pembayaran.toLowerCase() === statusFilter.toLowerCase();
+    return matchesSearch && matchesStatus;
   });
 
+  const totalPages = Math.ceil(filteredReceivables.length / itemsPerPage);
+  const paginatedData = filteredReceivables.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleExport = () => {
+    const headers = ['ID TRX', 'Pelanggan', 'Total Transaksi', 'Sisa Tagihan', 'Status'];
+    const data = filteredReceivables.map(tx => [
+      formatTransactionId(tx),
+      tx.customer_name || 'Tanpa Nama',
+      tx.total_amount,
+      tx.sisa_tagihan,
+      tx.status_pembayaran
+    ]);
+    exportToCSV(data, headers, `Laporan_Piutang_${new Date().getTime()}`);
+  };
+
   return (
-    <div className="p-6 max-w-7xl mx-auto h-full flex flex-col">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Piutang Pelanggan</h1>
-          <p className="text-gray-500 dark:text-gray-400">Daftar tagihan transaksi yang belum lunas (Read-Only)</p>
+    <div className="h-full flex flex-col">
+      {/* New Page Header */}
+      <div className="mb-6 text-left">
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Piutang Pelanggan</h1>
+        <p className="text-sm text-gray-500 mt-1">Kelola dan pantau status tagihan piutang dari setiap transaksi pelanggan</p>
+      </div>
+
+      {/* Integrated Toolbar */}
+      <div className="mb-6 flex flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <div className="flex gap-3 flex-1">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Cari berdasarkan Nama Pelanggan, ID TRX, atau ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm outline-none transition-all"
+            />
+          </div>
+          <div className="relative hidden sm:block w-48 flex-shrink-0">
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500 w-4 h-4" />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full pl-9 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm outline-none transition-all appearance-none cursor-pointer"
+            >
+              <option value="Semua">Semua Status</option>
+              <option value="Belum Bayar">Belum Lunas</option>
+              <option value="DP">DP / Sebagian</option>
+            </select>
+          </div>
         </div>
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Cari pelanggan / ID..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm outline-none dark:text-white"
-          />
+        <div className="flex-shrink-0">
+          <button 
+            onClick={handleExport}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm relative group"
+            title="Unduh Data Hasil Pencarian Saat Ini"
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </button>
         </div>
       </div>
 
-      <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
-        <div className="overflow-x-auto">
+      <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+        <div className="overflow-x-auto flex-1">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-                <th className="py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID TRX</th>
-                <th className="py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pelanggan</th>
-                <th className="py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Transaksi</th>
-                <th className="py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sisa Tagihan</th>
-                <th className="py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Aksi</th>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">ID TRX</th>
+                <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Pelanggan</th>
+                <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Total Transaksi</th>
+                <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Sisa Tagihan</th>
+                <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
+                <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+            <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="py-12 text-center text-gray-500">Memuat data...</td>
+                  <td colSpan="6" className="py-12 text-center text-gray-500">Memuat data...</td>
                 </tr>
-              ) : filteredReceivables.length === 0 ? (
+              ) : paginatedData.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="py-12 text-center text-gray-500">Tidak ada data piutang</td>
+                  <td colSpan="6" className="py-12 text-center text-gray-500">Tidak ada data piutang</td>
                 </tr>
               ) : (
-                filteredReceivables.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                    <td className="py-4 px-6 text-sm font-medium text-gray-900 dark:text-white">{formatTransactionId(tx)}</td>
-                    <td className="py-4 px-6 text-sm text-gray-700 dark:text-gray-300">
-                      <div>{tx.customer_name || 'Tanpa Nama'}</div>
-                      <div className="text-xs text-gray-400">{tx.car_brand} {tx.car_model}</div>
+                paginatedData.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-gray-50/80 transition-colors group">
+                    <td className="py-3 px-6 text-sm font-medium text-gray-900 whitespace-nowrap">{formatTransactionId(tx)}</td>
+                    <td className="py-3 px-6 text-sm text-gray-700">
+                      <div className="font-medium">{tx.customer_name || 'Tanpa Nama'}</div>
+                      <div className="text-xs text-gray-400 mt-0.5">{tx.car_brand} {tx.car_model}</div>
                     </td>
-                    <td className="py-4 px-6 text-sm text-gray-700 dark:text-gray-300">
+                    <td className="py-3 px-6 text-sm text-gray-700 whitespace-nowrap">
                       {formatRupiah(tx.total_amount)}
                     </td>
-                    <td className="py-4 px-6 text-sm font-semibold text-red-600 dark:text-red-400">
+                    <td className="py-3 px-6 text-sm font-bold text-red-700 whitespace-nowrap">
                       {formatRupiah(tx.sisa_tagihan)}
                     </td>
-                    <td className="py-4 px-6">
-                      <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
+                    <td className="py-3 px-6 whitespace-nowrap">
+                      <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-bold rounded-full border ${
+                        tx.status_pembayaran.toLowerCase().includes('dp') || tx.status_pembayaran.toLowerCase().includes('sebagian')
+                          ? 'bg-amber-100 text-amber-800 border-amber-200' 
+                          : 'bg-red-50 text-red-700 border-red-200'
+                      }`}>
                         {tx.status_pembayaran}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-right">
-                      <button
-                        onClick={() => setSelectedTransaction(tx)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                      >
-                        <Eye className="w-3.5 h-3.5" /> Bukti
-                      </button>
+                    <td className="py-3 px-6 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => setSelectedTransaction(tx)}
+                          title="Lihat Bukti"
+                          className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          title="Print Nota"
+                          className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                        >
+                          <Printer className="w-4 h-4" />
+                        </button>
+                        <button
+                          title="Lainnya"
+                          className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                        >
+                          <MoreHorizontal className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -113,6 +179,34 @@ const FinanceReceivables = () => {
             </tbody>
           </table>
         </div>
+        
+        {/* Pagination Footer */}
+        {!loading && filteredReceivables.length > 0 && (
+          <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100 bg-white">
+            <span className="text-sm text-gray-500">
+              Showing <span className="font-medium text-gray-900">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-medium text-gray-900">{Math.min(currentPage * itemsPerPage, filteredReceivables.length)}</span> of <span className="font-medium text-gray-900">{filteredReceivables.length}</span> items
+            </span>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-sm font-medium text-gray-700 px-2">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Payment Proof Modal */}

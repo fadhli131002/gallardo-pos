@@ -5,7 +5,7 @@ import { PRICING_MATRIX, CAR_BRANDS, formatCurrency, PRODUCT_CATALOG } from '../
 import { useOrders } from '../../context/OrderContext';
 import { useInventory } from '../../context/InventoryContext';
 import { format } from 'date-fns';
-import { Trash2, Plus, Minus, Calculator, Wallet, User, Car, CheckCircle, Package, Search, Tag, Settings, CreditCard, ChevronDown, ChevronRight, Check, CheckSquare, Printer, MessageCircle, X, ShoppingCart, Loader2, FileText, CarFront, Upload, Percent, Banknote, QrCode, Gift } from 'lucide-react';
+import { Trash2, Plus, Minus, Calculator, Wallet, User, Car, CheckCircle, Package, Search, Tag, Settings, CreditCard, ChevronDown, ChevronRight, Check, CheckSquare, Printer, MessageCircle, X, ShoppingCart, Loader2, FileText, CarFront, Upload, Percent, Banknote, QrCode, Gift, Bike, Armchair, Sparkles } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import SharedInvoice from '../../components/SharedInvoice';
 import logoGallardo from '../../assets/logo-gallardo.png';
@@ -1597,39 +1597,106 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
 
       {/* Variant Modal */}
       {showVariantModal && selectedProductForModal && (
-        <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
-          <div className="modal-content animate-fade-in" style={{ position: 'relative', backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', width: '100%', maxWidth: '700px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)' }}>
+          
+          <style>{`
+            .custom-scrollbar::-webkit-scrollbar {
+              width: 6px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+              background: #f1f5f9; 
+              border-radius: 4px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+              background: #cbd5e1; 
+              border-radius: 4px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: #94a3b8; 
+            }
+            .option-card {
+              transition: all 0.2s ease;
+            }
+            .option-card:hover:not(.selected) {
+              border-color: #cbd5e1;
+              box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+              background-color: #ffffff;
+            }
+            .btn-primary-action {
+              transition: all 0.2s ease;
+            }
+            .btn-primary-action:hover {
+              background-color: #1d4ed8;
+              box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
+              transform: translateY(-1px);
+            }
+          `}</style>
 
-            <div style={{ flexShrink: 0, padding: '24px', borderBottom: '1px solid #e5e7eb', backgroundColor: '#ffffff' }}>
-              <h2 className="font-sans font-bold mb-1" style={{ color: '#111', fontSize: '1.75rem', margin: 0 }}>{selectedProductForModal.name}</h2>
-              <p className="text-sm m-0 mt-1" style={{ color: '#6b7280', fontSize: '1rem', margin: 0, marginTop: '4px' }}>Silakan pilih opsi sebanyak yang Anda butuhkan, Anda dapat mengubahnya nanti di keranjang.</p>
+          <div className="modal-content animate-fade-in" style={{ position: 'relative', backgroundColor: '#ffffff', borderRadius: '24px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', width: '100%', maxWidth: '720px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>
+
+            <div style={{ flexShrink: 0, padding: '24px 32px', borderBottom: '1px solid #f1f5f9', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {selectedProductForModal.image ? (
+                <img src={`${window.API_URL}/storage/${selectedProductForModal.image}`} alt={selectedProductForModal.name} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
+              ) : (
+                <div style={{ padding: '12px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <Package size={24} color="#334155" />
+                </div>
+              )}
+              <div>
+                <h2 className="font-bold mb-1" style={{ color: '#0f172a', fontSize: '1.5rem', margin: 0, letterSpacing: '-0.025em' }}>{selectedProductForModal.name}</h2>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0, marginTop: '4px', lineHeight: '1.4' }}>Silakan pilih opsi spesifikasi yang Anda butuhkan. Anda dapat mengubahnya nanti di keranjang.</p>
+              </div>
             </div>
 
-            <div style={{ flex: 1, padding: '24px', overflowY: 'auto', backgroundColor: '#ffffff' }}>
+            <div className="custom-scrollbar" style={{ flex: 1, padding: '32px', overflowY: 'auto', backgroundColor: '#ffffff', position: 'relative' }}>
               {selectedProductForModal.category === 'Kaca Film' && (
                 <>
-                  <div style={{ marginBottom: '24px' }}>
-                    <label className="font-sans text-sm font-bold mb-3 block" style={{ color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px', display: 'block' }}>1. Posisi Pemasangan</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                  <div style={{ marginBottom: '32px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                      <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.05em' }}>BAGIAN 1 &bull;</span>
+                      <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700', color: '#1e293b', letterSpacing: '0.025em' }}>POSISI PEMASANGAN</h3>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                       {posisiPemasangan.map(val => (
-                        <div key={val.id} onClick={() => setModalVariantState(prev => ({ ...prev, posisi: val.name }))}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', border: modalVariantState.posisi === val.name ? '2px solid #6366f1' : '1px solid #e5e7eb', backgroundColor: modalVariantState.posisi === val.name ? '#eef2ff' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s' }}
+                        <div key={val.id} 
+                          className={`option-card ${modalVariantState.posisi === val.name ? 'selected' : ''}`}
+                          onClick={() => setModalVariantState(prev => ({ ...prev, posisi: val.name }))}
+                          style={{ 
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '16px', 
+                            border: modalVariantState.posisi === val.name ? '2px solid #2563eb' : '1px solid #e2e8f0', 
+                            backgroundColor: modalVariantState.posisi === val.name ? '#eff6ff' : '#ffffff', 
+                            cursor: 'pointer'
+                          }}
                         >
-                          <span style={{ fontWeight: 'bold', color: modalVariantState.posisi === val.name ? '#3730a3' : '#111', fontSize: '15px' }}>{val.name}</span>
-                          {modalVariantState.posisi === val.name ? <CheckCircle size={20} color="#6366f1" /> : <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '1px solid #d1d5db' }}></div>}
+                          <span style={{ fontWeight: modalVariantState.posisi === val.name ? '700' : '600', color: modalVariantState.posisi === val.name ? '#1e40af' : '#334155', fontSize: '0.95rem', display: 'block' }}>{val.name}</span>
+                          <div style={{ flexShrink: 0, width: '22px', height: '22px', borderRadius: '50%', border: modalVariantState.posisi === val.name ? 'none' : '2px solid #cbd5e1', backgroundColor: modalVariantState.posisi === val.name ? '#2563eb' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {modalVariantState.posisi === val.name && <CheckCircle size={14} color="#ffffff" strokeWidth={3} />}
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                  <div style={{ marginBottom: '24px' }}>
-                    <label className="font-sans text-sm font-bold mb-3 block" style={{ color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px', display: 'block' }}>2. Posisi Pemasangan (Partial)</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                  <div style={{ marginBottom: '32px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                      <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.05em' }}>BAGIAN 2 &bull;</span>
+                      <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700', color: '#1e293b', letterSpacing: '0.025em' }}>POSISI PEMASANGAN (PARTIAL)</h3>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                       {posisiPartial.map(val => (
-                        <div key={val.id} onClick={() => setModalVariantState(prev => ({ ...prev, posisi: val.name }))}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', border: modalVariantState.posisi === val.name ? '2px solid #6366f1' : '1px solid #e5e7eb', backgroundColor: modalVariantState.posisi === val.name ? '#eef2ff' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s' }}
+                        <div key={val.id} 
+                          className={`option-card ${modalVariantState.posisi === val.name ? 'selected' : ''}`}
+                          onClick={() => setModalVariantState(prev => ({ ...prev, posisi: val.name }))}
+                          style={{ 
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '16px', 
+                            border: modalVariantState.posisi === val.name ? '2px solid #2563eb' : '1px solid #e2e8f0', 
+                            backgroundColor: modalVariantState.posisi === val.name ? '#eff6ff' : '#ffffff', 
+                            cursor: 'pointer'
+                          }}
                         >
-                          <span style={{ fontWeight: 'bold', color: modalVariantState.posisi === val.name ? '#3730a3' : '#111', fontSize: '15px' }}>{val.name}</span>
-                          {modalVariantState.posisi === val.name ? <CheckCircle size={20} color="#6366f1" /> : <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '1px solid #d1d5db' }}></div>}
+                          <span style={{ fontWeight: modalVariantState.posisi === val.name ? '700' : '600', color: modalVariantState.posisi === val.name ? '#1e40af' : '#334155', fontSize: '0.95rem', display: 'block' }}>{val.name}</span>
+                          <div style={{ flexShrink: 0, width: '22px', height: '22px', borderRadius: '50%', border: modalVariantState.posisi === val.name ? 'none' : '2px solid #cbd5e1', backgroundColor: modalVariantState.posisi === val.name ? '#2563eb' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {modalVariantState.posisi === val.name && <CheckCircle size={14} color="#ffffff" strokeWidth={3} />}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1638,46 +1705,75 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
               )}
 
               {(selectedProductForModal.category === 'PPF' || selectedProductForModal.category === 'Coating & Chemical') && (
-                <div style={{ marginBottom: '24px' }}>
-                  <label className="font-sans text-sm font-bold mb-3 block" style={{ color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px', display: 'block' }}>Peruntukan / Bagian</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-                    {peruntukanItems.filter(p => p.kategori === selectedProductForModal.type).map(val => (
-                      <div key={val.id} onClick={() => setModalVariantState(prev => ({ ...prev, peruntukan: val.nama }))}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', border: modalVariantState.peruntukan === val.nama ? '2px solid #6366f1' : '1px solid #e5e7eb', backgroundColor: modalVariantState.peruntukan === val.nama ? '#eef2ff' : '#ffffff', cursor: 'pointer', transition: 'all 0.2s' }}
-                      >
-                        <span style={{ fontWeight: 'bold', color: modalVariantState.peruntukan === val.nama ? '#3730a3' : '#111', fontSize: '15px' }}>{val.nama}</span>
-                        {modalVariantState.peruntukan === val.nama ? <CheckCircle size={20} color="#6366f1" /> : <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '1px solid #d1d5db' }}></div>}
-                      </div>
-                    ))}
+                <div style={{ marginBottom: '32px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                    <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.05em' }}>BAGIAN 1 &bull;</span>
+                    <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700', color: '#1e293b', letterSpacing: '0.025em' }}>PERUNTUKAN / BAGIAN</h3>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                    {peruntukanItems.filter(p => p.kategori === selectedProductForModal.type).map(val => {
+                      const cleanName = val.nama.replace(/RANTIZ /i, '');
+                      const nUpper = cleanName.toUpperCase();
+                      let IconComponent = Car;
+                      if (nUpper.includes('MOTOR')) IconComponent = Bike;
+                      else if (nUpper.includes('LEATHER') || nUpper.includes('INTERIOR')) IconComponent = Armchair;
+                      else if (nUpper.includes('GLASS') || nUpper.includes('COATING')) IconComponent = Sparkles;
+                      else if (nUpper.includes('MAINTENANCE')) IconComponent = Settings;
+                      else if (nUpper.includes('PARTIAL')) IconComponent = CarFront;
+
+                      return (
+                        <div key={val.id} 
+                          className={`option-card ${modalVariantState.peruntukan === val.nama ? 'selected' : ''}`}
+                          onClick={() => setModalVariantState(prev => ({ ...prev, peruntukan: val.nama }))}
+                          style={{ 
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '16px', 
+                            border: modalVariantState.peruntukan === val.nama ? '2px solid #2563eb' : '1px solid #e2e8f0', 
+                            backgroundColor: modalVariantState.peruntukan === val.nama ? '#eff6ff' : '#ffffff', 
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <span style={{ fontWeight: modalVariantState.peruntukan === val.nama ? '700' : '600', color: modalVariantState.peruntukan === val.nama ? '#1e40af' : '#334155', fontSize: '0.95rem', display: 'block' }}>{cleanName}</span>
+                          <div style={{ flexShrink: 0, width: '22px', height: '22px', borderRadius: '50%', border: modalVariantState.peruntukan === val.nama ? 'none' : '2px solid #cbd5e1', backgroundColor: modalVariantState.peruntukan === val.nama ? '#2563eb' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {modalVariantState.peruntukan === val.nama && <CheckCircle size={14} color="#ffffff" strokeWidth={3} />}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               )}
 
-              <div style={{ marginBottom: '24px' }}>
-                <label className="font-sans text-sm font-bold mb-3 block" style={{ color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', display: 'block' }}>Catatan Produk (Opsional)</label>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ color: '#1e293b', fontSize: '0.95rem', fontWeight: '700', marginBottom: '12px', display: 'block', letterSpacing: '0.025em' }}>CATATAN PRODUK (OPSIONAL)</label>
                 <textarea
-                  placeholder="Contoh: Harap hati-hati pada bagian spion kiri..."
+                  placeholder="Contoh: Catatan warna, posisi pemasangan, atau instruksi khusus..."
                   value={modalVariantState.catatan || ''}
                   onChange={(e) => setModalVariantState(prev => ({ ...prev, catatan: e.target.value }))}
-                  style={{ width: '100%', minHeight: '80px', padding: '12px', borderRadius: '12px', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb', color: '#111', fontSize: '14px', resize: 'vertical' }}
+                  style={{ width: '100%', minHeight: '90px', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#0f172a', fontSize: '0.95rem', resize: 'vertical', fontFamily: 'inherit', transition: 'border-color 0.2s', outline: 'none' }}
+                  onFocus={(e) => e.target.style.borderColor = '#94a3b8'}
+                  onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                 />
               </div>
             </div>
 
-            <div style={{ flexShrink: 0, padding: '16px 24px', borderTop: '1px solid #e5e7eb', display: 'flex', justifyItems: 'center', justifyContent: 'flex-end', gap: '12px', backgroundColor: '#f9fafb' }}>
+            <div style={{ position: 'sticky', bottom: 0, padding: '20px 32px', borderTop: '1px solid rgba(226, 232, 240, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '16px', backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(12px)', zIndex: 10 }}>
               <button
                 type="button"
-                style={{ padding: '10px 20px', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #d1d5db', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+                style={{ padding: '12px 24px', color: '#475569', backgroundColor: 'transparent', border: 'none', borderRadius: '12px', fontWeight: '600', fontSize: '0.95rem', cursor: 'pointer', transition: 'all 0.2s' }}
+                onMouseOver={(e) => { e.target.style.backgroundColor = '#f1f5f9'; e.target.style.color = '#0f172a'; }}
+                onMouseOut={(e) => { e.target.style.backgroundColor = 'transparent'; e.target.style.color = '#475569'; }}
                 onClick={() => setShowVariantModal(false)}
               >
                 Batal
               </button>
               <button
                 type="button"
-                style={{ padding: '10px 20px', color: '#ffffff', backgroundColor: '#2563eb', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+                className="btn-primary-action"
+                style={{ padding: '12px 28px', color: '#ffffff', backgroundColor: '#2563eb', border: 'none', borderRadius: '14px', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                 onClick={handleAddToCartFromModal}
               >
-                Lanjutkan &gt;
+                Lanjutkan
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </button>
             </div>
 

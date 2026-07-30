@@ -32,6 +32,7 @@ model Transaction {
   installation_date String?
   installation_time String?
   total_amount      Float
+  sales_commission  Float?
   discount          Float             @default(0)
   sisa_tagihan      Float
   status_pembayaran String            @default("Proses")

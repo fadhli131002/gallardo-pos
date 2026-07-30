@@ -115,13 +115,15 @@ const Calendar = () => {
           return check >= start && check <= end;
         });
         const hasOrders = dayOrders.length > 0;
-        const cellClass = hasOrders && isSameMonth(day, monthStart) 
-          ? 'cell active-day' 
-          : 'cell';
+        const isToday = isSameDay(day, new Date());
+        
+        let cellClass = 'cell';
+        if (isToday) cellClass += ' today-cell';
+        if (!isSameMonth(day, monthStart)) cellClass += ' disabled';
         
         days.push(
           <div
-            className={`${cellClass} ${!isSameMonth(day, monthStart) ? 'disabled' : ''}`}
+            className={cellClass}
             key={day}
           >
             <span className="number font-mono-num">{formattedDate}</span>
@@ -136,10 +138,9 @@ const Calendar = () => {
                     ))}
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', marginTop: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                     <span className="status-indicator">
                       <span className="status-dot"></span>
-                      Tersedia
                     </span>
                   </div>
                 )
@@ -209,18 +210,18 @@ const Calendar = () => {
                 return orderDate >= mStart && orderDate <= mEnd;
               }).map(order => (
                 <div key={order.id} className="active-order-card">
-                  <div className="flex justify-between">
-                    <h4 className="font-sans font-semibold">{order.customerName}</h4>
-                    <span className="text-xs font-mono-num text-secondary">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-sans font-bold text-gray-900" style={{ fontSize: '0.95rem' }}>{order.customerName}</h4>
+                    <span className="date-badge">
                       {format(new Date(order.date), 'dd/MM')}
                     </span>
                   </div>
-                  <p className="text-sm text-secondary font-mono-ui mt-1 mb-2">{order.service}</p>
+                  <p className="product-tag">{order.service}</p>
                   <button 
-                    className="btn-resolve mt-3"
+                    className="btn-resolve"
                     onClick={() => setConfirmModalOrder(order.id)}
                   >
-                    <CheckCircle2 size={16} color="#059669" />
+                    <CheckCircle2 size={16} className="resolve-icon" color="#059669" />
                     Selesaikan Pemasangan
                   </button>
                 </div>

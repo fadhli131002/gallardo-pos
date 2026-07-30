@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { DollarSign, CreditCard, TrendingUp, TrendingDown } from 'lucide-react';
+import { DollarSign, CreditCard, TrendingUp, TrendingDown, FileText, PieChart, Download, Calendar as CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 const FinanceDashboard = () => {
@@ -71,84 +71,153 @@ const FinanceDashboard = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="max-w-full">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Keuangan</h1>
-          <p className="text-gray-500 dark:text-gray-400">Ringkasan kas, piutang, dan profitabilitas</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Dashboard Keuangan</h1>
+          <p className="text-sm text-gray-500 mt-1">Pantau performa kas, piutang, dan laba rugi bisnis Anda secara real-time</p>
         </div>
-        <div>
-          <select 
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <select 
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer"
+            >
+              <option value="Hari Ini">Hari Ini</option>
+              <option value="Bulan Ini">Bulan Ini</option>
+              <option value="Tahun Ini">Tahun Ini</option>
+              <option value="Semua Waktu">Semua Waktu</option>
+            </select>
+          </div>
+          <button 
+            onClick={() => window.print()}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap"
           >
-            <option value="Hari Ini">Hari Ini</option>
-            <option value="Bulan Ini">Bulan Ini</option>
-            <option value="Tahun Ini">Tahun Ini</option>
-            <option value="Semua Waktu">Semua Waktu</option>
-          </select>
+            <Download className="w-4 h-4" />
+            Unduh Laporan PDF
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Kas Masuk Card */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col"
+          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400">Total Kas Masuk (Hari Ini)</h3>
-            <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
-            </div>
+          <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+            <DollarSign className="w-20 h-20 text-green-600" />
           </div>
-          <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {formatRupiah(summary.totalKasMasuk)}
+          <div className="relative z-10">
+            <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-1">Kas Masuk</h3>
+            <div className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">
+              {formatRupiah(summary.totalKasMasuk)}
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center border border-green-100">
+                <DollarSign className="w-4 h-4 text-green-600" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-green-700 flex items-center">
+                  <TrendingUp size={12} className="mr-1" /> Stabil
+                </span>
+                <span className="text-[10px] text-gray-400 uppercase tracking-wide">Periode Terpilih</span>
+              </div>
+            </div>
           </div>
         </motion.div>
 
         {/* Piutang Card */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col"
+          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400">Total Piutang (Belum Lunas)</h3>
-            <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-              <CreditCard className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+          <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+            <CreditCard className="w-20 h-20 text-orange-600" />
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-1">Piutang</h3>
+            <div className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">
+              {formatRupiah(summary.totalPiutang)}
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center border border-orange-100">
+                <CreditCard className="w-4 h-4 text-orange-600" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-orange-700 flex items-center">
+                  Belum Lunas
+                </span>
+                <span className="text-[10px] text-gray-400 uppercase tracking-wide">Total Akumulasi</span>
+              </div>
             </div>
           </div>
-          <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {formatRupiah(summary.totalPiutang)}
+        </motion.div>
+
+        {/* Omset Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden"
+        >
+          <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+            <FileText className="w-20 h-20 text-blue-600" />
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-1">Total Omset</h3>
+            <div className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">
+              {formatRupiah(summary.totalOmset)}
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100">
+                <FileText className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-blue-700 flex items-center">
+                  Sales Gross
+                </span>
+                <span className="text-[10px] text-gray-400 uppercase tracking-wide">Periode Terpilih</span>
+              </div>
+            </div>
           </div>
         </motion.div>
 
         {/* Laba/Rugi Card */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col"
+          transition={{ delay: 0.3 }}
+          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400">Laba / Rugi Standar</h3>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${summary.labaRugi >= 0 ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
-              {summary.labaRugi >= 0 ? (
-                <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              ) : (
-                <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
-              )}
+          <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+            <PieChart className={`w-20 h-20 ${summary.labaRugi >= 0 ? 'text-indigo-600' : 'text-red-600'}`} />
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-1">Laba / Rugi</h3>
+            <div className={`text-2xl font-bold mb-4 tracking-tight ${summary.labaRugi >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
+              {summary.labaRugi < 0 ? '-' : ''}{formatRupiah(Math.abs(summary.labaRugi))}
             </div>
-          </div>
-          <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {formatRupiah(summary.labaRugi)}
-          </div>
-          <div className="text-xs text-gray-400 mt-auto">
-            Omset: {formatRupiah(summary.totalOmset)} | HPP: {formatRupiah(summary.totalHpp)}
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${summary.labaRugi >= 0 ? 'bg-indigo-50 border-indigo-100' : 'bg-red-50 border-red-100'}`}>
+                {summary.labaRugi >= 0 ? (
+                  <TrendingUp className="w-4 h-4 text-indigo-600" />
+                ) : (
+                  <TrendingDown className="w-4 h-4 text-red-600" />
+                )}
+              </div>
+              <div className="flex flex-col">
+                <span className={`text-xs font-semibold flex items-center ${summary.labaRugi >= 0 ? 'text-indigo-700' : 'text-red-700'}`}>
+                  {summary.labaRugi >= 0 ? 'Profit' : 'Loss'}
+                </span>
+                <span className="text-[10px] text-gray-400 uppercase tracking-wide">Standar (Omset - HPP)</span>
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>

@@ -12,5 +12,6 @@ router.get('/receivables', financeController.getReceivables);
 router.post('/refund', financeController.processRefund);
 router.get('/refunds', financeController.getRefundHistory);
 router.get('/commissions', financeController.getSalesCommissions);
+router.patch('/commissions/:id', financeController.updateCommission);
 
 module.exports = router;

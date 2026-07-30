@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { formatRupiah } from '../../utils/formatRupiah';
 import { formatTransactionId } from '../../utils/formatId';
-import { Search, RotateCcw, AlertTriangle, X, CheckCircle2 } from 'lucide-react';
+import { exportToCSV } from '../../utils/exportCSV';
+import { Search, RotateCcw, AlertTriangle, X, CheckCircle2, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const FinanceRefunds = () => {
@@ -10,6 +11,10 @@ const FinanceRefunds = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('history'); // history | create
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   
   // Search state for "Buat Refund Baru"
   const [searchTxId, setSearchTxId] = useState('');
@@ -141,81 +146,102 @@ const FinanceRefunds = () => {
     item.id.toString().includes(searchTerm)
   );
 
+  const totalPages = Math.ceil(filteredRefunds.length / itemsPerPage);
+  const paginatedData = filteredRefunds.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleExport = () => {
+    const headers = ['ID TRX', 'Pelanggan', 'Total Transaksi', 'Total Refund', 'Alasan Refund'];
+    const data = filteredRefunds.map(tx => [
+      formatTransactionId(tx),
+      tx.customer_name || 'Tanpa Nama',
+      tx.total_amount,
+      tx.refund_amount,
+      tx.refund_reason
+    ]);
+    exportToCSV(data, headers, `Laporan_Refund_${new Date().getTime()}`);
+  };
+
   return (
-    <div className="p-6 max-w-7xl mx-auto h-full flex flex-col">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="h-full flex flex-col">
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Refund Transaksi</h1>
-          <p className="text-gray-500 dark:text-gray-400">Pengembalian dana pelanggan dan riwayatnya</p>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+          <h1 className="text-2xl font-bold text-gray-900 hidden">Refund Transaksi</h1>
+          <div className="flex bg-gray-100 p-1 rounded-lg">
             <button
               onClick={() => setActiveTab('history')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'history' ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'history' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Riwayat Refund
             </button>
             <button
               onClick={() => setActiveTab('create')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'create' ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'create' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Buat Refund Baru
             </button>
           </div>
-
-          {activeTab === 'history' && (
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        </div>
+        
+        {activeTab === 'history' && (
+          <div className="flex gap-3 w-full sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Cari pelanggan / ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full sm:w-64 pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm outline-none dark:text-white"
+                className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white text-sm outline-none transition-all"
               />
             </div>
-          )}
-        </div>
+            <button 
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm whitespace-nowrap"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
+      <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
         {activeTab === 'history' ? (
-          <div className="overflow-x-auto">
+          <>
+            <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-                  <th className="py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID TRX</th>
-                  <th className="py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pelanggan</th>
-                  <th className="py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Transaksi</th>
-                  <th className="py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Refund</th>
-                  <th className="py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Alasan Refund</th>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">ID TRX</th>
+                  <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Pelanggan</th>
+                  <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Total Transaksi</th>
+                  <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Total Refund</th>
+                  <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Alasan Refund</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
                     <td colSpan="5" className="py-12 text-center text-gray-500">Memuat data...</td>
                   </tr>
-                ) : filteredRefunds.length === 0 ? (
+                ) : paginatedData.length === 0 ? (
                   <tr>
                     <td colSpan="5" className="py-12 text-center text-gray-500">Tidak ada data refund</td>
                   </tr>
                 ) : (
-                  filteredRefunds.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                      <td className="py-4 px-6 text-sm font-medium text-gray-900 dark:text-white">{formatTransactionId(tx)}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700 dark:text-gray-300">
-                        <div>{tx.customer_name || 'Tanpa Nama'}</div>
+                  paginatedData.map((tx) => (
+                    <tr key={tx.id} className="hover:bg-gray-50/80 transition-colors group">
+                      <td className="py-3 px-6 text-sm font-medium text-gray-900 whitespace-nowrap">{formatTransactionId(tx)}</td>
+                      <td className="py-3 px-6 text-sm text-gray-700">
+                        <div className="font-medium">{tx.customer_name || 'Tanpa Nama'}</div>
                       </td>
-                      <td className="py-4 px-6 text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-3 px-6 text-sm text-gray-700 whitespace-nowrap">
                         {formatRupiah(tx.total_amount)}
                       </td>
-                      <td className="py-4 px-6 text-sm font-bold text-red-600 dark:text-red-400">
+                      <td className="py-3 px-6 text-sm font-bold text-red-600 whitespace-nowrap">
                         {formatRupiah(tx.refund_amount)}
                       </td>
-                      <td className="py-4 px-6 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
+                      <td className="py-3 px-6 text-sm text-gray-500 max-w-xs truncate">
                         {tx.refund_reason}
                       </td>
                     </tr>
@@ -224,6 +250,34 @@ const FinanceRefunds = () => {
               </tbody>
             </table>
           </div>
+          {/* Pagination Footer */}
+          {!loading && filteredRefunds.length > 0 && (
+            <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100 bg-white">
+              <span className="text-sm text-gray-500">
+                Showing <span className="font-medium text-gray-900">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-medium text-gray-900">{Math.min(currentPage * itemsPerPage, filteredRefunds.length)}</span> of <span className="font-medium text-gray-900">{filteredRefunds.length}</span> items
+              </span>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-sm font-medium text-gray-700 px-2">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button 
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-1.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+          </>
         ) : (
           <div className="p-6 md:p-8 max-w-3xl mx-auto w-full">
             <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl p-6 mb-8">
