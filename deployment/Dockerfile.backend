@@ -18,4 +18,4 @@ COPY . .
 EXPOSE 5000
 
 # Start command (syncs database schema and starts the server)
-CMD npx prisma db push --accept-data-loss && node src/app.js
+CMD npx prisma db push && node src/app.js
