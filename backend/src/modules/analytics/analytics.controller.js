@@ -216,13 +216,8 @@ const getSalesDashboardStats = async (req, res, next) => {
       orderBy: { created_at: 'desc' }
     });
 
-    // Filter: milik sales ini berdasarkan sales_id OR event/spgName partial match
-    const transactions = allTransactions.filter(t => {
-      if (t.sales_id === userId) return true;
-      if (!searchName) return false;
-      const normEvent = normalise(t.event || '');
-      return normEvent !== '' && (normEvent.includes(searchName) || searchName.includes(normEvent));
-    });
+    // Filter: milik sales ini berdasarkan sales_id pembuat transaksi
+    const transactions = allTransactions.filter(t => t.sales_id === userId);
 
     // 1. Total Customers (unique non-empty names/phones)
     const customerSet = new Set();

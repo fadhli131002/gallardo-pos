@@ -184,3 +184,12 @@ model PurchaseOrder {
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 }
+
+model SalesMaster {
+  id         Int      @id @default(autoincrement())
+  sales_id   String   @unique // e.g. "#S01"
+  nama       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+

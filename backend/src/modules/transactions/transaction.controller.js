@@ -41,10 +41,7 @@ const getTransactions = async (req, res, next) => {
 
       transactions = await prisma.transaction.findMany({
         where: {
-          OR: [
-            { sales_id: userId },
-            { event: { contains: baseName } }
-          ]
+          sales_id: userId
         },
         include: { payments: true, items: true, complaints: true },
         orderBy: { created_at: 'desc' }

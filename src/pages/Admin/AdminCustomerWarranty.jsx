@@ -81,12 +81,6 @@ const AdminCustomerWarranty = () => {
     // 0. Strict Sales Isolation Filter
     if (userRole === 'sales') {
       if (isRetail) return false;
-
-      if (!userName) return false; // user not loaded yet — show nothing
-      const nu = normName(userName);
-      const ns = normName(order.spgName || order.event || '');
-      const isMyOrder = nu && ns && (ns.includes(nu) || nu.includes(ns));
-      if (!isMyOrder) return false;
     }
 
     // 1. Search Filter

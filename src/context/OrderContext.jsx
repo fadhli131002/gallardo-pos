@@ -207,11 +207,13 @@ export const OrderProvider = ({ children }) => {
       refreshVehiclesFromApi();
       refreshCategoriesFromApi();
       refreshVariantsFromApi();
+      refreshSalesMasterFromApi();
     }, 3000);
     const handleFocus = () => {
       refreshOrdersFromApi();
       refreshVehiclesFromApi();
       refreshCategoriesFromApi();
+      refreshSalesMasterFromApi();
     };
     window.addEventListener('focus', handleFocus);
     return () => {
@@ -225,18 +227,56 @@ export const OrderProvider = ({ children }) => {
   const [posisiPemasangan, setPosisiPemasangan] = useState([]);
   const [posisiPartial, setPosisiPartial] = useState([]);
 
-  const [salesItems, setSalesItems] = useState([
-    { id: '#S01', nama: 'Rosyid' },
-    { id: '#S02', nama: 'Femmy' },
-    { id: '#S03', nama: 'Syauqi' },
-    { id: '#S04', nama: 'Cantika' },
-    { id: '#S05', nama: 'Caca' },
-    { id: '#S06', nama: 'Daniel' }
-  ]);
+  const [salesItems, setSalesItems] = useState([]);
 
-  const addSales = (sales) => setSalesItems(prev => [...prev, sales]);
-  const removeSales = (id) => setSalesItems(prev => prev.filter(s => s.id !== id));
-  const updateSales = (id, updatedItem) => setSalesItems(prev => prev.map(s => s.id === id ? { ...s, ...updatedItem } : s));
+  const refreshSalesMasterFromApi = async () => {
+    try {
+      if (!token) return;
+      const response = await fetch(window.API_URL + '/api/sales-master', { headers: { 'Authorization': `Bearer ${token}` }, cache: 'no-store' });
+      if (response.ok) {
+        const data = await response.json();
+        setSalesItems(data.map(s => ({ id: s.sales_id, nama: s.nama })));
+      }
+    } catch (err) {
+      console.error('Error fetching sales master:', err);
+    }
+  };
+
+  useEffect(() => {
+    refreshSalesMasterFromApi();
+  }, [token]);
+
+  const addSales = async (sales) => {
+    try {
+      const response = await fetch(window.API_URL + '/api/sales-master', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ sales_id: sales.id, nama: sales.nama })
+      });
+      if (response.ok) await refreshSalesMasterFromApi();
+    } catch (err) { console.error(err); }
+  };
+
+  const removeSales = async (id) => {
+    try {
+      const response = await fetch(`${window.API_URL}/api/sales-master/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) await refreshSalesMasterFromApi();
+    } catch (err) { console.error(err); }
+  };
+
+  const updateSales = async (id, updatedItem) => {
+    try {
+      const response = await fetch(`${window.API_URL}/api/sales-master/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ nama: updatedItem.nama })
+      });
+      if (response.ok) await refreshSalesMasterFromApi();
+    } catch (err) { console.error(err); }
+  };
 
 
   // CRUD for Kaca Film variants
