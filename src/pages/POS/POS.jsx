@@ -90,16 +90,16 @@ const POS = () => {
       id: inv.id,
       id_barang: inv.id,
       name: getProductName(inv),
-      category: inv.kategori === 'Coating' ? 'Coating & Chemical' : inv.kategori === 'Tools' ? 'Tools & Equipment' : inv.kategori,
-      type: inv.kategori === 'Kaca Film' ? 'Kaca Film' : inv.kategori === 'PPF' ? 'PPF' : inv.kategori === 'Coating' ? 'Coating' : 'Tool',
-      isVariablePrice: inv.kategori === 'Kaca Film' || inv.kategori === 'PPF',
+      category: (inv.kategori || '').toLowerCase() === 'coating' ? 'Coating & Chemical' : (inv.kategori || '').toLowerCase() === 'tools' ? 'Tools & Equipment' : inv.kategori,
+      type: (inv.kategori || '').toLowerCase() === 'kaca film' ? 'Kaca Film' : (inv.kategori || '').toLowerCase() === 'ppf' ? 'PPF' : (inv.kategori || '').toLowerCase() === 'coating' ? 'Coating' : 'Tool',
+      isVariablePrice: (inv.kategori || '').toLowerCase() === 'kaca film' || (inv.kategori || '').toLowerCase() === 'ppf',
       price: 0,
       stokUtama: inv.stokUtama,
       stokPecahan: inv.stokPecahan,
       konversi: inv.konversi || 1,
       satuan: inv.satuan,
       trackInventory: true,
-      warrantyMonths: inv.kategori === 'PPF' ? 60 : inv.kategori === 'Kaca Film' ? 60 : inv.kategori === 'Coating' ? 36 : 0,
+      warrantyMonths: (inv.kategori || '').toLowerCase() === 'ppf' ? 60 : (inv.kategori || '').toLowerCase() === 'kaca film' ? 60 : (inv.kategori || '').toLowerCase() === 'coating' ? 36 : 0,
       kegelapan: inv.kegelapan
     })),
     ...PRODUCT_CATALOG
@@ -1711,7 +1711,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                     <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700', color: '#1e293b', letterSpacing: '0.025em' }}>PERUNTUKAN / BAGIAN</h3>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-                    {peruntukanItems.filter(p => p.kategori === selectedProductForModal.type).map(val => {
+                    {peruntukanItems.filter(p => (p.kategori || '').toLowerCase().trim() === (selectedProductForModal.type || '').toLowerCase().trim()).map(val => {
                       const cleanName = val.nama.replace(/RANTIZ /i, '');
                       const nUpper = cleanName.toUpperCase();
                       let IconComponent = Car;
