@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { DollarSign, CreditCard, TrendingUp, TrendingDown, FileText, PieChart, Download, Calendar as CalendarIcon } from 'lucide-react';
+import { DollarSign, CreditCard, TrendingUp, TrendingDown, FileText, PieChart, Download, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 import DashboardDetailsModal from '../../components/DashboardDetailsModal';
 
 const FinanceDashboard = () => {
@@ -20,6 +24,9 @@ const FinanceDashboard = () => {
   const [modalType, setModalType] = useState('');
   const [modalData, setModalData] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
+
+  // PDF State
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -111,6 +118,163 @@ const FinanceDashboard = () => {
     }
   };
 
+  const generatePDFReport = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      let query = '';
+      const now = new Date();
+      let startDate = '';
+      let endDate = '';
+      
+      if (dateFilter === 'Hari Ini') {
+        startDate = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+        endDate = new Date(now.setHours(23, 59, 59, 999)).toISOString();
+      } else if (dateFilter === 'Bulan Ini') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
+      } else if (dateFilter === 'Tahun Ini') {
+        startDate = new Date(now.getFullYear(), 0, 1).toISOString();
+        endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999).toISOString();
+      }
+      
+      if (dateFilter !== 'Semua Waktu') {
+        query = `?startDate=${startDate}&endDate=${endDate}`;
+      } else {
+        query = '?';
+      }
+
+      const baseUrl = window.API_URL ? `${window.API_URL}/api/finance/dashboard/details` : '/api/finance/dashboard/details';
+      
+      // Fetch all details simultaneously
+      const [resKas, resPiutang, resLaba] = await Promise.all([
+        fetch(`${baseUrl}${query}&type=kas-masuk`),
+        fetch(`${baseUrl}${query}&type=piutang`),
+        fetch(`${baseUrl}${query}&type=laba-rugi`)
+      ]);
+
+      if (!resKas.ok || !resPiutang.ok || !resLaba.ok) {
+        throw new Error('Gagal mengambil data untuk laporan PDF');
+      }
+
+      const dataKas = await resKas.json();
+      const dataPiutang = await resPiutang.json();
+      const dataLaba = await resLaba.json();
+
+      const doc = new jsPDF();
+      
+      // Header
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Laporan Keuangan', 14, 20);
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Gallardo Autosport', 14, 28);
+      doc.text(`Periode: ${dateFilter}`, 14, 34);
+      doc.text(`Dicetak pada: ${format(new Date(), 'dd MMM yyyy, HH:mm', { locale: id })}`, 14, 40);
+
+      // Summary Section
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Ringkasan', 14, 52);
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Total Kas Masuk: ${formatRupiah(summary.totalKasMasuk)}`, 14, 60);
+      doc.text(`Total Piutang: ${formatRupiah(summary.totalPiutang)}`, 14, 66);
+      doc.text(`Total Omset: ${formatRupiah(summary.totalOmset)}`, 14, 72);
+      doc.text(`Laba Bersih: ${formatRupiah(summary.labaRugi)}`, 14, 78);
+
+      let currentY = 90;
+
+      // 1. Kas Masuk Table
+      if (dataKas && dataKas.length > 0) {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Rincian Kas Masuk', 14, currentY);
+        
+        const tableData = dataKas.map(item => [
+          format(new Date(item.date), 'dd MMM yyyy, HH:mm', { locale: id }),
+          item.description,
+          formatRupiah(item.amount)
+        ]);
+
+        doc.autoTable({
+          startY: currentY + 4,
+          head: [['Tanggal', 'Keterangan', 'Nominal']],
+          body: tableData,
+          theme: 'striped',
+          headStyles: { fillColor: [41, 128, 185] }
+        });
+        currentY = doc.lastAutoTable.finalY + 15;
+      }
+
+      // 2. Piutang Table
+      if (dataPiutang && dataPiutang.length > 0) {
+        if (currentY > 250) {
+          doc.addPage();
+          currentY = 20;
+        }
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Daftar Piutang Belum Lunas', 14, currentY);
+        
+        const tableData = dataPiutang.map(item => [
+          item.customer_name || 'Tanpa Nama',
+          format(new Date(item.created_at), 'dd MMM yyyy', { locale: id }),
+          item.status_pembayaran,
+          formatRupiah(item.total_amount),
+          formatRupiah(item.sisa_tagihan)
+        ]);
+
+        doc.autoTable({
+          startY: currentY + 4,
+          head: [['Pelanggan', 'Tanggal', 'Status', 'Total Transaksi', 'Sisa Piutang']],
+          body: tableData,
+          theme: 'striped',
+          headStyles: { fillColor: [211, 84, 0] }
+        });
+        currentY = doc.lastAutoTable.finalY + 15;
+      }
+
+      // 3. Omset / Laba Rugi Table
+      if (dataLaba && dataLaba.length > 0) {
+        if (currentY > 250) {
+          doc.addPage();
+          currentY = 20;
+        }
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Rincian Transaksi (Laba Rugi & Omset)', 14, currentY);
+        
+        const tableData = dataLaba.map(item => [
+          item.customer_name || 'Tanpa Nama',
+          format(new Date(item.created_at), 'dd MMM yyyy', { locale: id }),
+          formatRupiah(item.total_amount),
+          formatRupiah(item.hpp),
+          formatRupiah(item.labaBersih)
+        ]);
+
+        doc.autoTable({
+          startY: currentY + 4,
+          head: [['Pelanggan', 'Tanggal', 'Nilai Omset', 'HPP Modal', 'Laba Bersih']],
+          body: tableData,
+          theme: 'striped',
+          headStyles: { fillColor: [39, 174, 96] }
+        });
+      }
+
+      doc.save(`Laporan_Keuangan_Gallardo_${dateFilter.replace(/ /g, '_')}.pdf`);
+      toast.success('Laporan PDF berhasil diunduh');
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -141,11 +305,16 @@ const FinanceDashboard = () => {
             </select>
           </div>
           <button 
-            onClick={() => window.print()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap"
+            onClick={generatePDFReport}
+            disabled={isGeneratingPdf}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            <Download className="w-4 h-4" />
-            Unduh Laporan PDF
+            {isGeneratingPdf ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            {isGeneratingPdf ? 'Memproses PDF...' : 'Unduh Laporan PDF'}
           </button>
         </div>
       </div>
