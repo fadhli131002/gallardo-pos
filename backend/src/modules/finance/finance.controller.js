@@ -50,7 +50,6 @@ exports.getDashboardSummary = async (req, res, next) => {
     const omset = await prisma.transaction.aggregate({
       _sum: { total_amount: true },
       where: {
-        status_pembayaran: { in: ['LUNAS', 'DP'] },
         created_at: createdFilter
       }
     });
@@ -184,7 +183,7 @@ exports.getSalesCommissions = async (req, res, next) => {
     // Ambil transaksi LUNAS dan filter tanggal jika ada
     const transactions = await prisma.transaction.findMany({
       where: {
-        status_pembayaran: 'LUNAS',
+        status_pembayaran: { in: ['LUNAS', 'Lunas', 'lunas', 'Selesai'] },
         ...(Object.keys(dateFilter).length > 0 && { created_at: dateFilter })
       },
       select: {
