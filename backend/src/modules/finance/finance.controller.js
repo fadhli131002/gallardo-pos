@@ -76,7 +76,13 @@ exports.getDashboardSummary = async (req, res, next) => {
       }
     }
 
-    const labaRugi = totalOmset - totalHpp - totalKomisi;
+    const expenses = await prisma.expense.aggregate({
+      _sum: { amount: true },
+      where: { date: dateFilter }
+    });
+    const totalExpense = expenses._sum.amount || 0;
+
+    const labaRugi = totalOmset - totalHpp - totalKomisi - totalExpense;
 
     res.json({
       totalKasMasuk,
@@ -84,7 +90,8 @@ exports.getDashboardSummary = async (req, res, next) => {
       labaRugi,
       totalOmset,
       totalHpp,
-      totalKomisi
+      totalKomisi,
+      totalExpense
     });
   } catch (error) {
     next(error);
