@@ -17,6 +17,8 @@ const FinanceDashboard = () => {
     totalHpp: 0
   });
   const [dateFilter, setDateFilter] = useState('Hari Ini');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
   const [loading, setLoading] = useState(true);
 
   // Modal State
@@ -29,8 +31,9 @@ const FinanceDashboard = () => {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   useEffect(() => {
+    if (dateFilter === 'Custom' && (!customStartDate || !customEndDate)) return;
     fetchDashboardData();
-  }, [dateFilter]);
+  }, [dateFilter, customStartDate, customEndDate]);
 
   const fetchDashboardData = async () => {
     try {
@@ -50,6 +53,13 @@ const FinanceDashboard = () => {
       } else if (dateFilter === 'Tahun Ini') {
         startDate = new Date(now.getFullYear(), 0, 1).toISOString();
         endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999).toISOString();
+      } else if (dateFilter === 'Custom' && customStartDate && customEndDate) {
+        let start = new Date(customStartDate);
+        start.setHours(0, 0, 0, 0);
+        startDate = start.toISOString();
+        let end = new Date(customEndDate);
+        end.setHours(23, 59, 59, 999);
+        endDate = end.toISOString();
       }
     
       if (dateFilter !== 'Semua Waktu') {
@@ -96,6 +106,13 @@ const FinanceDashboard = () => {
       } else if (dateFilter === 'Tahun Ini') {
         startDate = new Date(now.getFullYear(), 0, 1).toISOString();
         endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999).toISOString();
+      } else if (dateFilter === 'Custom' && customStartDate && customEndDate) {
+        let start = new Date(customStartDate);
+        start.setHours(0, 0, 0, 0);
+        startDate = start.toISOString();
+        let end = new Date(customEndDate);
+        end.setHours(23, 59, 59, 999);
+        endDate = end.toISOString();
       }
       
       if (dateFilter !== 'Semua Waktu') {
@@ -135,6 +152,13 @@ const FinanceDashboard = () => {
       } else if (dateFilter === 'Tahun Ini') {
         startDate = new Date(now.getFullYear(), 0, 1).toISOString();
         endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999).toISOString();
+      } else if (dateFilter === 'Custom' && customStartDate && customEndDate) {
+        let start = new Date(customStartDate);
+        start.setHours(0, 0, 0, 0);
+        startDate = start.toISOString();
+        let end = new Date(customEndDate);
+        end.setHours(23, 59, 59, 999);
+        endDate = end.toISOString();
       }
       
       if (dateFilter !== 'Semua Waktu') {
@@ -160,6 +184,17 @@ const FinanceDashboard = () => {
       const dataPiutang = await resPiutang.json();
       const dataLaba = await resLaba.json();
 
+      const getFormattedPeriod = () => {
+        const d = new Date();
+        if (dateFilter === 'Hari Ini') return format(d, 'dd MMMM yyyy', { locale: id });
+        if (dateFilter === 'Bulan Ini') return format(d, 'MMMM yyyy', { locale: id });
+        if (dateFilter === 'Tahun Ini') return `Tahun ${format(d, 'yyyy')}`;
+        if (dateFilter === 'Custom' && customStartDate && customEndDate) {
+          return `${format(new Date(customStartDate), 'dd MMM yyyy', { locale: id })} - ${format(new Date(customEndDate), 'dd MMM yyyy', { locale: id })}`;
+        }
+        return 'Seluruh Periode';
+      };
+
       const doc = new jsPDF();
       
       // Header
@@ -170,7 +205,7 @@ const FinanceDashboard = () => {
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
       doc.text('Gallardo Autosport', 14, 28);
-      doc.text(`Periode: ${dateFilter}`, 14, 34);
+      doc.text(`Periode: ${getFormattedPeriod()}`, 14, 34);
       doc.text(`Dicetak pada: ${format(new Date(), 'dd MMM yyyy, HH:mm', { locale: id })}`, 14, 40);
 
       // Summary Section
@@ -296,15 +331,35 @@ const FinanceDashboard = () => {
             <select 
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer"
+              className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer min-w-[140px]"
             >
               <option value="Hari Ini">Hari Ini</option>
               <option value="Bulan Ini">Bulan Ini</option>
               <option value="Tahun Ini">Tahun Ini</option>
               <option value="Semua Waktu">Semua Waktu</option>
+              <option value="Custom">Pilih Tanggal (Custom)</option>
             </select>
           </div>
-          <button 
+          
+          {dateFilter === 'Custom' && (
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={customStartDate}
+                onChange={(e) => setCustomStartDate(e.target.value)}
+                className="px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm"
+              />
+              <span className="text-gray-500">-</span>
+              <input
+                type="date"
+                value={customEndDate}
+                onChange={(e) => setCustomEndDate(e.target.value)}
+                className="px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm"
+              />
+            </div>
+          )}
+
+          <button  
             onClick={generatePDFReport}
             disabled={isGeneratingPdf}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
