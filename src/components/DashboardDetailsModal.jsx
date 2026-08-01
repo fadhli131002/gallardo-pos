@@ -1,9 +1,9 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function DashboardDetailsModal({ isOpen, onClose, type, data, loading }) {
-  if (!isOpen) return null;
 
   const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -141,9 +141,25 @@ export default function DashboardDetailsModal({ isOpen, onClose, type, data, loa
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 transition-opacity">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden animate-fade-in-up">
-        {/* Header */}
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black bg-opacity-50"
+            onClick={onClose}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+            className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden relative z-10"
+          >
+            {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
           <h3 className="text-lg font-bold text-gray-900">{getTitle()}</h3>
           <button 
@@ -170,7 +186,9 @@ export default function DashboardDetailsModal({ isOpen, onClose, type, data, loa
             Tutup
           </button>
         </div>
+      </motion.div>
       </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }
