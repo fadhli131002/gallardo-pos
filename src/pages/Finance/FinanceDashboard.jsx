@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { DollarSign, CreditCard, TrendingUp, TrendingDown, FileText, PieChart, Download, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import DashboardDetailsModal from '../../components/DashboardDetailsModal';
@@ -199,7 +199,7 @@ const FinanceDashboard = () => {
           formatRupiah(item.amount)
         ]);
 
-        doc.autoTable({
+        autoTable(doc, {
           startY: currentY + 4,
           head: [['Tanggal', 'Keterangan', 'Nominal']],
           body: tableData,
@@ -228,7 +228,7 @@ const FinanceDashboard = () => {
           formatRupiah(item.sisa_tagihan)
         ]);
 
-        doc.autoTable({
+        autoTable(doc, {
           startY: currentY + 4,
           head: [['Pelanggan', 'Tanggal', 'Status', 'Total Transaksi', 'Sisa Piutang']],
           body: tableData,
@@ -257,7 +257,7 @@ const FinanceDashboard = () => {
           formatRupiah(item.labaBersih)
         ]);
 
-        doc.autoTable({
+        autoTable(doc, {
           startY: currentY + 4,
           head: [['Pelanggan', 'Tanggal', 'Nilai Omset', 'HPP Modal', 'Laba Bersih']],
           body: tableData,
