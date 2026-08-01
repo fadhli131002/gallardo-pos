@@ -8,6 +8,7 @@ const financeController = require('./finance.controller');
 // router.use(roleMiddleware(['finance', 'admin', 'superadmin']));
 
 router.get('/dashboard', financeController.getDashboardSummary);
+router.get('/dashboard/details', financeController.getDashboardDetails);
 router.get('/receivables', financeController.getReceivables);
 router.post('/refund', financeController.processRefund);
 router.get('/refunds', financeController.getRefundHistory);

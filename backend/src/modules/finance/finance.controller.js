@@ -86,6 +86,75 @@ exports.getDashboardSummary = async (req, res, next) => {
   }
 };
 
+exports.getDashboardDetails = async (req, res, next) => {
+  try {
+    const { type, startDate, endDate } = req.query;
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let dateFilter = { gte: today };
+    let createdFilter = { gte: today };
+
+    if (startDate && endDate) {
+      dateFilter = { gte: new Date(startDate), lte: new Date(endDate) };
+      createdFilter = { gte: new Date(startDate), lte: new Date(endDate) };
+    } else if (startDate) {
+      dateFilter = { gte: new Date(startDate) };
+      createdFilter = { gte: new Date(startDate) };
+    }
+
+    if (type === 'kas-masuk') {
+      const logs = await prisma.cashFlowLog.findMany({
+        where: { type: 'IN', date: dateFilter },
+        orderBy: { date: 'desc' }
+      });
+      return res.json(logs);
+    } else if (type === 'piutang') {
+      const receivables = await prisma.transaction.findMany({
+        where: { sisa_tagihan: { gt: 0 } },
+        orderBy: { created_at: 'desc' },
+        select: { id: true, customer_name: true, total_amount: true, sisa_tagihan: true, status_pembayaran: true, created_at: true }
+      });
+      return res.json(receivables);
+    } else if (type === 'omset' || type === 'laba-rugi') {
+      const transactions = await prisma.transaction.findMany({
+        where: { created_at: createdFilter },
+        include: {
+          inventory_logs: {
+            where: { jenis: 'DEDUCT' },
+            include: { inventory: true }
+          }
+        },
+        orderBy: { created_at: 'desc' }
+      });
+
+      const enriched = transactions.map(trx => {
+        let hpp = 0;
+        trx.inventory_logs.forEach(log => {
+          if (log.inventory && log.inventory.harga_modal) {
+            const konversi = log.inventory.konversi || 1;
+            hpp += (log.jumlah * (log.inventory.harga_modal / konversi));
+          }
+        });
+        return {
+          id: trx.id,
+          customer_name: trx.customer_name,
+          total_amount: trx.total_amount,
+          status_pembayaran: trx.status_pembayaran,
+          created_at: trx.created_at,
+          hpp,
+          labaBersih: trx.total_amount - hpp
+        };
+      });
+      return res.json(enriched);
+    }
+
+    res.status(400).json({ message: 'Invalid detail type' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // PIUTANG PELANGGAN
 exports.getReceivables = async (req, res, next) => {
   try {

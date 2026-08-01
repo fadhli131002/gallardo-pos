@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { DollarSign, CreditCard, TrendingUp, TrendingDown, FileText, PieChart, Download, Calendar as CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import DashboardDetailsModal from '../../components/DashboardDetailsModal';
 
 const FinanceDashboard = () => {
   const [summary, setSummary] = useState({
@@ -13,6 +14,12 @@ const FinanceDashboard = () => {
   });
   const [dateFilter, setDateFilter] = useState('Hari Ini');
   const [loading, setLoading] = useState(true);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [modalData, setModalData] = useState(null);
+  const [modalLoading, setModalLoading] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -62,6 +69,48 @@ const FinanceDashboard = () => {
     }).format(number || 0);
   };
 
+  const handleCardClick = async (type) => {
+    setModalType(type);
+    setIsModalOpen(true);
+    setModalLoading(true);
+    setModalData(null);
+    try {
+      let query = '';
+      const now = new Date();
+      let startDate = '';
+      let endDate = '';
+      
+      if (dateFilter === 'Hari Ini') {
+        startDate = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+        endDate = new Date(now.setHours(23, 59, 59, 999)).toISOString();
+      } else if (dateFilter === 'Bulan Ini') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
+      } else if (dateFilter === 'Tahun Ini') {
+        startDate = new Date(now.getFullYear(), 0, 1).toISOString();
+        endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999).toISOString();
+      }
+      
+      if (dateFilter !== 'Semua Waktu') {
+        query = `&startDate=${startDate}&endDate=${endDate}`;
+      }
+      
+      const url = window.API_URL 
+        ? `${window.API_URL}/api/finance/dashboard/details?type=${type}${query}` 
+        : `/api/finance/dashboard/details?type=${type}${query}`;
+        
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Gagal mengambil data rincian');
+      const data = await res.json();
+      setModalData(data);
+    } catch (err) {
+      toast.error(err.message);
+      setIsModalOpen(false);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -106,7 +155,8 @@ const FinanceDashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden"
+          onClick={() => handleCardClick('kas-masuk')}
+          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden cursor-pointer"
         >
           <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
             <DollarSign className="w-20 h-20 text-green-600" />
@@ -135,7 +185,8 @@ const FinanceDashboard = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden"
+          onClick={() => handleCardClick('piutang')}
+          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden cursor-pointer"
         >
           <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
             <CreditCard className="w-20 h-20 text-orange-600" />
@@ -164,7 +215,8 @@ const FinanceDashboard = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden"
+          onClick={() => handleCardClick('omset')}
+          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden cursor-pointer"
         >
           <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
             <FileText className="w-20 h-20 text-blue-600" />
@@ -193,7 +245,8 @@ const FinanceDashboard = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden"
+          onClick={() => handleCardClick('laba-rugi')}
+          className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden cursor-pointer"
         >
           <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
             <PieChart className={`w-20 h-20 ${summary.labaRugi >= 0 ? 'text-indigo-600' : 'text-red-600'}`} />
@@ -221,6 +274,14 @@ const FinanceDashboard = () => {
           </div>
         </motion.div>
       </div>
+
+      <DashboardDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        type={modalType}
+        data={modalData}
+        loading={modalLoading}
+      />
     </div>
   );
 };
