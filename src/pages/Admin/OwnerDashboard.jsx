@@ -34,6 +34,7 @@ import {
 import { toast } from 'sonner';
 import './OwnerDashboard.css';
 import { useAuth } from '../../context/AuthContext';
+import OwnerInventory from '../../components/OwnerInventory';
 
 export default function OwnerDashboard() {
   const { user } = useAuth();
@@ -265,6 +266,12 @@ export default function OwnerDashboard() {
         >
           <Activity size={16} /> Performa & Operasional
         </button>
+        <button
+          onClick={() => setActiveTab('inventory')}
+          className={`tab-btn ${activeTab === 'inventory' ? 'active' : ''}`}
+        >
+          <Package size={16} /> Stok & Inventaris
+        </button>
       </div>
 
       {isLoading ? (
@@ -477,6 +484,10 @@ export default function OwnerDashboard() {
 
               </div>
             </>
+          )}
+
+          {activeTab === 'inventory' && (
+            <OwnerInventory isDarkMode={isDarkMode} />
           )}
 
           {activeTab === 'operational' && (
