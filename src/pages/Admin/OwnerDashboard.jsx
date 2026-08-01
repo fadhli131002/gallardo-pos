@@ -160,26 +160,99 @@ export default function OwnerDashboard() {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val || 0);
   };
 
-  const handleExportPDF = () => {
-    const element = document.getElementById('dashboard-content');
-    if (!element) return;
+  const handleExportPDF = async () => {
+    try {
+      toast.info('Menyiapkan file PDF...');
+      const token = sessionStorage.getItem('token');
+      const headers = { 'Authorization': `Bearer ${token}` };
+      
+      const queryParams = new URLSearchParams({ year });
+      if (month) queryParams.append('month', month);
 
-    const opt = {
-      margin: [10, 10, 10, 10],
-      filename: `Laporan_Keuangan_Gallardo_${month ? month + '_' : ''}${year}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: 1280 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-      pagebreak: { mode: ['avoid-all', 'css'] }
-    };
+      // Fetch required data for PDF
+      const [arusRes, bebanRes, labaRes] = await Promise.all([
+        fetch(`${window.API_URL}/api/owner/dashboard-details?${queryParams}&type=arus-kas`, { headers }),
+        fetch(`${window.API_URL}/api/owner/dashboard-details?${queryParams}&type=beban`, { headers }),
+        fetch(`${window.API_URL}/api/owner/dashboard-details?${queryParams}&type=laba-rugi`, { headers })
+      ]);
 
-    toast.info('Menyiapkan file PDF...');
-    html2pdf().set(opt).from(element).save().then(() => {
-      toast.success('Laporan berhasil diexport ke PDF!');
-    }).catch((err) => {
+      const arusJson = await arusRes.json();
+      const bebanJson = await bebanRes.json();
+      const labaJson = await labaRes.json();
+
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.getWidth();
+      
+      doc.setFontSize(16);
+      doc.text('Laporan Eksekutif Keuangan', pageWidth / 2, 20, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.text(`Periode: ${month ? month + '/' : ''}${year}`, pageWidth / 2, 26, { align: 'center' });
+      doc.text('Dicetak pada: ' + new Date().toLocaleString('id-ID'), pageWidth / 2, 32, { align: 'center' });
+
+      // Executive Summary
+      doc.setFontSize(12);
+      doc.text('Ringkasan', 14, 45);
+      
+      autoTable(doc, {
+        startY: 50,
+        head: [['Metrik', 'Nilai (Rp)']],
+        body: [
+          ['Total Omset', formatCurrency(summaryData.totalOmset)],
+          ['Total HPP (Modal)', formatCurrency(summaryData.totalHPP)],
+          ['Laba Bersih', formatCurrency(summaryData.labaBersih)],
+          ['Arus Kas Bersih', formatCurrency(summaryData.netCashFlow)],
+          ['Total Kas Keluar', formatCurrency(summaryData.cashOut)],
+          ['Kerugian Komplain', formatCurrency(summaryData.totalKerugianKomplain)],
+        ],
+        theme: 'striped',
+        headStyles: { fillColor: [79, 70, 229] }
+      });
+
+      // Arus Kas List
+      if (arusJson.success && arusJson.data.length > 0) {
+        doc.text('Rincian Arus Kas', 14, doc.lastAutoTable.finalY + 15);
+        const arusBody = arusJson.data.map(item => [
+          new Date(item.date).toLocaleDateString('id-ID'),
+          item.referenceId || '-',
+          item.type === 'IN' ? 'Masuk' : 'Keluar',
+          item.description,
+          formatCurrency(item.amount)
+        ]);
+        autoTable(doc, {
+          startY: doc.lastAutoTable.finalY + 20,
+          head: [['Tanggal', 'Referensi', 'Tipe', 'Deskripsi', 'Nominal']],
+          body: arusBody,
+          theme: 'striped',
+          headStyles: { fillColor: [79, 70, 229] }
+        });
+      }
+
+      // Beban Operasional List
+      if (bebanJson.success && bebanJson.data.length > 0) {
+        doc.text('Rincian Beban Operasional', 14, doc.lastAutoTable.finalY + 15);
+        const bebanBody = bebanJson.data.map(item => [
+          new Date(item.date).toLocaleDateString('id-ID'),
+          item.category,
+          item.title,
+          formatCurrency(item.amount)
+        ]);
+        autoTable(doc, {
+          startY: doc.lastAutoTable.finalY + 20,
+          head: [['Tanggal', 'Kategori', 'Keterangan', 'Nominal']],
+          body: bebanBody,
+          theme: 'striped',
+          headStyles: { fillColor: [79, 70, 229] }
+        });
+      }
+
+      doc.save(`Laporan_Eksekutif_${month ? month + '_' : ''}${year}.pdf`);
+      toast.success('Laporan PDF berhasil diunduh!');
+
+    } catch (err) {
       console.error(err);
-      toast.error('Gagal export PDF');
-    });
+      toast.error('Gagal membuat PDF');
+    }
   };
 
   return (
@@ -254,7 +327,10 @@ export default function OwnerDashboard() {
               <div className="metric-grid">
 
                 {/* LABA BERSIH */}
-                <div className="metric-card">
+                <div className="metric-card cursor-pointer hover:shadow-lg transition-shadow border border-transparent hover:border-indigo-100 relative group" onClick={() => fetchDetails('laba-rugi')}>
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ExternalLink size={16} className="text-indigo-400" />
+                  </div>
                   <div className="metric-header">
                     <h3 className="metric-title">Laba Bersih</h3>
                     <div className="metric-icon-wrap icon-emerald">
@@ -277,7 +353,10 @@ export default function OwnerDashboard() {
                 </div>
 
                 {/* ARUS KAS BERSIH */}
-                <div className="metric-card">
+                <div className="metric-card cursor-pointer hover:shadow-lg transition-shadow border border-transparent hover:border-blue-100 relative group" onClick={() => fetchDetails('arus-kas')}>
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ExternalLink size={16} className="text-blue-400" />
+                  </div>
                   <div className="metric-header">
                     <h3 className="metric-title">Arus Kas Bersih</h3>
                     <div className="metric-icon-wrap icon-blue">
@@ -300,7 +379,10 @@ export default function OwnerDashboard() {
                 </div>
 
                 {/* TOTAL BEBAN */}
-                <div className="metric-card">
+                <div className="metric-card cursor-pointer hover:shadow-lg transition-shadow border border-transparent hover:border-purple-100 relative group" onClick={() => fetchDetails('beban')}>
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ExternalLink size={16} className="text-purple-400" />
+                  </div>
                   <div className="metric-header">
                     <h3 className="metric-title">Total Beban & Operasional</h3>
                     <div className="metric-icon-wrap icon-purple">
@@ -486,6 +568,14 @@ export default function OwnerDashboard() {
 
         </div>
       )}
+
+      <DashboardDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        type={modalType}
+        data={modalData}
+        loading={modalLoading}
+      />
 
     </div>
   );
