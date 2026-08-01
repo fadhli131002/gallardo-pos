@@ -104,9 +104,9 @@ const Calendar = () => {
         
         const dayOrders = filteredOrders.filter(o => {
           if (o.status !== 'OPEN') return false;
-          const start = new Date(o.date);
+          const start = new Date(o.installationDate || o.date);
           start.setHours(0, 0, 0, 0);
-          const end = getEndDate(o.date, o.serviceType);
+          const end = getEndDate(o.installationDate || o.date, o.serviceType);
           end.setHours(0, 0, 0, 0);
           
           const check = new Date(cloneDay);
