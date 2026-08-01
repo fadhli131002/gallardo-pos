@@ -328,8 +328,6 @@ export default function OwnerDashboard() {
                   </ResponsiveContainer>
                 </div>
               </div>
-
-              </div>
             </>
           )}
 
