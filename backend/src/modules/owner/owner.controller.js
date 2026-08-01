@@ -39,9 +39,13 @@ const getDashboardSummary = async (req, res, next) => {
 
     let totalOmset = 0;
     let totalHPP = 0;
+    let totalKomisi = 0;
 
     transactions.forEach(trx => {
       totalOmset += trx.total_amount;
+      
+      const COMMISSION_RATE = 0.05;
+      totalKomisi += trx.sales_commission !== null ? trx.sales_commission : (trx.total_amount * COMMISSION_RATE);
       
       // Hitung HPP dari inventory logs
       trx.inventory_logs.forEach(log => {
@@ -101,7 +105,7 @@ const getDashboardSummary = async (req, res, next) => {
     });
 
     // Laba Bersih
-    const labaBersih = totalOmset - totalHPP - totalExpense - totalKerugianKomplain;
+    const labaBersih = totalOmset - totalHPP - totalKomisi - totalExpense - totalKerugianKomplain;
 
     console.log("=== DEBUG DASHBOARD OWNER ===");
     console.log("Transactions Count:", transactions.length);
@@ -109,6 +113,7 @@ const getDashboardSummary = async (req, res, next) => {
     console.log("Complaints Count:", complaints.length);
     console.log("Total Omset:", totalOmset);
     console.log("Total HPP:", totalHPP);
+    console.log("Total Komisi:", totalKomisi);
     console.log("Total Expense:", totalExpense);
     console.log("Total Kerugian Komplain:", totalKerugianKomplain);
     console.log("Laba Bersih:", labaBersih);
@@ -200,6 +205,7 @@ const getDashboardSummary = async (req, res, next) => {
       data: {
         totalOmset,
         totalHPP,
+        totalKomisi,
         totalExpense,
         labaBersih,
         totalKerugianKomplain,
