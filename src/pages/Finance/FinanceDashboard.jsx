@@ -289,12 +289,13 @@ const FinanceDashboard = () => {
           format(new Date(item.created_at), 'dd MMM yyyy', { locale: id }),
           formatRupiah(item.total_amount),
           formatRupiah(item.hpp),
+          formatRupiah(item.komisi || 0),
           formatRupiah(item.labaBersih)
         ]);
 
         autoTable(doc, {
           startY: currentY + 4,
-          head: [['Pelanggan', 'Tanggal', 'Nilai Omset', 'HPP Modal', 'Laba Bersih']],
+          head: [['Pelanggan', 'Tanggal', 'Nilai Omset', 'HPP Modal', 'Potongan Komisi', 'Laba Bersih']],
           body: tableData,
           theme: 'striped',
           headStyles: { fillColor: [39, 174, 96] }

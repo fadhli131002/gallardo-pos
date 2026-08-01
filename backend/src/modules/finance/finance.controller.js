@@ -48,12 +48,13 @@ exports.getDashboardSummary = async (req, res, next) => {
 
     // 3. Laba/Rugi Standar
     const omset = await prisma.transaction.aggregate({
-      _sum: { total_amount: true },
+      _sum: { total_amount: true, sales_commission: true },
       where: {
         created_at: createdFilter
       }
     });
     const totalOmset = omset._sum.total_amount || 0;
+    const totalKomisi = omset._sum.sales_commission || 0;
 
     const inventoryLogs = await prisma.inventoryLog.findMany({
       where: { 
@@ -72,14 +73,15 @@ exports.getDashboardSummary = async (req, res, next) => {
       }
     }
 
-    const labaRugi = totalOmset - totalHpp;
+    const labaRugi = totalOmset - totalHpp - totalKomisi;
 
     res.json({
       totalKasMasuk,
       totalPiutang,
       labaRugi,
       totalOmset,
-      totalHpp
+      totalHpp,
+      totalKomisi
     });
   } catch (error) {
     next(error);
@@ -136,14 +138,15 @@ exports.getDashboardDetails = async (req, res, next) => {
             hpp += (log.jumlah * (log.inventory.harga_modal / konversi));
           }
         });
+        const komisi = trx.sales_commission || 0;
         return {
           id: trx.id,
           customer_name: trx.customer_name,
-          total_amount: trx.total_amount,
-          status_pembayaran: trx.status_pembayaran,
           created_at: trx.created_at,
-          hpp,
-          labaBersih: trx.total_amount - hpp
+          total_amount: trx.total_amount,
+          hpp: hpp,
+          komisi: komisi,
+          labaBersih: trx.total_amount - hpp - komisi
         };
       });
       return res.json(enriched);

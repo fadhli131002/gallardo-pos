@@ -111,10 +111,10 @@ export default function DashboardDetailsModal({ isOpen, onClose, type, data, loa
       return (
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
-            <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transaksi</th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Nilai Omset</th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">HPP (Modal)</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Potongan Komisi</th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Laba Bersih</th>
             </tr>
           </thead>
@@ -127,6 +127,7 @@ export default function DashboardDetailsModal({ isOpen, onClose, type, data, loa
                 </td>
                 <td className="px-4 py-3 text-sm text-blue-600 font-medium text-right">{formatRupiah(item.total_amount)}</td>
                 <td className="px-4 py-3 text-sm text-red-600 font-medium text-right">-{formatRupiah(item.hpp)}</td>
+                <td className="px-4 py-3 text-sm text-red-600 font-medium text-right">-{formatRupiah(item.komisi || 0)}</td>
                 <td className={`px-4 py-3 text-sm font-bold text-right ${item.labaBersih >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {item.labaBersih > 0 ? '+' : ''}{formatRupiah(item.labaBersih)}
                 </td>
