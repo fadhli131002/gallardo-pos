@@ -264,6 +264,7 @@ const getProfitLossChart = async (req, res, next) => {
       name: new Date(y, i, 1).toLocaleString('id-ID', { month: 'short' }),
       omset: 0,
       hpp: 0,
+      komisi: 0,
       expense: 0,
       labaBersih: 0
     }));
@@ -271,6 +272,9 @@ const getProfitLossChart = async (req, res, next) => {
     transactions.forEach(trx => {
       const m = new Date(trx.created_at).getMonth();
       monthlyData[m].omset += trx.total_amount;
+      
+      const COMMISSION_RATE = 0.05;
+      monthlyData[m].komisi += trx.sales_commission !== null ? trx.sales_commission : (trx.total_amount * COMMISSION_RATE);
       
       trx.inventory_logs.forEach(log => {
         if (log.inventory) {
@@ -320,7 +324,7 @@ const getProfitLossChart = async (req, res, next) => {
     });
 
     monthlyData.forEach(data => {
-      data.labaBersih = data.omset - data.hpp - data.expense - (data.kerugianKomplain || 0);
+      data.labaBersih = data.omset - data.hpp - data.komisi - data.expense - (data.kerugianKomplain || 0);
     });
 
     console.log("=== DEBUG PROFIT LOSS CHART ===");
