@@ -9,6 +9,7 @@ router.use(authorizeRole(['owner', 'superadmin', 'admin', 'finance']));
 
 // Dashboard Summary & Charts
 router.get('/dashboard-summary', ownerController.getDashboardSummary);
+router.get('/dashboard-details', ownerController.getDashboardDetails);
 router.get('/profit-loss', ownerController.getProfitLossChart);
 
 // Expenses

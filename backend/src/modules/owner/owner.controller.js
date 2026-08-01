@@ -474,11 +474,93 @@ const addPurchaseOrder = async (req, res, next) => {
   }
 };
 
+// 4. GET Dashboard Details
+const getDashboardDetails = async (req, res, next) => {
+  try {
+    const { type, year, month } = req.query;
+    
+    // Build date filter
+    let startDate, endDate;
+    const y = parseInt(year) || new Date().getFullYear();
+    
+    if (month) {
+      const m = parseInt(month);
+      startDate = new Date(y, m - 1, 1);
+      endDate = new Date(y, m, 1);
+    } else {
+      startDate = new Date(y, 0, 1);
+      endDate = new Date(y + 1, 0, 1);
+    }
+
+    const dateFilter = {
+      gte: startDate,
+      lt: endDate
+    };
+
+    if (type === 'beban') {
+      const expenses = await prisma.expense.findMany({
+        where: { date: dateFilter },
+        orderBy: { date: 'desc' }
+      });
+      return res.json({ success: true, data: expenses });
+    }
+    
+    if (type === 'arus-kas') {
+      const logs = await prisma.cashFlowLog.findMany({
+        where: { date: dateFilter },
+        orderBy: { date: 'desc' }
+      });
+      return res.json({ success: true, data: logs });
+    }
+
+    if (type === 'laba-rugi') {
+      const transactions = await prisma.transaction.findMany({
+        where: { created_at: dateFilter },
+        include: {
+          inventory_logs: {
+            where: { jenis: 'DEDUCT' },
+            include: { inventory: true }
+          }
+        },
+        orderBy: { created_at: 'desc' }
+      });
+
+      const enriched = transactions.map(trx => {
+        let hpp = 0;
+        trx.inventory_logs.forEach(log => {
+          if (log.inventory && log.inventory.harga_modal) {
+            const konversi = log.inventory.konversi || 1;
+            hpp += (log.jumlah / konversi) * log.inventory.harga_modal;
+          }
+        });
+        const COMMISSION_RATE = 0.05;
+        const komisi = trx.sales_commission !== null ? trx.sales_commission : (trx.total_amount * COMMISSION_RATE);
+        return {
+          id: trx.id,
+          customer_name: trx.customer_name,
+          created_at: trx.created_at,
+          total_amount: trx.total_amount,
+          hpp: hpp,
+          komisi: komisi,
+          labaBersih: trx.total_amount - hpp - komisi
+        };
+      });
+      return res.json({ success: true, data: enriched });
+    }
+
+    res.status(400).json({ success: false, message: 'Invalid detail type' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 module.exports = {
   getDashboardSummary,
   getProfitLossChart,
   getExpenses,
   addExpense,
   getPurchaseOrders,
-  addPurchaseOrder
+  addPurchaseOrder,
+  getDashboardDetails
 };

@@ -27,6 +27,8 @@ export default function DashboardDetailsModal({ isOpen, onClose, type, data, loa
       case 'piutang': return 'Rincian Piutang Belum Lunas';
       case 'omset': return 'Rincian Transaksi (Omset)';
       case 'laba-rugi': return 'Analisis Laba Rugi Transaksi';
+      case 'beban': return 'Rincian Beban Operasional';
+      case 'arus-kas': return 'Rincian Arus Kas (Masuk & Keluar)';
       default: return 'Rincian';
     }
   };
@@ -131,6 +133,64 @@ export default function DashboardDetailsModal({ isOpen, onClose, type, data, loa
                 <td className="px-4 py-3 text-sm text-red-600 font-medium text-right">-{formatRupiah(item.komisi || 0)}</td>
                 <td className={`px-4 py-3 text-sm font-bold text-right ${item.labaBersih >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {item.labaBersih > 0 ? '+' : ''}{formatRupiah(item.labaBersih)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    if (type === 'beban') {
+      return (
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Nominal</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((item, idx) => (
+              <tr key={idx}>
+                <td className="px-4 py-3 text-sm text-gray-900">{formatDate(item.date)}</td>
+                <td className="px-4 py-3 text-sm text-gray-900 font-medium">{item.title}</td>
+                <td className="px-4 py-3 text-sm text-gray-500">{item.category}</td>
+                <td className="px-4 py-3 text-sm font-bold text-red-600 text-right">
+                  {formatRupiah(item.amount)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    if (type === 'arus-kas') {
+      return (
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Referensi</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deskripsi</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Kas Masuk (IN)</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Kas Keluar (OUT)</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((item, idx) => (
+              <tr key={idx}>
+                <td className="px-4 py-3 text-sm text-gray-900">{formatDate(item.date)}</td>
+                <td className="px-4 py-3 text-sm text-gray-500 text-xs font-mono">{item.referenceId || '-'}</td>
+                <td className="px-4 py-3 text-sm text-gray-900">{item.description}</td>
+                <td className="px-4 py-3 text-sm font-bold text-green-600 text-right">
+                  {item.type === 'IN' ? `+${formatRupiah(item.amount)}` : '-'}
+                </td>
+                <td className="px-4 py-3 text-sm font-bold text-red-600 text-right">
+                  {item.type === 'OUT' ? `-${formatRupiah(item.amount)}` : '-'}
                 </td>
               </tr>
             ))}

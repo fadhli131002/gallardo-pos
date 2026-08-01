@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import html2pdf from 'html2pdf.js';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import DashboardDetailsModal from '../../components/DashboardDetailsModal';
 import {
   TrendingUp,
   Wallet,
@@ -58,7 +60,44 @@ export default function OwnerDashboard() {
     complaintStats: { total: 0, resolved: 0, pending: 0 }
   });
 
+  
   const [chartData, setChartData] = useState([]);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [modalData, setModalData] = useState([]);
+  const [modalLoading, setModalLoading] = useState(false);
+
+  const fetchDetails = async (type) => {
+    setIsModalOpen(true);
+    setModalType(type);
+    setModalLoading(true);
+    setModalData([]);
+
+    try {
+      const token = sessionStorage.getItem('token');
+      const headers = { 'Authorization': `Bearer ${token}` };
+      const queryParams = new URLSearchParams({ type, year });
+      if (month) queryParams.append('month', month);
+
+      const res = await fetch(`${window.API_URL}/api/owner/dashboard-details?${queryParams}`, { headers });
+      const json = await res.json();
+      
+      if (json.success) {
+        setModalData(json.data);
+      } else {
+        toast.error('Gagal mengambil rincian data');
+        setIsModalOpen(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Terjadi kesalahan server');
+      setIsModalOpen(false);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
 
   const [activeTab, setActiveTab] = useState('finance');
   const [isLoading, setIsLoading] = useState(true);
