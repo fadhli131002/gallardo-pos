@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Package, History, AlertTriangle, ArrowUpRight, ArrowDownRight, Archive, Box } from 'lucide-react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 export default function OwnerInventory({ isDarkMode }) {
   const [activeSubTab, setActiveSubTab] = useState('summary'); // 'summary' or 'ledger'
