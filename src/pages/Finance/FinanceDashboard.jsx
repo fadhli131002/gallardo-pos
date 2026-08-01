@@ -154,7 +154,7 @@ const FinanceDashboard = () => {
       toast.error('Terjadi kesalahan server');
     }
   };
-\n  const formatRupiah = (number) => {
+  const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
