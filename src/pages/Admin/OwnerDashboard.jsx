@@ -59,8 +59,6 @@ export default function OwnerDashboard() {
   });
 
   const [chartData, setChartData] = useState([]);
-  const [expenses, setExpenses] = useState([]);
-  const [purchaseOrders, setPurchaseOrders] = useState([]);
 
   const [activeTab, setActiveTab] = useState('finance');
   const [isLoading, setIsLoading] = useState(true);
@@ -106,16 +104,6 @@ export default function OwnerDashboard() {
       if (chartJson.success) {
         setChartData(chartJson.data);
       }
-
-      // Fetch Expenses
-      const expRes = await fetch(`${window.API_URL}/api/owner/expenses?${queryParams}`, { headers });
-      const expJson = await expRes.json();
-      if (expJson.success) setExpenses(expJson.data);
-
-      // Fetch Purchase Orders
-      const poRes = await fetch(`${window.API_URL}/api/owner/purchase-orders?${queryParams}`, { headers });
-      const poJson = await poRes.json();
-      if (poJson.success) setPurchaseOrders(poJson.data);
 
     } catch (err) {
       console.error(err);
@@ -340,83 +328,6 @@ export default function OwnerDashboard() {
                   </ResponsiveContainer>
                 </div>
               </div>
-
-              {/* TABLES */}
-              <div className="tables-grid">
-
-                {/* PO */}
-                <div className="table-card">
-                  <div className="table-header">
-                    <h2 className="table-title">
-                      <Package size={20} color="#64748b" /> Laporan Pembelian
-                    </h2>
-                  </div>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th>Tanggal</th>
-                          <th>Supplier / Item</th>
-                          <th>Status</th>
-                          <th>Total Biaya</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {purchaseOrders.length === 0 ? (
-                          <tr>
-                            <td colSpan={4} style={{ textAlign: 'center', color: '#94a3b8' }}>Belum ada data pembelian.</td>
-                          </tr>
-                        ) : purchaseOrders.map(po => (
-                          <tr key={po.id}>
-                            <td>{new Date(po.date).toLocaleDateString('id-ID')}</td>
-                            <td style={{ fontWeight: '500' }}>{po.supplier}</td>
-                            <td>
-                              <span className={`status-badge ${po.status === 'Received' ? 'status-received' : 'status-pending'}`}>
-                                {po.status}
-                              </span>
-                            </td>
-                            <td>{formatCurrency(po.totalAmount)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Expenses */}
-                <div className="table-card">
-                  <div className="table-header">
-                    <h2 className="table-title">
-                      <FileText size={20} color="#64748b" /> Beban Operasional
-                    </h2>
-                  </div>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th>Tanggal</th>
-                          <th>Keterangan</th>
-                          <th>Kategori</th>
-                          <th>Nominal</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {expenses.length === 0 ? (
-                          <tr>
-                            <td colSpan={4} style={{ textAlign: 'center', color: '#94a3b8' }}>Belum ada data pengeluaran.</td>
-                          </tr>
-                        ) : expenses.map(exp => (
-                          <tr key={exp.id}>
-                            <td>{new Date(exp.date).toLocaleDateString('id-ID')}</td>
-                            <td style={{ fontWeight: '500' }}>{exp.title}</td>
-                            <td style={{ color: '#64748b' }}>{exp.category}</td>
-                            <td>{formatCurrency(exp.amount)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
 
               </div>
             </>
