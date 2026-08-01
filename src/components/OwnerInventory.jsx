@@ -54,13 +54,13 @@ export default function OwnerInventory({ isDarkMode }) {
     <div className={`mt-6 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
       
       {/* Sub Tabs */}
-      <div className="flex space-x-4 mb-6 border-b border-gray-200 dark:border-gray-700 pb-2">
+      <div className={`flex space-x-4 mb-6 border-b pb-2 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
         <button 
           onClick={() => setActiveSubTab('summary')}
           className={`flex items-center px-4 py-2 text-sm font-medium transition-colors ${
             activeSubTab === 'summary' 
-              ? 'text-primary-600 border-b-2 border-primary-600' 
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+              ? (isDarkMode ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-primary-600 border-b-2 border-primary-600')
+              : (isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700')
           }`}
         >
           <Package size={16} className="mr-2" />
@@ -70,8 +70,8 @@ export default function OwnerInventory({ isDarkMode }) {
           onClick={() => setActiveSubTab('ledger')}
           className={`flex items-center px-4 py-2 text-sm font-medium transition-colors ${
             activeSubTab === 'ledger' 
-              ? 'text-primary-600 border-b-2 border-primary-600' 
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+              ? (isDarkMode ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-primary-600 border-b-2 border-primary-600')
+              : (isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700')
           }`}
         >
           <History size={16} className="mr-2" />
@@ -82,12 +82,12 @@ export default function OwnerInventory({ isDarkMode }) {
       {isLoading ? (
         <div className="text-center py-12 text-gray-500">Memuat data...</div>
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className={`rounded-xl shadow-sm border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           
           {activeSubTab === 'summary' && (
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 uppercase">
+                <thead className={`uppercase ${isDarkMode ? 'bg-gray-900 text-gray-400 border-b border-gray-700' : 'bg-gray-50 text-gray-500 border-b border-gray-200'}`}>
                   <tr>
                     <th className="px-6 py-4 font-semibold">Barang / Produk</th>
                     <th className="px-6 py-4 font-semibold">Kategori</th>
@@ -95,34 +95,34 @@ export default function OwnerInventory({ isDarkMode }) {
                     <th className="px-6 py-4 font-semibold text-center">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
                   {inventory.length === 0 ? (
                     <tr><td colSpan="4" className="text-center py-8 text-gray-500">Tidak ada data inventaris</td></tr>
                   ) : (
                     inventory.map(item => (
-                      <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <tr key={item.id} className={`transition-colors ${isDarkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}`}>
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg mr-3">
+                            <div className={`p-2 rounded-lg mr-3 ${isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
                               <Archive size={18} />
                             </div>
                             <div>
                               <div className="font-semibold">{item.brand} {item.varian}</div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400">{item.id}</div>
+                              <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{item.id}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{item.kategori}</td>
+                        <td className={`px-6 py-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{item.kategori}</td>
                         <td className="px-6 py-4 text-right">
                           <span className="font-medium">{item.stok_utama}</span> {item.satuan}
                         </td>
                         <td className="px-6 py-4 text-center">
                           {item.is_low_stock ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${isDarkMode ? 'bg-red-900/30 text-red-400 border-red-800' : 'bg-red-100 text-red-800 border-red-200'}`}>
                               <AlertTriangle size={12} className="mr-1" /> Menipis
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${isDarkMode ? 'bg-green-900/30 text-green-400 border-green-800' : 'bg-green-100 text-green-800 border-green-200'}`}>
                               Aman
                             </span>
                           )}
@@ -138,7 +138,7 @@ export default function OwnerInventory({ isDarkMode }) {
           {activeSubTab === 'ledger' && (
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 uppercase">
+                <thead className={`uppercase ${isDarkMode ? 'bg-gray-900 text-gray-400 border-b border-gray-700' : 'bg-gray-50 text-gray-500 border-b border-gray-200'}`}>
                   <tr>
                     <th className="px-6 py-4 font-semibold">Tanggal & Waktu</th>
                     <th className="px-6 py-4 font-semibold">Barang / Produk</th>
@@ -147,13 +147,13 @@ export default function OwnerInventory({ isDarkMode }) {
                     <th className="px-6 py-4 font-semibold">Keterangan</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
                   {logs.length === 0 ? (
                     <tr><td colSpan="5" className="text-center py-8 text-gray-500">Tidak ada riwayat pergerakan stok</td></tr>
                   ) : (
                     logs.map(log => (
-                      <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
+                      <tr key={log.id} className={`transition-colors ${isDarkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}`}>
+                        <td className={`px-6 py-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                           {new Date(log.created_at).toLocaleString('id-ID')}
                         </td>
                         <td className="px-6 py-4 font-medium">
@@ -161,26 +161,26 @@ export default function OwnerInventory({ isDarkMode }) {
                         </td>
                         <td className="px-6 py-4">
                           {log.jenis === 'RESTOCK' && (
-                            <span className="inline-flex items-center text-green-600 dark:text-green-400 font-medium">
+                            <span className={`inline-flex items-center font-medium ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
                               <ArrowDownRight size={16} className="mr-1" /> Masuk
                             </span>
                           )}
                           {log.jenis === 'DEDUCT' && (
-                            <span className="inline-flex items-center text-red-600 dark:text-red-400 font-medium">
+                            <span className={`inline-flex items-center font-medium ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>
                               <ArrowUpRight size={16} className="mr-1" /> Keluar
                             </span>
                           )}
                           {log.jenis === 'ADJUST' && (
-                            <span className="inline-flex items-center text-blue-600 dark:text-blue-400 font-medium">
+                            <span className={`inline-flex items-center font-medium ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
                               <Box size={16} className="mr-1" /> Penyesuaian
                             </span>
                           )}
                         </td>
                         <td className="px-6 py-4 text-right font-bold">
                           {log.jenis === 'RESTOCK' ? '+' : (log.jenis === 'DEDUCT' ? '-' : '')}
-                          {log.jumlah} <span className="text-xs text-gray-500 font-normal">{log.inventory?.satuan}</span>
+                          {log.jumlah} <span className="text-xs font-normal text-gray-500">{log.inventory?.satuan}</span>
                         </td>
-                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400 text-xs max-w-xs truncate" title={log.keterangan}>
+                        <td className={`px-6 py-4 text-xs max-w-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} title={log.keterangan}>
                           {log.keterangan || '-'}
                         </td>
                       </tr>
