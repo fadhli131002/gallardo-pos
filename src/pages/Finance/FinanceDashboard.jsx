@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { DollarSign, CreditCard, TrendingUp, TrendingDown, FileText, PieChart, Download, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { DollarSign, CreditCard, TrendingUp, TrendingDown, FileText, PieChart, Download, Calendar as CalendarIcon, Loader2, Package, Plus } from \'lucide-react\';
 import { toast } from 'sonner';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -20,6 +20,13 @@ const FinanceDashboard = () => {
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   const [loading, setLoading] = useState(true);
+  const [expenses, setExpenses] = useState([]);
+  const [purchaseOrders, setPurchaseOrders] = useState([]);
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [expenseForm, setExpenseForm] = useState({ title: '', category: 'Operational', amount: '', date: '' });
+  const [showPOModal, setShowPOModal] = useState(false);
+  const [poForm, setPOForm] = useState({ supplier: '', totalAmount: '', status: 'Received', date: '' });
+
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,6 +78,23 @@ const FinanceDashboard = () => {
       if (!res.ok) throw new Error('Gagal mengambil data dashboard keuangan');
       const data = await res.json();
       setSummary(data);
+      // Fetch Expenses & PO
+      try {
+        const expRes = await fetch(window.API_URL ? `${window.API_URL}/api/owner/expenses${query}` : `/api/owner/expenses${query}`, { headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') } });
+        if (expRes.ok) {
+          const expJson = await expRes.json();
+          if (expJson.success) setExpenses(expJson.data);
+        }
+
+        const poRes = await fetch(window.API_URL ? `${window.API_URL}/api/owner/purchase-orders${query}` : `/api/owner/purchase-orders${query}`, { headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') } });
+        if (poRes.ok) {
+          const poJson = await poRes.json();
+          if (poJson.success) setPurchaseOrders(poJson.data);
+        }
+      } catch (e) {
+        console.error('Error fetching expenses/PO:', e);
+      }
+
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -78,7 +102,59 @@ const FinanceDashboard = () => {
     }
   };
 
-  const formatRupiah = (number) => {
+  
+  const handleAddExpense = async (e) => {
+    e.preventDefault();
+    try {
+      const token = sessionStorage.getItem('token');
+      const res = await fetch(`${window.API_URL}/api/owner/expenses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(expenseForm)
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Pengeluaran berhasil dicatat');
+        setShowExpenseModal(false);
+        setExpenseForm({ title: '', category: 'Operational', amount: '', date: '' });
+        fetchDashboardData();
+      } else {
+        toast.error(data.message || 'Gagal menyimpan');
+      }
+    } catch (err) {
+      toast.error('Terjadi kesalahan server');
+    }
+  };
+
+  const handleAddPO = async (e) => {
+    e.preventDefault();
+    try {
+      const token = sessionStorage.getItem('token');
+      const res = await fetch(`${window.API_URL}/api/owner/purchase-orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(poForm)
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Pembelian barang berhasil dicatat');
+        setShowPOModal(false);
+        setPOForm({ supplier: '', totalAmount: '', status: 'Received', date: '' });
+        fetchDashboardData();
+      } else {
+        toast.error(data.message || 'Gagal menyimpan');
+      }
+    } catch (err) {
+      toast.error('Terjadi kesalahan server');
+    }
+  };
+\n  const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
@@ -500,7 +576,159 @@ const FinanceDashboard = () => {
         </motion.div>
       </div>
 
-      <DashboardDetailsModal
+      
+      {/* TABLES: Expenses & PO */}
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* PO Table */}
+        <div className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <Package size={20} className="text-indigo-600" /> Laporan Pembelian
+            </h2>
+            <button onClick={() => setShowPOModal(true)} className="flex items-center gap-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+              <Plus size={16} /> Catat Pembelian
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-gray-50 text-gray-500 uppercase">
+                <tr>
+                  <th className="px-4 py-3">Tanggal</th>
+                  <th className="px-4 py-3">Supplier / Item</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3 text-right">Total Biaya</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {purchaseOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-6 text-gray-400">Belum ada data pembelian.</td>
+                  </tr>
+                ) : purchaseOrders.map(po => (
+                  <tr key={po.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600">{new Date(po.date).toLocaleDateString('id-ID')}</td>
+                    <td className="px-4 py-3 font-medium text-gray-800">{po.supplier}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${po.status === 'Received' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                        {po.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-bold text-gray-900">{formatRupiah(po.totalAmount)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Expenses Table */}
+        <div className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <FileText size={20} className="text-rose-600" /> Beban Operasional
+            </h2>
+            <button onClick={() => setShowExpenseModal(true)} className="flex items-center gap-2 bg-rose-50 text-rose-700 hover:bg-rose-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+              <Plus size={16} /> Input Expense
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-gray-50 text-gray-500 uppercase">
+                <tr>
+                  <th className="px-4 py-3">Tanggal</th>
+                  <th className="px-4 py-3">Keterangan</th>
+                  <th className="px-4 py-3">Kategori</th>
+                  <th className="px-4 py-3 text-right">Nominal</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {expenses.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-6 text-gray-400">Belum ada data pengeluaran.</td>
+                  </tr>
+                ) : expenses.map(exp => (
+                  <tr key={exp.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-600">{new Date(exp.date).toLocaleDateString('id-ID')}</td>
+                    <td className="px-4 py-3 font-medium text-gray-800">{exp.title}</td>
+                    <td className="px-4 py-3 text-gray-500">{exp.category}</td>
+                    <td className="px-4 py-3 text-right font-bold text-gray-900">{formatRupiah(exp.amount)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* MODALS for Expense and PO */}
+      {showExpenseModal && (
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Catat Pengeluaran Baru</h3>
+            <form onSubmit={handleAddExpense} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Keterangan / Judul</label>
+                <input required type="text" value={expenseForm.title} onChange={e => setExpenseForm({ ...expenseForm, title: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Misal: Gaji Bulan Juli" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Kategori</label>
+                <select value={expenseForm.category} onChange={e => setExpenseForm({ ...expenseForm, category: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                  <option value="Operational">Operasional (Umum)</option>
+                  <option value="Salary">Gaji Karyawan</option>
+                  <option value="Utility">Listrik & Internet</option>
+                  <option value="Other">Lain-lain</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Nominal (Rp)</label>
+                <input required type="text" value={expenseForm.amount ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(expenseForm.amount) : ''} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setExpenseForm({ ...expenseForm, amount: val ? Number(val) : '' }) }} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Rp 0" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Tanggal Pengeluaran</label>
+                <input required type="date" value={expenseForm.date} onChange={e => setExpenseForm({ ...expenseForm, date: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" />
+              </div>
+              <div className="flex justify-end gap-3 mt-6">
+                <button type="button" onClick={() => setShowExpenseModal(false)} className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Batal</button>
+                <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm">Simpan Pengeluaran</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showPOModal && (
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Catat Pembelian Stok</h3>
+            <form onSubmit={handleAddPO} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Nama Supplier / Deskripsi</label>
+                <input required type="text" value={poForm.supplier} onChange={e => setPOForm({ ...poForm, supplier: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Misal: PT Global (Kaca Film)" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Status Penerimaan</label>
+                <select value={poForm.status} onChange={e => setPOForm({ ...poForm, status: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                  <option value="Received">Barang Diterima & Lunas</option>
+                  <option value="Pending">Pending / Belum Lunas</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Total Biaya (Rp)</label>
+                <input required type="text" value={poForm.totalAmount ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(poForm.totalAmount) : ''} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setPOForm({ ...poForm, totalAmount: val ? Number(val) : '' }) }} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Rp 0" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Tanggal Pembelian</label>
+                <input required type="date" value={poForm.date} onChange={e => setPOForm({ ...poForm, date: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" />
+              </div>
+              <div className="flex justify-end gap-3 mt-6">
+                <button type="button" onClick={() => setShowPOModal(false)} className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Batal</button>
+                <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm">Simpan Pembelian</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+\n      <DashboardDetailsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         type={modalType}

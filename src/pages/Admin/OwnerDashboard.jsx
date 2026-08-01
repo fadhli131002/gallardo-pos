@@ -62,12 +62,6 @@ export default function OwnerDashboard() {
   const [expenses, setExpenses] = useState([]);
   const [purchaseOrders, setPurchaseOrders] = useState([]);
 
-  const [showExpenseModal, setShowExpenseModal] = useState(false);
-  const [expenseForm, setExpenseForm] = useState({ title: '', category: 'Operational', amount: '', date: '' });
-
-  const [showPOModal, setShowPOModal] = useState(false);
-  const [poForm, setPOForm] = useState({ supplier: '', totalAmount: '', status: 'Received', date: '' });
-
   const [activeTab, setActiveTab] = useState('finance');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -134,58 +128,6 @@ export default function OwnerDashboard() {
   useEffect(() => {
     fetchDashboardData();
   }, [year, month]);
-
-  const handleAddExpense = async (e) => {
-    e.preventDefault();
-    try {
-      const token = sessionStorage.getItem('token');
-      const res = await fetch(`${window.API_URL}/api/owner/expenses`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(expenseForm)
-      });
-      const data = await res.json();
-      if (data.success) {
-        toast.success('Pengeluaran berhasil dicatat');
-        setShowExpenseModal(false);
-        setExpenseForm({ title: '', category: 'Operational', amount: '', date: '' });
-        fetchDashboardData();
-      } else {
-        toast.error(data.message || 'Gagal menyimpan');
-      }
-    } catch (err) {
-      toast.error('Terjadi kesalahan server');
-    }
-  };
-
-  const handleAddPO = async (e) => {
-    e.preventDefault();
-    try {
-      const token = sessionStorage.getItem('token');
-      const res = await fetch(`${window.API_URL}/api/owner/purchase-orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(poForm)
-      });
-      const data = await res.json();
-      if (data.success) {
-        toast.success('Pembelian barang berhasil dicatat');
-        setShowPOModal(false);
-        setPOForm({ supplier: '', totalAmount: '', status: 'Received', date: '' });
-        fetchDashboardData();
-      } else {
-        toast.error(data.message || 'Gagal menyimpan');
-      }
-    } catch (err) {
-      toast.error('Terjadi kesalahan server');
-    }
-  };
 
   const formatCurrency = (val) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val || 0);
@@ -408,9 +350,6 @@ export default function OwnerDashboard() {
                     <h2 className="table-title">
                       <Package size={20} color="#64748b" /> Laporan Pembelian
                     </h2>
-                    <button onClick={() => setShowPOModal(true)} className="btn-outline" style={{ padding: '6px 12px', fontSize: '13px' }}>
-                      <Plus size={14} /> Catat Pembelian
-                    </button>
                   </div>
                   <div style={{ overflowX: 'auto' }}>
                     <table className="data-table">
@@ -450,9 +389,6 @@ export default function OwnerDashboard() {
                     <h2 className="table-title">
                       <FileText size={20} color="#64748b" /> Beban Operasional
                     </h2>
-                    <button onClick={() => setShowExpenseModal(true)} className="btn-primary" style={{ padding: '6px 12px', fontSize: '13px' }}>
-                      <Plus size={14} /> Input Expense
-                    </button>
                   </div>
                   <div style={{ overflowX: 'auto' }}>
                     <table className="data-table">
@@ -600,75 +536,6 @@ export default function OwnerDashboard() {
 
           {/* Banner Removed per user request */}
 
-        </div>
-      )}
-
-      {/* MODALS */}
-      {showExpenseModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3 className="modal-title">Catat Pengeluaran Baru</h3>
-            <form onSubmit={handleAddExpense}>
-              <div className="form-group">
-                <label className="form-label">Keterangan / Judul</label>
-                <input required type="text" value={expenseForm.title} onChange={e => setExpenseForm({ ...expenseForm, title: e.target.value })} className="form-input" placeholder="Misal: Gaji Bulan Juli" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Kategori</label>
-                <select value={expenseForm.category} onChange={e => setExpenseForm({ ...expenseForm, category: e.target.value })} className="form-input">
-                  <option value="Operational">Operasional (Umum)</option>
-                  <option value="Salary">Gaji Karyawan</option>
-                  <option value="Utility">Listrik & Internet</option>
-                  <option value="Other">Lain-lain</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Nominal (Rp)</label>
-                <input required type="text" value={expenseForm.amount ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(expenseForm.amount) : ''} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setExpenseForm({ ...expenseForm, amount: val ? Number(val) : '' }) }} className="form-input" placeholder="Rp 0" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Tanggal Pengeluaran</label>
-                <input required type="date" value={expenseForm.date} onChange={e => setExpenseForm({ ...expenseForm, date: e.target.value })} className="form-input" />
-              </div>
-              <div className="modal-actions">
-                <button type="button" onClick={() => setShowExpenseModal(false)} className="btn-outline">Batal</button>
-                <button type="submit" className="btn-primary">Simpan Pengeluaran</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {showPOModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3 className="modal-title">Catat Pembelian Stok</h3>
-            <form onSubmit={handleAddPO}>
-              <div className="form-group">
-                <label className="form-label">Nama Supplier / Deskripsi</label>
-                <input required type="text" value={poForm.supplier} onChange={e => setPOForm({ ...poForm, supplier: e.target.value })} className="form-input" placeholder="Misal: PT Global (Kaca Film)" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Status Penerimaan</label>
-                <select value={poForm.status} onChange={e => setPOForm({ ...poForm, status: e.target.value })} className="form-input">
-                  <option value="Received">Barang Diterima & Lunas</option>
-                  <option value="Pending">Pending / Belum Lunas</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Total Biaya (Rp)</label>
-                <input required type="text" value={poForm.totalAmount ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(poForm.totalAmount) : ''} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setPOForm({ ...poForm, totalAmount: val ? Number(val) : '' }) }} className="form-input" placeholder="Rp 0" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Tanggal Pembelian</label>
-                <input required type="date" value={poForm.date} onChange={e => setPOForm({ ...poForm, date: e.target.value })} className="form-input" />
-              </div>
-              <div className="modal-actions">
-                <button type="button" onClick={() => setShowPOModal(false)} className="btn-outline">Batal</button>
-                <button type="submit" className="btn-primary">Simpan Pembelian</button>
-              </div>
-            </form>
-          </div>
         </div>
       )}
 

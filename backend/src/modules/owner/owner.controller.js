@@ -342,10 +342,15 @@ const getProfitLossChart = async (req, res, next) => {
 // 3. Expenses CRUD
 const getExpenses = async (req, res, next) => {
   try {
-    const { year, month } = req.query;
+    const { year, month, startDate, endDate } = req.query;
     let where = {};
     
-    if (year) {
+    if (startDate && endDate) {
+      where.date = {
+        gte: new Date(startDate),
+        lte: new Date(endDate)
+      };
+    } else if (year) {
       const y = parseInt(year);
       if (month) {
         const m = parseInt(month);
@@ -404,10 +409,15 @@ const addExpense = async (req, res, next) => {
 // 4. Purchase Orders CRUD
 const getPurchaseOrders = async (req, res, next) => {
   try {
-    const { year, month } = req.query;
+    const { year, month, startDate, endDate } = req.query;
     let where = {};
     
-    if (year) {
+    if (startDate && endDate) {
+      where.date = {
+        gte: new Date(startDate),
+        lte: new Date(endDate)
+      };
+    } else if (year) {
       const y = parseInt(year);
       if (month) {
         const m = parseInt(month);

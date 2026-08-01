@@ -5,7 +5,7 @@ const ownerController = require('./owner.controller');
 
 // Dashboard Summary & Charts
 router.use(authenticateToken);
-router.use(authorizeRole(['owner', 'superadmin', 'admin']));
+router.use(authorizeRole(['owner', 'superadmin', 'admin', 'finance']));
 
 // Dashboard Summary & Charts
 router.get('/dashboard-summary', ownerController.getDashboardSummary);
