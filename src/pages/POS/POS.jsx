@@ -674,7 +674,6 @@ const POS = () => {
       if (!response.ok) {
         const errMsg = resJson.message || 'Gagal menyimpan ke database backend.';
         toast.error(`❌ ${errMsg}`);
-        setIsSubmitting(false);
         return; // Batalkan checkout
       } else {
         // Refresh seluruh data dari backend agar ID dan struktur sama persis
