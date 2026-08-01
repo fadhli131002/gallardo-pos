@@ -47,14 +47,17 @@ exports.getDashboardSummary = async (req, res, next) => {
     const totalPiutang = receivables._sum.sisa_tagihan || 0;
 
     // 3. Laba/Rugi Standar
-    const omset = await prisma.transaction.aggregate({
-      _sum: { total_amount: true, sales_commission: true },
-      where: {
-        created_at: createdFilter
-      }
+    const transactions = await prisma.transaction.findMany({
+      where: { created_at: createdFilter },
+      select: { total_amount: true, sales_commission: true }
     });
-    const totalOmset = omset._sum.total_amount || 0;
-    const totalKomisi = omset._sum.sales_commission || 0;
+
+    let totalOmset = 0;
+    let totalKomisi = 0;
+    transactions.forEach(t => {
+      totalOmset += t.total_amount || 0;
+      totalKomisi += t.sales_commission !== null ? t.sales_commission : ((t.total_amount || 0) * 0.05);
+    });
 
     const inventoryLogs = await prisma.inventoryLog.findMany({
       where: { 
@@ -138,7 +141,8 @@ exports.getDashboardDetails = async (req, res, next) => {
             hpp += (log.jumlah * (log.inventory.harga_modal / konversi));
           }
         });
-        const komisi = trx.sales_commission || 0;
+        const COMMISSION_RATE = 0.05;
+        const komisi = trx.sales_commission !== null ? trx.sales_commission : (trx.total_amount * COMMISSION_RATE);
         return {
           id: trx.id,
           customer_name: trx.customer_name,
