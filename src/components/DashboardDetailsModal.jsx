@@ -111,6 +111,7 @@ export default function DashboardDetailsModal({ isOpen, onClose, type, data, loa
       return (
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
+            <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transaksi</th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Nilai Omset</th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">HPP (Modal)</th>
