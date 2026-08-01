@@ -8,7 +8,7 @@ export const useInventory = () => {
 };
 
 export const InventoryProvider = ({ children }) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   // Initial dummy data
   const [inventory, setInventory] = useState([
     { id: 'INV-001', kategori: 'PPF', brand: 'Vansgard', varian: 'Ultra', stokUtama: 10, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 15 },
@@ -74,13 +74,14 @@ export const InventoryProvider = ({ children }) => {
         }
       }
 
-      // 2. Fetch inventory logs
-      const resLogs = await fetch(window.API_URL + '/api/inventory/logs', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (resLogs.ok) {
-        const jsonLogs = await resLogs.json();
-        if (jsonLogs.success && Array.isArray(jsonLogs.data)) {
+      // 2. Fetch inventory logs (Hanya untuk role yang diizinkan)
+      if (user && ['admin', 'superadmin', 'owner'].includes(user.role)) {
+        const resLogs = await fetch(window.API_URL + '/api/inventory/logs', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (resLogs.ok) {
+          const jsonLogs = await resLogs.json();
+          if (jsonLogs.success && Array.isArray(jsonLogs.data)) {
           const mappedLogs = jsonLogs.data.map(log => {
             const inv = log.inventory || {};
             const trx = log.transaction || {};
@@ -144,6 +145,7 @@ export const InventoryProvider = ({ children }) => {
           });
           setInventoryLogs(mappedLogs);
         }
+      }
       }
     } catch (err) {
       console.error('Failed to sync inventory & logs from API:', err);
