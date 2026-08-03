@@ -125,25 +125,10 @@ const FinanceInvoices = () => {
     html2pdf().set(opt).from(container).save();
   };
 
-  const handlePrint = async (invoice) => {
-    const element = document.getElementById('invoice-content-to-print');
-    if (!element) return;
-
-    const opt = {
-      margin: 0,
-      filename: `Invoice_${invoice.invoiceId || invoice.id}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2, 
-        useCORS: true, 
-        backgroundColor: '#ffffff',
-        windowWidth: 1024
-      },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    await html2pdf().set(opt).from(element).save();
-    setSelectedInvoice(null);
+  const handlePrint = (invoice) => {
+    const targetId = invoice.transaction_id || invoice.id;
+    const cleanId = String(targetId).replace(/\//g, '-');
+    window.open(`/sales/invoices/print/${cleanId}`, '_blank');
   };
 
   return (

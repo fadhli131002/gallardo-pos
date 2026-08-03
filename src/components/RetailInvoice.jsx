@@ -46,7 +46,7 @@ export default function RetailInvoice({ order }) {
   };
 
   return (
-    <div id="invoice-content-to-print" className="flex flex-col min-h-[800px] print:!min-h-[27cm] print:!p-0 print:!m-0 print:!border-none print:!shadow-none print:!w-full print:!max-w-none print:!h-auto print:scale-[0.95] print:origin-top" style={{ backgroundColor: '#ffffff', padding: '40px', color: '#000', width: '794px', minWidth: '794px', maxWidth: '794px', boxSizing: 'border-box', position: 'relative' }}>
+    <div id="invoice-content-to-print" className="flex flex-col min-h-[800px] print:!min-h-[27cm] print:!p-0 print:!m-0 print:!border-none print:!shadow-none print:!w-full print:!max-w-none print:!h-auto print:scale-[0.95] print:origin-top" style={{ backgroundColor: '#ffffff', padding: '40px', color: '#000', width: '100%', minWidth: '100%', maxWidth: '100%', boxSizing: 'border-box', position: 'relative' }}>
       
       {/* HEADER */}
       <div className="flex justify-between items-start mb-6">

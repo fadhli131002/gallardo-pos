@@ -612,6 +612,7 @@ const POS = () => {
         car_year: formData.carYear || null,
         installation_date: formData.installationDate || null,
         installation_time: formData.installationTime || null,
+        notes: formData.notes || null,
         total_amount: newOrder.totalPrice,
         sisa_tagihan: newOrder.remainingAmount || 0,
         status_pembayaran: newOrder.paymentType === 'Lunas' ? 'Lunas' : 'Proses',

@@ -91,7 +91,7 @@ export default function SharedInvoice({ order }) {
   }
 
   return (
-    <div id="invoice-content-to-print" className="flex flex-col min-h-[800px] print:!min-h-[27cm] print:!p-0 print:!m-0 print:!border-none print:!shadow-none print:!w-full print:!max-w-none print:!h-auto print:scale-[0.95] print:origin-top" style={{ backgroundColor: '#ffffff', padding: '40px', color: '#111', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', width: '794px', minWidth: '794px', maxWidth: '794px', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+    <div id="invoice-content-to-print" className="flex flex-col print:!p-0 print:!m-0 print:!border-none print:!shadow-none print:!w-full print:!max-w-none print:!h-auto print:scale-[0.96] print:origin-top" style={{ backgroundColor: '#ffffff', padding: '24px 32px', color: '#111', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', width: '100%', minWidth: '100%', maxWidth: '100%', boxSizing: 'border-box', position: 'relative', overflow: 'visible', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
 
       <div style={{
         position: 'absolute',
@@ -108,9 +108,9 @@ export default function SharedInvoice({ order }) {
         {labelStatus}
       </div>
 
-      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1 }}>
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1, pageBreakInside: 'avoid', breakInside: 'avoid' }}>
         {/* HEADER */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #111', paddingBottom: '20px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #111', paddingBottom: '12px', marginBottom: '14px' }}>
           <div>
             <img src={logoGallardo} alt="Gallardo Autosport" style={{ height: '40px', objectFit: 'contain', marginBottom: '10px' }} />
           </div>
@@ -121,74 +121,74 @@ export default function SharedInvoice({ order }) {
         </div>
 
         {/* 2-COLUMN INFO */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px', fontSize: '12px', lineHeight: '1.6' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px', fontSize: '12px', fontWeight: '500', lineHeight: '1.5' }}>
           {/* Kolom Kiri */}
           <div style={{ flex: 1 }}>
-            <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '8px', fontWeight: 'bold' }}>Info Pelanggan & Kendaraan</h3>
+            <h3 style={{ fontSize: '13px', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '6px', fontWeight: 'bold' }}>Info Pelanggan & Kendaraan</h3>
             <table style={{ borderCollapse: 'collapse', width: '100%' }}>
               <tbody>
                 <tr>
-                  <td style={{ width: '130px', padding: '2px 0', color: '#555' }}>Nama Pelanggan</td>
-                  <td style={{ padding: '2px 0', fontWeight: 'bold' }}>: {((order.customer && order.customer.name) || order.customerName || order.nama_pelanggan || '').toUpperCase()}</td>
+                  <td style={{ width: '130px', padding: '1px 0', color: '#555' }}>Nama Pelanggan</td>
+                  <td style={{ padding: '1px 0', fontWeight: 'bold' }}>: {((order.customer && order.customer.name) || order.customerName || order.nama_pelanggan || '').toUpperCase()}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 0', color: '#555' }}>No. HP</td>
-                  <td style={{ padding: '2px 0' }}>: {(order.customer && order.customer.phone) || order.customerHp || order.customerPhone || order.no_hp || '-'}</td>
+                  <td style={{ padding: '1px 0', color: '#555' }}>No. HP</td>
+                  <td style={{ padding: '1px 0' }}>: {(order.customer && order.customer.phone) || order.customerHp || order.customerPhone || order.no_hp || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 0', color: '#555' }}>Alamat</td>
-                  <td style={{ padding: '2px 0' }}>: {(order.customer && order.customer.address) || order.customerAddress || order.address || order.alamat || order.location || '-'}</td>
+                  <td style={{ padding: '1px 0', color: '#555' }}>Alamat</td>
+                  <td style={{ padding: '1px 0' }}>: {(order.customer && order.customer.address) || order.customerAddress || order.address || order.alamat || order.location || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 0', color: '#555' }}>Merek / Tipe Mobil</td>
-                  <td style={{ padding: '2px 0', fontWeight: 'bold' }}>: {((order.vehicle && order.vehicle.brand) || order.carBrand || '')} {((order.vehicle && order.vehicle.model) || order.carModel || '')}</td>
+                  <td style={{ padding: '1px 0', color: '#555' }}>Merek / Tipe Mobil</td>
+                  <td style={{ padding: '1px 0', fontWeight: 'bold' }}>: {((order.vehicle && order.vehicle.brand) || order.carBrand || '')} {((order.vehicle && order.vehicle.model) || order.carModel || '')}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 0', color: '#555' }}>Plat Nomor</td>
-                  <td style={{ padding: '2px 0', fontWeight: 'bold' }}>: {((order.vehicle && order.vehicle.plateNumber) || order.plateNumber || order.plat_nomor || '-').toUpperCase()}</td>
+                  <td style={{ padding: '1px 0', color: '#555' }}>Plat Nomor</td>
+                  <td style={{ padding: '1px 0', fontWeight: 'bold' }}>: {((order.vehicle && order.vehicle.plateNumber) || order.plateNumber || order.plat_nomor || '-').toUpperCase()}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 0', color: '#555' }}>No. Rangka</td>
-                  <td style={{ padding: '2px 0', fontWeight: 'bold' }}>: {((order.vehicle && order.vehicle.chassisNumber) || order.chassisNumber || order.no_rangka || order.vin || '-').toUpperCase()}</td>
+                  <td style={{ padding: '1px 0', color: '#555' }}>No. Rangka</td>
+                  <td style={{ padding: '1px 0', fontWeight: 'bold' }}>: {((order.vehicle && order.vehicle.chassisNumber) || order.chassisNumber || order.no_rangka || order.vin || '-').toUpperCase()}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 0', color: '#555' }}>Tahun</td>
-                  <td style={{ padding: '2px 0', fontWeight: 'bold' }}>: {(order.vehicle && order.vehicle.year) || order.carYear || order.year || order.tahun || '-'}</td>
+                  <td style={{ padding: '1px 0', color: '#555' }}>Tahun</td>
+                  <td style={{ padding: '1px 0', fontWeight: 'bold' }}>: {(order.vehicle && order.vehicle.year) || order.carYear || order.year || order.tahun || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 0', color: '#555' }}>Warna Kendaraan</td>
-                  <td style={{ padding: '2px 0', fontWeight: 'bold' }}>: {order.carColor || order.warna || '-'}</td>
+                  <td style={{ padding: '1px 0', color: '#555' }}>Warna Kendaraan</td>
+                  <td style={{ padding: '1px 0', fontWeight: 'bold' }}>: {order.carColor || order.warna || '-'}</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <div style={{ width: '40px' }}></div> {/* Spacer */}
+          <div style={{ width: '30px' }}></div> {/* Spacer */}
 
           {/* Kolom Kanan */}
           <div style={{ flex: 1 }}>
-            <h3 style={{ fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '8px', fontWeight: 'bold' }}>Info Pemasangan & Sales</h3>
+            <h3 style={{ fontSize: '13px', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '6px', fontWeight: 'bold' }}>Info Pemasangan & Sales</h3>
             <table style={{ borderCollapse: 'collapse', width: '100%' }}>
               <tbody>
                 <tr>
-                  <td style={{ width: '120px', padding: '2px 0', color: '#555' }}>Tgl. Order</td>
-                  <td style={{ padding: '2px 0' }}>: {format(new Date(), 'dd MMM yyyy')}</td>
+                  <td style={{ width: '120px', padding: '1px 0', color: '#555' }}>Tgl. Order</td>
+                  <td style={{ padding: '1px 0' }}>: {format(new Date(), 'dd MMM yyyy')}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 0', color: '#555' }}>EST Tgl. Pasang</td>
-                  <td style={{ padding: '2px 0' }}>: {(order.installationDate || order.estimatedDate || order.tanggal_pasang) ? format(new Date(order.installationDate || order.estimatedDate || order.tanggal_pasang), 'dd MMM yyyy') : '-'}</td>
+                  <td style={{ padding: '1px 0', color: '#555' }}>EST Tgl. Pasang</td>
+                  <td style={{ padding: '1px 0' }}>: {(order.installationDate || order.estimatedDate || order.tanggal_pasang) ? format(new Date(order.installationDate || order.estimatedDate || order.tanggal_pasang), 'dd MMM yyyy') : '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 0', color: '#555' }}>Sales</td>
-                  <td style={{ padding: '2px 0', fontWeight: 'bold' }}>: {(order.spgName || order.salesName || '-').toUpperCase()}</td>
+                  <td style={{ padding: '1px 0', color: '#555' }}>Sales</td>
+                  <td style={{ padding: '1px 0', fontWeight: 'bold' }}>: {(order.spgName || order.salesName || '-').toUpperCase()}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 0', color: '#555' }}>Tipe Order</td>
-                  <td style={{ padding: '2px 0' }}>: {order.billType || '-'}</td>
+                  <td style={{ padding: '1px 0', color: '#555' }}>Tipe Order</td>
+                  <td style={{ padding: '1px 0' }}>: {order.billType || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '2px 0', color: '#555', verticalAlign: 'top' }}>Catatan</td>
-                  <td style={{ padding: '2px 0', verticalAlign: 'top' }}>: {order.notes || '-'}</td>
+                  <td style={{ padding: '1px 0', color: '#555', verticalAlign: 'top' }}>Catatan</td>
+                  <td style={{ padding: '1px 0', verticalAlign: 'top' }}>: {order.notes || order.keterangan || '-'}</td>
                 </tr>
               </tbody>
             </table>
@@ -196,16 +196,16 @@ export default function SharedInvoice({ order }) {
         </div>
 
         {/* TABLE */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '20px', backgroundColor: 'transparent' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', fontWeight: '500', marginBottom: '12px', backgroundColor: 'transparent' }}>
           <thead>
             <tr style={{ backgroundColor: 'transparent', borderTop: '2px solid #111', borderBottom: '2px solid #111' }}>
-              <th style={{ padding: '10px 8px', textAlign: 'center', width: '5%' }}>No.</th>
-              <th style={{ padding: '10px 8px', textAlign: 'left', width: '30%' }}>Item</th>
-              <th style={{ padding: '10px 8px', textAlign: 'left', width: '20%' }}>Varian</th>
-              <th style={{ padding: '10px 8px', textAlign: 'center', width: '5%' }}>Qty</th>
-              <th style={{ padding: '10px 8px', textAlign: 'right', width: '15%' }}>Harga Satuan</th>
-              <th style={{ padding: '10px 8px', textAlign: 'right', width: '10%' }}>Diskon</th>
-              <th style={{ padding: '10px 8px', textAlign: 'right', width: '15%' }}>Total Harga</th>
+              <th style={{ padding: '6px 8px', textAlign: 'center', width: '5%' }}>No.</th>
+              <th style={{ padding: '6px 8px', textAlign: 'left', width: '30%' }}>Item</th>
+              <th style={{ padding: '6px 8px', textAlign: 'left', width: '20%' }}>Varian</th>
+              <th style={{ padding: '6px 8px', textAlign: 'center', width: '5%' }}>Qty</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', width: '15%' }}>Harga Satuan</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', width: '10%' }}>Diskon</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', width: '15%' }}>Total Harga</th>
             </tr>
           </thead>
           <tbody>
@@ -224,95 +224,95 @@ export default function SharedInvoice({ order }) {
 
                 return (
                   <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '10px 8px', textAlign: 'center', color: '#555' }}>{idx + 1}.</td>
-                    <td style={{ padding: '10px 8px', fontWeight: 'bold' }}>
+                    <td style={{ padding: '6px 8px', textAlign: 'center', color: '#555' }}>{idx + 1}.</td>
+                    <td style={{ padding: '6px 8px', fontWeight: 'bold' }}>
                       {itemName}
                       {(item.catatan || item.notes || item.product_note) && (
-                        <div style={{ fontSize: '10px', color: '#6b7280', fontWeight: 'normal', marginTop: '4px' }}>
+                        <div style={{ fontSize: '10px', color: '#6b7280', fontWeight: 'normal', marginTop: '2px' }}>
                           Catatan: {item.catatan || item.notes || item.product_note}
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: '10px 8px', color: '#555' }}>{varian}</td>
-                    <td style={{ padding: '10px 8px', textAlign: 'center' }}>{item.qty}</td>
-                    <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatCurrency(price).replace('Rp', '').trim()}</td>
-                    <td style={{ padding: '10px 8px', textAlign: 'right' }}>{discountPercentage > 0 ? discountPercentage.toFixed(1) + '%' : '0'}</td>
-                    <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(totalItemPrice).replace('Rp', '').trim()}</td>
+                    <td style={{ padding: '6px 8px', color: '#555' }}>{varian}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'center' }}>{item.qty}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right' }}>{formatCurrency(price).replace('Rp', '').trim()}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right' }}>{discountPercentage > 0 ? discountPercentage.toFixed(1) + '%' : '0'}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(totalItemPrice).replace('Rp', '').trim()}</td>
                   </tr>
                 );
               })
             ) : (
               <tr style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px 8px', textAlign: 'center', color: '#555' }}>1.</td>
-                <td style={{ padding: '10px 8px', fontWeight: 'bold' }}>{(order.service || '').toUpperCase()}</td>
-                <td style={{ padding: '10px 8px', color: '#555' }}>{order.filmVariation || '-'}</td>
-                <td style={{ padding: '10px 8px', textAlign: 'center' }}>1</td>
-                <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatCurrency(orderTotalPrice).replace('Rp', '').trim()}</td>
-                <td style={{ padding: '10px 8px', textAlign: 'right' }}>{discountPercentage > 0 ? discountPercentage.toFixed(1) + '%' : '0'}</td>
-                <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(orderTotalPrice).replace('Rp', '').trim()}</td>
+                <td style={{ padding: '6px 8px', textAlign: 'center', color: '#555' }}>1.</td>
+                <td style={{ padding: '6px 8px', fontWeight: 'bold' }}>{(order.service || '').toUpperCase()}</td>
+                <td style={{ padding: '6px 8px', color: '#555' }}>{order.filmVariation || '-'}</td>
+                <td style={{ padding: '6px 8px', textAlign: 'center' }}>1</td>
+                <td style={{ padding: '6px 8px', textAlign: 'right' }}>{formatCurrency(orderTotalPrice).replace('Rp', '').trim()}</td>
+                <td style={{ padding: '6px 8px', textAlign: 'right' }}>{discountPercentage > 0 ? discountPercentage.toFixed(1) + '%' : '0'}</td>
+                <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(orderTotalPrice).replace('Rp', '').trim()}</td>
               </tr>
             )}
           </tbody>
         </table>
 
         {/* BOTTOM SECTION */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
           {/* Row 1: Signatures and Table */}
-          <div className="mt-[30px] print:!mt-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div className="mt-2 print:!mt-2" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
 
             {/* Notes & Signatures */}
-            <div style={{ flex: 1, paddingRight: '40px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', marginBottom: '10px', padding: '0 20px' }}>
+            <div style={{ flex: 1, paddingRight: '30px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', marginBottom: '6px', padding: '0 10px' }}>
                 <div style={{ flex: 1 }}>
-                  <p style={{ margin: '0 0 50px 0', fontSize: '12px', color: '#555' }}>Pelanggan,</p>
-                  <p style={{ margin: 0, fontWeight: 'bold', fontSize: '12px' }}>{(order.customerName || '').toUpperCase()}</p>
-                  <div style={{ borderBottom: '1px solid #111', margin: '2px 20px 0 20px' }}></div>
+                  <p style={{ margin: '0 0 35px 0', fontSize: '11px', color: '#555' }}>Pelanggan,</p>
+                  <p style={{ margin: 0, fontWeight: 'bold', fontSize: '11px' }}>{(order.customerName || '').toUpperCase()}</p>
+                  <div style={{ borderBottom: '1px solid #111', margin: '2px 10px 0 10px' }}></div>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p style={{ margin: '0 0 50px 0', fontSize: '12px', color: '#555' }}>Admin,</p>
-                  <p style={{ margin: 0, fontWeight: 'bold', fontSize: '12px' }}>{(order.spgName || order.salesName || 'ADMIN').toUpperCase()}</p>
-                  <div style={{ borderBottom: '1px solid #111', margin: '2px 20px 0 20px' }}></div>
+                  <p style={{ margin: '0 0 35px 0', fontSize: '11px', color: '#555' }}>Admin,</p>
+                  <p style={{ margin: 0, fontWeight: 'bold', fontSize: '11px' }}>{(order.spgName || order.salesName || 'ADMIN').toUpperCase()}</p>
+                  <div style={{ borderBottom: '1px solid #111', margin: '2px 10px 0 10px' }}></div>
                 </div>
               </div>
 
-              <div style={{ fontWeight: 'bold', fontSize: '11px', color: '#111', marginBottom: '20px', padding: '0 20px' }}>
+              <div style={{ fontWeight: 'bold', fontSize: '10px', color: '#111', marginBottom: '10px', padding: '0 10px' }}>
                 Metode Pembayaran : {order.paymentMethod || order.method || '-'} ({order.paymentType || order.paymentStatus || order.type || '-'})
               </div>
             </div>
 
             {/* Calculation */}
-            <div style={{ width: '280px', backgroundColor: 'transparent' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', backgroundColor: 'transparent' }}>
+            <div style={{ width: '260px', backgroundColor: 'transparent' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', backgroundColor: 'transparent' }}>
                 <tbody>
                   <tr>
-                    <td style={{ padding: '6px 8px', color: '#555' }}>Total Tagihan</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 'bold', fontSize: '14px' }}>{formatCurrency(orderTotalPrice).replace('Rp', '').trim()}</td>
+                    <td style={{ padding: '4px 6px', color: '#555' }}>Total Tagihan</td>
+                    <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', fontSize: '13px' }}>{formatCurrency(orderTotalPrice).replace('Rp', '').trim()}</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #ddd' }}>
-                    <td style={{ padding: '6px 8px', color: '#555' }}>Diskon/Potongan</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right' }}>{order.discountAmount > 0 ? `- ${formatCurrency(order.discountAmount).replace('Rp', '').trim()}` : '0'}</td>
+                    <td style={{ padding: '4px 6px', color: '#555' }}>Diskon/Potongan</td>
+                    <td style={{ padding: '4px 6px', textAlign: 'right' }}>{order.discountAmount > 0 ? `- ${formatCurrency(order.discountAmount).replace('Rp', '').trim()}` : '0'}</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '8px 8px', fontWeight: 'bold', fontSize: '14px' }}>Total Dibayar</td>
-                    <td style={{ padding: '8px 8px', textAlign: 'right', fontWeight: 'bold', fontSize: '14px', color: '#111' }}>{formatCurrency(totalDibayar).replace('Rp', '').trim()}</td>
+                    <td style={{ padding: '6px 6px', fontWeight: 'bold', fontSize: '13px' }}>Total Dibayar</td>
+                    <td style={{ padding: '6px 6px', textAlign: 'right', fontWeight: 'bold', fontSize: '13px', color: '#111' }}>{formatCurrency(totalDibayar).replace('Rp', '').trim()}</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '6px 8px', color: '#555' }}>Sisa / Kurang Bayar</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 'bold', color: sisaKurangBayar > 0 ? '#dc2626' : '#111' }}>{formatCurrency(sisaKurangBayar).replace('Rp', '').trim()}</td>
+                    <td style={{ padding: '4px 6px', color: '#555' }}>Sisa / Kurang Bayar</td>
+                    <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', color: sisaKurangBayar > 0 ? '#dc2626' : '#111' }}>{formatCurrency(sisaKurangBayar).replace('Rp', '').trim()}</td>
                   </tr>
                 </tbody>
               </table>
-              <div style={{ textAlign: 'right', fontStyle: 'italic', fontSize: '11px', color: '#111', fontWeight: 'bold', marginTop: '20px' }}>
+              <div style={{ textAlign: 'right', fontStyle: 'italic', fontSize: '10px', color: '#111', fontWeight: 'bold', marginTop: '10px' }}>
                 TERBILANG: # {getTerbilang(totalDibayar)} Rupiah #
               </div>
             </div>
           </div>
 
           {/* Row 2: Catatan Penting and Bank Info */}
-          <div className="mt-auto" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'start' }}>
+          <div className="mt-auto pt-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'start', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
             <div style={{ textAlign: 'justify', backgroundColor: 'transparent' }}>
-              <div style={{ fontSize: '9px', color: '#111', lineHeight: '1.4' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Gallardo Auto Sport</div>
+              <div style={{ fontSize: '10px', color: '#111', lineHeight: '1.4' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '3px' }}>Gallardo Auto Sport</div>
                 <div style={{ marginBottom: '2px' }}>Ruko Alicante, Blok D9 - D10, Medang, Kec. Pagedangan, Kabupaten Tangerang, Banten 15334</div>
                 <div style={{ marginBottom: '2px' }}>0822-5802-6577</div>
                 <div style={{ marginBottom: '2px' }}>(Untuk Transfer Pembayaran ke:)</div>
@@ -322,15 +322,15 @@ export default function SharedInvoice({ order }) {
             </div>
 
             <div style={{ textAlign: 'justify' }}>
-              <div style={{ fontSize: '9px', color: '#444', lineHeight: '1.4' }}>
-                <p style={{ margin: '0 0 4px 0', fontWeight: 'bold', color: '#111', textAlign: 'left' }}>Catatan Penting:</p>
-                <ol style={{ margin: 0, paddingLeft: '15px', listStyleType: 'decimal', listStylePosition: 'outside', textAlign: 'justify' }}>
-                  <li style={{ marginBottom: '2px' }}>Pihak Gallardo Autosport tidak bertanggung jawab atas segala bentuk kerusakan atau malfungsi pada jalur pemanas kaca (Defogger Line) akibat proses instalasi kaca film.</li>
-                  <li style={{ marginBottom: '2px' }}>Harap tunjukkan dokumen faktur ini kepada staf kami pada saat jadwal pemasangan.</li>
-                  <li style={{ marginBottom: '2px' }}>Pesanan akan otomatis dibatalkan apabila tidak ada pengerjaan/pemasangan dalam kurun waktu 90 hari sejak transaksi.</li>
-                  <li style={{ marginBottom: '2px' }}>Faktur cetak ini sah dan berlaku sebagai kuitansi pembayaran resmi.</li>
-                  <li style={{ marginBottom: '2px' }}>Segala bentuk pembayaran nontunai (Transfer Bank, Kartu Kredit, QRIS, dll) baru dinyatakan sah setelah dana terverifikasi masuk ke mutasi rekening resmi kami.</li>
-                  <li style={{ marginBottom: '2px' }}>Uang muka (Down Payment/DP) yang telah dibayarkan tidak dapat dikembalikan (non-refundable) apabila terjadi pembatalan sepihak oleh konsumen.</li>
+              <div style={{ fontSize: '10px', color: '#444', lineHeight: '1.4' }}>
+                <p style={{ margin: '0 0 3px 0', fontWeight: 'bold', color: '#111', textAlign: 'left' }}>Catatan Penting:</p>
+                <ol style={{ margin: 0, paddingLeft: '14px', listStyleType: 'decimal', listStylePosition: 'outside', textAlign: 'justify' }}>
+                  <li style={{ marginBottom: '1px' }}>Pihak Gallardo Autosport tidak bertanggung jawab atas segala bentuk kerusakan atau malfungsi pada jalur pemanas kaca (Defogger Line) akibat proses instalasi kaca film.</li>
+                  <li style={{ marginBottom: '1px' }}>Harap tunjukkan dokumen faktur ini kepada staf kami pada saat jadwal pemasangan.</li>
+                  <li style={{ marginBottom: '1px' }}>Pesanan akan otomatis dibatalkan apabila tidak ada pengerjaan/pemasangan dalam kurun waktu 90 hari sejak transaksi.</li>
+                  <li style={{ marginBottom: '1px' }}>Faktur cetak ini sah dan berlaku sebagai kuitansi pembayaran resmi.</li>
+                  <li style={{ marginBottom: '1px' }}>Segala bentuk pembayaran nontunai (Transfer Bank, Kartu Kredit, QRIS, dll) baru dinyatakan sah setelah dana terverifikasi masuk ke mutasi rekening resmi kami.</li>
+                  <li style={{ marginBottom: '1px' }}>Uang muka (Down Payment/DP) yang telah dibayarkan tidak dapat dikembalikan (non-refundable) apabila terjadi pembatalan sepihak oleh konsumen.</li>
                 </ol>
               </div>
             </div>

@@ -1,31 +1,29 @@
 import { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
 import { useOrders } from '../../context/OrderContext';
 import { format, addYears } from 'date-fns';
 import { X, Search, FileText, Download, Printer, Loader2, Shield, ShieldAlert, MessageCircle, FileSpreadsheet, CheckCircle } from 'lucide-react';
-import html2pdf from 'html2pdf.js';
 import SharedInvoice from '../../components/SharedInvoice';
 import * as XLSX from 'xlsx';
-import logoGallardo from '../../assets/logo-gallardo.png';
-import logoNewRatu from '../../assets/logo-new-ratu.png';
 import { formatCurrency } from '../../data/mockData';
 import PrintWarrantyHandler, { hasWarranty } from '../../components/PrintWarrantyHandler';
 import './Customers.css';
+
+// Helper to compute warranty years for display
+function getWarrantyYears(order) {
+  if (!order || !order.warrantyYears) return 0;
+  return Number(order.warrantyYears) || 0;
+}
 
 const Customers = () => {
   const { orders } = useOrders();
   const { userBranch } = useOutletContext() || { userBranch: 'Gallardo' };
   
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [invoiceOrder, setInvoiceOrder] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterDate, setFilterDate] = useState(''); // YYYY-MM-DD
+  const [filterDate, setFilterDate] = useState('');
   const [filterWarranty, setFilterWarranty] = useState('All');
   const [paymentFilter, setPaymentFilter] = useState('Semua Pembayaran');
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [isPrintingInvoice, setIsPrintingInvoice] = useState(false);
-
-  const monthOptions = []; // No longer needed as we use date picker
 
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
@@ -55,12 +53,8 @@ const Customers = () => {
 
       if (paymentFilter !== 'Semua Pembayaran') {
         const isPenawaran = order.billType === 'Penawaran' || order.salesCategory === 'Penawaran' || order.paymentMethod === 'Penawaran' || order.method === 'Penawaran';
-        
         let pStatus = (order.paymentType || order.paymentStatus || order.type || 'BELUM BAYAR').toUpperCase();
-        if (isPenawaran) {
-          pStatus = 'PENAWARAN';
-        }
-        
+        if (isPenawaran) pStatus = 'PENAWARAN';
         if (paymentFilter === 'Penawaran' && pStatus !== 'PENAWARAN') return false;
         if (paymentFilter === 'Lunas' && pStatus !== 'LUNAS') return false;
         if (paymentFilter === 'Belum Bayar' && pStatus !== 'BELUM BAYAR') return false;
@@ -80,8 +74,6 @@ const Customers = () => {
     
     const excelData = filteredOrders.map(o => {
       const isWarrantyActive = hasWarranty(o);
-      const warrantyStatus = isWarrantyActive ? 'Aktif' : 'Tidak Tersedia';
-      
       return {
         'Nama Pelanggan': o.customerName || '-',
         'No. WhatsApp': o.customerHp || '-',
@@ -95,155 +87,27 @@ const Customers = () => {
         'Tahun': o.carYear || '-',
         'Jenis Layanan/Paket': o.service || '-',
         'Tgl Transaksi': format(new Date(o.date), 'dd MMM yyyy'),
-        'Status Garansi': warrantyStatus
+        'Status Garansi': isWarrantyActive ? 'Aktif' : 'Tidak Tersedia'
       };
     });
 
     const worksheet = XLSX.utils.json_to_sheet(excelData, { header: headers });
-    
-    // Auto-size columns for better readability
     const columnWidths = headers.map(header => ({
-      wch: Math.max(
-        header.length,
-        ...excelData.map(row => (row[header] ? row[header].toString().length : 0))
-      ) + 2
+      wch: Math.max(header.length, ...excelData.map(row => (row[header] ? row[header].toString().length : 0))) + 2
     }));
     worksheet['!cols'] = columnWidths;
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Database Customer");
-    
     XLSX.writeFile(workbook, `Data_Customer_${format(new Date(), 'dd_MM_yyyy')}.xlsx`);
   };
 
-  const handleExportTablePDF = async () => {
-    const element = document.getElementById('customer-table-export');
-    if (!element) return;
-    
-    setIsGeneratingPDF(true);
-    const opt = {
-      margin: 10,
-      filename: `Data_Customer_${format(new Date(), 'dd_MM_yyyy')}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 1.5, 
-        useCORS: true, 
-        windowWidth: element.scrollWidth + 50,
-        ignoreElements: (el) => el.classList && el.classList.contains('no-print') 
-      },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    };
-
-    try {
-      await html2pdf().set(opt).from(element).save();
-    } catch (error) {
-      console.error("PDF generation failed", error);
-    } finally {
-      setIsGeneratingPDF(false);
-    }
+  const handlePrint = (order) => {
+    const cleanId = String(order.id).replace(/\//g, '-');
+    window.open(`/sales/invoices/print/${cleanId}`, '_blank');
   };
 
-  const handleShareWA = async (order) => {
-    setIsGeneratingPDF(true);
-    const text = `*GALLARDO AUTO SPORT - INVOICE*\n-----------------------------------\nHalo ${order.customerName},\nBerikut adalah rincian tagihan Anda:\nLayanan: ${order.service}\nKendaraan: ${order.carBrand} ${order.carModel} (${order.plateNumber})\nTotal: ${formatCurrency(order.totalPrice)}\n-----------------------------------\nTerima kasih atas kepercayaannya!`;
-    
-    const waUrl = `https://wa.me/${(order.customerHp || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(text)}`;
-    const element = document.getElementById('invoice-content-to-print');
 
-    if (!element) {
-      window.open(waUrl, '_blank');
-      setIsGeneratingPDF(false);
-      return;
-    }
-
-    const safeCustomerName = (order.customerName || 'Customer').replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-    const dynamicFileName = `Invoice_${order.id}_${safeCustomerName}.pdf`;
-
-    const opt = {
-      margin: 0,
-      filename: dynamicFileName,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2, 
-        useCORS: true, 
-        ignoreElements: (el) => el.classList && el.classList.contains('no-print')
-      },
-      jsPDF: { 
-        unit: 'px', 
-        format: [794, 1123], 
-        orientation: 'portrait' 
-      }
-    };
-
-    try {
-      const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-      const file = new File([pdfBlob], dynamicFileName, { type: 'application/pdf' });
-      
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: `Invoice ${order.id}`,
-          text: text
-        });
-      } else {
-        alert("Dokumen PDF akan diunduh otomatis. Silakan lampirkan file tersebut di WhatsApp.");
-        html2pdf().set(opt).from(element).save();
-        setTimeout(() => {
-          window.open(waUrl, '_blank');
-        }, 1500);
-      }
-    } catch (error) {
-      console.error("PDF generation failed", error);
-      window.open(waUrl, '_blank');
-    } finally {
-      setIsGeneratingPDF(false);
-    }
-  };
-
-  const handlePrintPDF = async () => {
-    const element = document.getElementById('invoice-content-to-print');
-    if (!element) return;
-    
-    setIsPrintingInvoice(true);
-
-    const order = invoiceOrder;
-    const safeCustomerName = (order?.customerName || 'Customer').replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-    const dynamicFileName = `Invoice_${order?.id || 'Doc'}_${safeCustomerName}.pdf`;
-
-    const opt = {
-      margin: 0,
-      filename: dynamicFileName,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2, 
-        useCORS: true, 
-        ignoreElements: (el) => el.classList && el.classList.contains('no-print')
-      },
-      jsPDF: { 
-        unit: 'px', 
-        format: [794, 1123], 
-        orientation: 'portrait' 
-      }
-    };
-    
-    try {
-      await html2pdf().set(opt).from(element).save();
-    } catch (error) {
-      console.error("Print failed", error);
-    } finally {
-      setIsPrintingInvoice(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        if (invoiceOrder) setInvoiceOrder(null);
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [invoiceOrder]);
 
   return (
     <div className="customers-page animate-fade-in">
@@ -343,7 +207,7 @@ const Customers = () => {
             <tbody>
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan="12" className="text-center text-tertiary py-8">Belum ada data customer</td>
+                  <td colSpan="14" className="text-center text-tertiary py-8">Belum ada data customer</td>
                 </tr>
               ) : (
                 filteredOrders.map((order) => {
@@ -386,7 +250,7 @@ const Customers = () => {
                         <button 
                           className="inline-flex items-center justify-center p-2 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors border border-gray-200" 
                           title="Cetak Invoice" 
-                          onClick={() => setInvoiceOrder(order)}
+                          onClick={() => handlePrint(order)}
                         >
                           <Printer size={16} />
                         </button>
@@ -399,31 +263,6 @@ const Customers = () => {
           </table>
         </div>
       </div>
-
-      {/* Invoice Modal */}
-      {invoiceOrder && (
-        <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setInvoiceOrder(null)}>
-          <div className="w-[95vw] max-w-5xl bg-white rounded-lg shadow-lg overflow-hidden flex flex-col relative" style={{ maxHeight: '90vh', minWidth: 0, minHeight: 0 }} onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close no-print absolute top-4 right-4 z-50 bg-white hover:bg-gray-100 rounded-full w-10 h-10 flex items-center justify-center text-gray-600 shadow-md transition-colors" onClick={() => setInvoiceOrder(null)}><X size={24} /></button>
-            <div className="flex-1 p-4 md:p-8 print:!overflow-visible" style={{ backgroundColor: '#e5e7eb', overflowY: 'auto', overflowX: 'auto', minWidth: 0, minHeight: 0 }}>
-              <div className="invoice-preview-wrapper" style={{ width: 'max-content', margin: '0 auto' }}>
-                <SharedInvoice order={invoiceOrder} />
-              </div>
-            </div>
-            
-            <div className="invoice-actions no-print mt-4 flex flex-wrap justify-center gap-4 pt-4">
-              <button 
-                className="flex justify-center items-center gap-2 bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-lg font-bold transition-colors shadow-lg" 
-                onClick={() => handlePrintPDF()}
-                disabled={isPrintingInvoice}
-              >
-                {isPrintingInvoice ? <Loader2 size={16} className="animate-spin" /> : <Printer size={16} />} 
-                {isPrintingInvoice ? 'Mencetak...' : 'Cetak Invoice PDF'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Certificate Modal */}
       {selectedOrder && (

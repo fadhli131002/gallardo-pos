@@ -41,30 +41,37 @@ const AdminInventory = () => {
     satuan: 'Roll'
   });
 
-  const FILM_BRANDS = [
-    'Performante',
-    'Deluxe'
-  ];
+  const [isNewBrand, setIsNewBrand] = useState(false);
+  const [isNewVarian, setIsNewVarian] = useState(false);
 
-  const FILM_VARIANTS = {
-    'Performante': [
-      'Iron Black 35',
-      'Iron Black 20',
-      'Iron Black 05',
-      'Black Stone 70',
-      'Black Stone 35',
-      'Black Stone 20',
-      'Black Stone 05'
-    ],
-    'Deluxe': [
-      'Classic 35',
-      'Classic 20',
-      'Classic 05',
-      'Jet Black 70',
-      'Jet Black 35',
-      'Jet Black 20',
-      'Jet Black 05'
-    ]
+  const getDynamicBrands = (kategori) => {
+    const brands = new Set();
+    inventory.forEach(item => {
+      if (item.kategori === kategori && item.brand && item.brand.trim() !== '') {
+        brands.add(item.brand);
+      }
+    });
+    return Array.from(brands).sort();
+  };
+
+  const getDynamicVariants = (kategori, brand) => {
+    const variants = new Set();
+    inventory.forEach(item => {
+      if (item.kategori === kategori && item.brand === brand && item.varian && item.varian.trim() !== '') {
+        variants.add(item.varian);
+      }
+    });
+    return Array.from(variants).sort();
+  };
+
+  const getAvailableBrands = () => {
+    const brands = getDynamicBrands(formData.kategori);
+    return [...brands, '+ Tambah Brand Baru...'];
+  };
+
+  const getAvailableVariants = () => {
+    const variants = getDynamicVariants(formData.kategori, formData.brand);
+    return [...variants, '+ Tambah Varian Baru...'];
   };
 
   const getKegelapanFromVarian = (varian) => {
@@ -76,32 +83,8 @@ const AdminInventory = () => {
     return '';
   };
 
-  const PPF_BRANDS = ['Vansgard'];
-  const PPF_VARIANTS = {
-    'Vansgard': ['Ultra', 'Matte', 'Armor', 'Super Safe', 'Color']
-  };
-
-  const COATING_BRANDS = ['Rantiz'];
-  const COATING_VARIANTS = {
-    'Rantiz': ['9H', '14H', '20H', 'Glass Coating']
-  };
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
-
-  const getAvailableBrands = () => {
-    if (formData.kategori === 'Kaca Film') return FILM_BRANDS;
-    if (formData.kategori === 'PPF') return PPF_BRANDS;
-    if (formData.kategori === 'Coating') return COATING_BRANDS;
-    return [];
-  };
-
-  const getAvailableVariants = () => {
-    if (formData.kategori === 'Kaca Film') return FILM_VARIANTS[formData.brand] || [];
-    if (formData.kategori === 'PPF') return PPF_VARIANTS[formData.brand] || [];
-    if (formData.kategori === 'Coating') return COATING_VARIANTS[formData.brand] || [];
-    return [];
-  };
 
   const handleOpenModal = (item = null) => {
     if (item) {
@@ -124,15 +107,22 @@ const AdminInventory = () => {
       setEditingItem(null);
       setEditBulk("");
       setEditEceran("");
+      setIsNewBrand(false);
+      setIsNewVarian(false);
+      
+      const availBrands = getDynamicBrands('Kaca Film');
+      const initialBrand = availBrands.length > 0 ? availBrands[0] : '';
+      const availVariants = initialBrand ? getDynamicVariants('Kaca Film', initialBrand) : [];
+      
       setFormData({
         kategori: 'Kaca Film',
-        brand: FILM_BRANDS[0],
-        varian: FILM_VARIANTS[FILM_BRANDS[0]][0],
+        brand: initialBrand,
+        varian: availVariants.length > 0 ? availVariants[0] : '',
         stokUtama: 0,
         stokPecahan: 0,
         harga_modal: 0,
         satuan: 'Roll',
-        konversi: 15
+        konversi: 30
       });
     }
     setIsModalOpen(true);
@@ -196,18 +186,24 @@ const AdminInventory = () => {
     let newKonversi = 15;
 
     if (val === 'Kaca Film') {
-      newBrand = FILM_BRANDS[0];
-      newVarian = FILM_VARIANTS[newBrand][0];
       newKonversi = 30;
     } else if (val === 'PPF') {
-      newBrand = PPF_BRANDS[0];
-      newVarian = PPF_VARIANTS[newBrand][0];
       newKonversi = 15;
     } else if (val === 'Coating') {
-      newBrand = COATING_BRANDS[0];
-      newVarian = COATING_VARIANTS[newBrand][0];
       newSatuan = 'Botol';
       newKonversi = 50;
+    }
+
+    setIsNewBrand(false);
+    setIsNewVarian(false);
+
+    const availableBrands = getDynamicBrands(val);
+    if (availableBrands.length > 0) {
+      newBrand = availableBrands[0];
+      const availableVariants = getDynamicVariants(val, newBrand);
+      if (availableVariants.length > 0) {
+        newVarian = availableVariants[0];
+      }
     }
 
     setFormData({
@@ -222,17 +218,40 @@ const AdminInventory = () => {
 
   const handleBrandChange = (e) => {
     const val = e.target.value;
-    let newVarian = '';
 
-    if (formData.kategori === 'Kaca Film') newVarian = FILM_VARIANTS[val]?.[0] || '';
-    if (formData.kategori === 'PPF') newVarian = PPF_VARIANTS[val]?.[0] || '';
-    if (formData.kategori === 'Coating') newVarian = COATING_VARIANTS[val]?.[0] || '';
+    if (val === '+ Tambah Brand Baru...') {
+      setIsNewBrand(true);
+      setFormData({ ...formData, brand: '', varian: '' });
+      setIsNewVarian(true);
+      return;
+    }
+
+    let newVarian = '';
+    const availableVariants = getDynamicVariants(formData.kategori, val);
+    if (availableVariants.length > 0) {
+      newVarian = availableVariants[0];
+    }
+
+    setIsNewBrand(false);
+    setIsNewVarian(false);
 
     setFormData({
       ...formData,
       brand: val,
       varian: newVarian
     });
+  };
+
+  const handleVarianChange = (e) => {
+    const val = e.target.value;
+    if (val === '+ Tambah Varian Baru...') {
+      setIsNewVarian(true);
+      setFormData({ ...formData, varian: '' });
+      return;
+    }
+    
+    setIsNewVarian(false);
+    setFormData({ ...formData, varian: val });
   };
 
   const handleDelete = (id) => {
@@ -594,32 +613,62 @@ const AdminInventory = () => {
 
                   <div className="form-group" style={{ gridColumn: 'span 2' }}>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Brand & Series</label>
-                    <select
-                      value={formData.brand}
-                      onChange={handleBrandChange}
-                      required
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
-                      className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
-                    >
-                      {getAvailableBrands().map((brand) => (
-                        <option key={brand} value={brand}>{brand}</option>
-                      ))}
-                    </select>
+                    {isNewBrand ? (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="text"
+                          value={formData.brand}
+                          onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                          placeholder="Masukkan Brand Baru..."
+                          required
+                          style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', color: '#111827' }}
+                          className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                        />
+                        <button type="button" onClick={() => { setIsNewBrand(false); setIsNewVarian(false); setFormData({...formData, brand: getDynamicBrands(formData.kategori)[0] || '', varian: getDynamicBrands(formData.kategori)[0] ? getDynamicVariants(formData.kategori, getDynamicBrands(formData.kategori)[0])[0] || '' : ''}); }} style={{ padding: '0 16px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#374151', cursor: 'pointer' }}>Batal</button>
+                      </div>
+                    ) : (
+                      <select
+                        value={formData.brand}
+                        onChange={handleBrandChange}
+                        required
+                        style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
+                        className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                      >
+                        {getAvailableBrands().map((brand) => (
+                          <option key={brand} value={brand}>{brand}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
 
                   <div className="form-group" style={{ gridColumn: 'span 2' }}>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Varian / Kegelapan</label>
-                    <select
-                      value={formData.varian}
-                      onChange={(e) => setFormData({ ...formData, varian: e.target.value })}
-                      required
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
-                      className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
-                    >
-                      {getAvailableVariants().map((variant) => (
-                        <option key={variant} value={variant}>{variant}</option>
-                      ))}
-                    </select>
+                    {isNewVarian ? (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="text"
+                          value={formData.varian}
+                          onChange={(e) => setFormData({ ...formData, varian: e.target.value })}
+                          placeholder="Masukkan Varian Baru..."
+                          required
+                          style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', color: '#111827' }}
+                          className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                        />
+                        <button type="button" onClick={() => { setIsNewVarian(false); setFormData({...formData, varian: getDynamicVariants(formData.kategori, formData.brand)[0] || ''}); }} style={{ padding: '0 16px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#374151', cursor: 'pointer' }}>Batal</button>
+                      </div>
+                    ) : (
+                      <select
+                        value={formData.varian}
+                        onChange={handleVarianChange}
+                        required
+                        style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
+                        className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                      >
+                        {getAvailableVariants().map((variant) => (
+                          <option key={variant} value={variant}>{variant}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
 
                   <div style={{ gridColumn: 'span 2', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>

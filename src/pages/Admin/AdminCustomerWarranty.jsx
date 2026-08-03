@@ -10,7 +10,6 @@ import logoGallardo from '../../assets/logo-gallardo.png';
 import logoNewRatu from '../../assets/logo-new-ratu.png';
 import { formatCurrency } from '../../data/mockData';
 import SharedInvoice from '../../components/SharedInvoice';
-import PrintInvoiceHandler from '../../components/PrintInvoiceHandler';
 import PrintWarrantyHandler, { hasWarranty } from '../../components/PrintWarrantyHandler';
 import ComplaintModal from '../../components/ComplaintModal';
 import { useInventory } from '../../context/InventoryContext';
@@ -59,8 +58,6 @@ const AdminCustomerWarranty = () => {
   const [showComplaintModal, setShowComplaintModal] = useState(false);
   const [complaintOrderData, setComplaintOrderData] = useState(null);
 
-  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
-  const [selectedPrintTx, setSelectedPrintTx] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
   const [filterStatus, setFilterStatus] = useState('Semua Status');
@@ -675,8 +672,8 @@ const AdminCustomerWarranty = () => {
                             </button>
                           )}
 
-                          <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setSelectedPrintTx(order); setIsPrintModalOpen(true); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                            <Printer size={16} color="#4b5563" /> Cetak Invoice
+                          <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); const cleanId = String(order.id).replace(/\//g, '-'); window.open(`/sales/invoices/print/${cleanId}`, '_blank'); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                            <Printer size={15} color="#4b5563" /> Cetak Invoice / SPK
                           </button>
 
                           {order.paymentHistory && order.paymentHistory.length > 0 && (
@@ -1622,12 +1619,6 @@ const AdminCustomerWarranty = () => {
         onSuccess={() => {
           // Additional logic if needed after saving complaint
         }}
-      />
-
-      <PrintInvoiceHandler 
-        isOpen={isPrintModalOpen} 
-        onClose={() => setIsPrintModalOpen(false)} 
-        transaction={selectedPrintTx} 
       />
     </>
   );

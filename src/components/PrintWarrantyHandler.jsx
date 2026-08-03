@@ -87,10 +87,10 @@ const PrintWarrantyHandler = ({ isOpen, onClose, transaction }) => {
       window.scrollTo(0, 0);
 
       Object.assign(clone.style, {
-        position: 'absolute',
+        position: 'fixed',
         top: '0',
         left: '0',
-        zIndex: '-1',
+        zIndex: '9998',
         margin: '0',
         boxShadow: 'none',
         transform: 'none',
@@ -102,11 +102,18 @@ const PrintWarrantyHandler = ({ isOpen, onClose, transaction }) => {
 
       const canvas = await html2canvas(clone, {
         scale: 3,
-        useCORS: true,
+        useCORS: true, allowTaint: true,
         backgroundColor: '#ffffff'
       });
 
-      document.body.removeChild(clone);
+      
+      if (originalParent) {
+        if (originalNextSibling) {
+          originalParent.insertBefore(element, originalNextSibling);
+        } else {
+          originalParent.appendChild(element);
+        }
+      }
       window.scrollTo(0, originalScrollY);
 
       const imgData = canvas.toDataURL('image/png');
@@ -213,7 +220,7 @@ const PrintWarrantyHandler = ({ isOpen, onClose, transaction }) => {
       />
 
       {/* Hidden Warranty Template */}
-      <div id="printable-warranty-wrapper" style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
+      <div id="printable-warranty-wrapper" style={{ position: 'fixed', top: 0, left: 0 }}>
         <div 
           ref={printRef}
           className="bg-white text-black relative w-[420px] min-h-[595px] flex flex-col justify-between shrink-0 box-border"

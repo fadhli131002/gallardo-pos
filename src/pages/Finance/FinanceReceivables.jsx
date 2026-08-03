@@ -4,7 +4,6 @@ import { Search, Eye, X, Image as ImageIcon, Download, ChevronLeft, ChevronRight
 import { formatRupiah } from '../../utils/formatRupiah';
 import { formatTransactionId } from '../../utils/formatId';
 import { exportToCSV } from '../../utils/exportCSV';
-import PrintInvoiceHandler from '../../components/PrintInvoiceHandler';
 import PrintWarrantyHandler, { hasWarranty } from '../../components/PrintWarrantyHandler';
 
 const FinanceReceivables = () => {
@@ -13,10 +12,8 @@ const FinanceReceivables = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
-  const [isPrintInvoiceOpen, setIsPrintInvoiceOpen] = useState(false);
-  const [selectedPrintInvoice, setSelectedPrintInvoice] = useState(null);
-  const [isPrintWarrantyOpen, setIsPrintWarrantyOpen] = useState(false);
   const [selectedPrintWarranty, setSelectedPrintWarranty] = useState(null);
+  const [isPrintWarrantyOpen, setIsPrintWarrantyOpen] = useState(false);
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -165,10 +162,10 @@ const FinanceReceivables = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => { setSelectedPrintInvoice(tx); setIsPrintInvoiceOpen(true); }}
-                          title="Print Nota"
+                        <button 
+                          onClick={() => { const cleanId = String(tx.id).replace(/\//g, '-'); window.open(`/sales/invoices/print/${cleanId}`, '_blank'); }}
                           className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                          title="Cetak Invoice"
                         >
                           <Printer className="w-4 h-4" />
                         </button>
@@ -279,11 +276,6 @@ const FinanceReceivables = () => {
       )}
 
       {/* Handlers */}
-      <PrintInvoiceHandler
-        isOpen={isPrintInvoiceOpen}
-        onClose={() => setIsPrintInvoiceOpen(false)}
-        transaction={selectedPrintInvoice}
-      />
       <PrintWarrantyHandler
         isOpen={isPrintWarrantyOpen}
         onClose={() => setIsPrintWarrantyOpen(false)}

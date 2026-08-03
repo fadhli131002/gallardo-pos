@@ -742,9 +742,53 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
       margin: [0.5, 0.5, 0.5, 0.5],
       filename: dynamicFileName,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.classList && el.classList.contains('no-print') },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true, allowTaint: true, 
+        backgroundColor: '#ffffff',
+        ignoreElements: (el) => el.classList && el.classList.contains('no-print'),
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.getElementById('printable-invoice-wrapper-handler') || clonedDoc.getElementById('invoice-content-to-print');
+          if (el) {
+            el.style.position = 'static';
+            el.style.top = '0px';
+            el.style.left = '0px';
+            el.style.margin = '0px';
+            el.style.opacity = '1';
+            el.style.visibility = 'visible';
+            el.style.transform = 'none';
+          }
+        }
+      },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
+
+    // Save original styles
+    const originalParent = element.parentNode;
+    const originalNextSibling = element.nextSibling;
+    const originalStyle = {
+      position: element.style.position,
+      top: element.style.top,
+      left: element.style.left,
+      zIndex: element.style.zIndex,
+      opacity: element.style.opacity,
+      visibility: element.style.visibility,
+      pointerEvents: element.style.pointerEvents,
+    };
+
+    // Temporarily bring the element front and center for html2canvas
+    document.body.appendChild(element);
+    element.style.position = 'absolute';
+    element.style.top = '0px';
+    element.style.left = '0px';
+    element.style.zIndex = '999999'; // Below loading spinner
+    element.style.opacity = '1';
+    element.style.visibility = 'visible';
+    element.style.pointerEvents = 'none';
+
+    window.scrollTo(0, 0);
+    // Wait a tick for browser to apply layout
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
       const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
@@ -766,10 +810,19 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
     } catch (err) {
       console.error('Error generating PDF', err);
       window.open(waUrl, '_blank');
+    } finally {
+      
+      if (originalParent) {
+        if (originalNextSibling) {
+          originalParent.insertBefore(element, originalNextSibling);
+        } else {
+          originalParent.appendChild(element);
+        }
+      }
     }
   };
 
-  const handlePrintPDF = async () => {
+    const handlePrintPDF = async () => {
     if (!invoiceData) return;
 
     setIsPrintingInvoice(true);
@@ -784,11 +837,38 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
       return;
     }
 
+    const originalStyle = {
+      position: element.style.position,
+      top: element.style.top,
+      left: element.style.left,
+      zIndex: element.style.zIndex,
+      opacity: element.style.opacity,
+    };
+
+    // Ready element for capture
+
     const opt = {
       margin: 0,
       filename: dynamicFileName,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: 1024, ignoreElements: (el) => el.classList && el.classList.contains('no-print') },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true, allowTaint: true, 
+        backgroundColor: '#ffffff',
+        ignoreElements: (el) => el.classList && el.classList.contains('no-print'),
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.getElementById('printable-invoice-wrapper-handler') || clonedDoc.getElementById('invoice-content-to-print');
+          if (el) {
+            el.style.position = 'static';
+            el.style.top = '0px';
+            el.style.left = '0px';
+            el.style.margin = '0px';
+            el.style.opacity = '1';
+            el.style.visibility = 'visible';
+            el.style.transform = 'none';
+          }
+        }
+      },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -797,6 +877,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
     } catch (err) {
       console.error('Error generating PDF', err);
     } finally {
+      
       setIsPrintingInvoice(false);
     }
   };
@@ -869,7 +950,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                   {showSuggestions && suggestions.length > 0 && (
                     <div
                       style={{
-                        position: 'absolute',
+                        position: 'fixed',
                         top: '100%',
                         left: 0,
                         right: 0,
@@ -939,7 +1020,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px' }}>
                 {/* Search Bar */}
                 <div style={{ position: 'relative', width: '100%', maxWidth: '100%' }}>
-                  <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+                  <Search size={18} style={{ position: 'fixed', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
                   <input
                     type="text"
                     placeholder="Cari nama produk atau brand..."
@@ -992,7 +1073,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                         <div className="p-name">{product.name}</div>
                         <div className="p-meta-container">
                           <div className="p-stock" style={{ color: (product.category === 'Tools & Equipment' ? product.stokUtama < 2 : product.stokUtama < 2) ? '#ef4444' : '#6b7280', fontWeight: (product.category === 'Tools & Equipment' ? product.stokUtama < 2 : product.stokUtama < 2) ? '600' : 'normal' }}>
-                            <Package size={14} style={{ display: 'inline', marginRight: '4px', opacity: 0.7 }} />
+                            <Package size={14} style={{ display: 'inline', marginRight: '4px', opacity: 1.7 }} />
                             {product.trackInventory
                               ? (product.category === 'Tools & Equipment'
                                 ? `Tersedia: ${product.stokUtama} ${product.satuan || ''}`
@@ -1003,7 +1084,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                           </div>
                           {product.category === 'Kaca Film' && product.kegelapan && (
                             <div className="p-kegelapan">
-                              <Percent size={14} style={{ marginRight: '4px', opacity: 0.7 }} />
+                              <Percent size={14} style={{ marginRight: '4px', opacity: 1.7 }} />
                               Kegelapan: {product.kegelapan}
                             </div>
                           )}
@@ -1133,7 +1214,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
             
             {/* Header */}
             <div style={{ padding: '32px 32px 24px', borderBottom: '1px solid #f3f4f6', backgroundColor: '#f8fafc', position: 'relative' }}>
-              <button onClick={() => setShowPaymentModal(false)} style={{ position: 'absolute', top: '24px', right: '24px', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#ffffff'}><X size={20} /></button>
+              <button onClick={() => setShowPaymentModal(false)} style={{ position: 'fixed', top: '24px', right: '24px', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#ffffff'}><X size={20} /></button>
               
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                 <div style={{ backgroundColor: '#e0e7ff', padding: '16px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.1)' }}>

@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Database and Environment Variables
+.env
+*.db
+*.sqlite
+backend/dev.db
+backend/prisma/dev.db
+backend/prisma/dev_backup.db
