@@ -79,6 +79,7 @@ export const OrderProvider = ({ children }) => {
             service: serviceName,
             serviceType: serviceType,
             totalPrice: trx.total_amount || 0,
+            discount: trx.discount || 0,
             paidAmount: paidAmount,
             remainingAmount: remainingAmount,
             paymentType: trx.payment_type || (isLunas ? 'Lunas' : (trx.status_pembayaran || 'Belum Bayar')),

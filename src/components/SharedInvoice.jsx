@@ -39,7 +39,8 @@ export default function SharedInvoice({ order }) {
   const orderTotalPrice = order.totalPrice !== undefined ? order.totalPrice : (calculatedTotalTagihan > 0 ? calculatedTotalTagihan : 0);
 
   const subTotalForDiscount = order.subTotal || calculatedTotalTagihan || 0;
-  const discountPercentage = (order.discountAmount && subTotalForDiscount > 0) ? ((order.discountAmount / subTotalForDiscount) * 100) : 0;
+  const orderDiscountAmount = order.discountAmount !== undefined ? order.discountAmount : (order.discount || 0);
+  const discountPercentage = (orderDiscountAmount && subTotalForDiscount > 0) ? ((orderDiscountAmount / subTotalForDiscount) * 100) : 0;
 
   let labelStatus = 'BELUM BAYAR';
   let totalDibayar = 0;
@@ -286,11 +287,11 @@ export default function SharedInvoice({ order }) {
                 <tbody>
                   <tr>
                     <td style={{ padding: '4px 6px', color: '#555' }}>Total Tagihan</td>
-                    <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', fontSize: '13px' }}>{formatCurrency(orderTotalPrice).replace('Rp', '').trim()}</td>
+                    <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', fontSize: '13px' }}>{formatCurrency(orderTotalPrice + orderDiscountAmount).replace('Rp', '').trim()}</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #ddd' }}>
                     <td style={{ padding: '4px 6px', color: '#555' }}>Diskon/Potongan</td>
-                    <td style={{ padding: '4px 6px', textAlign: 'right' }}>{order.discountAmount > 0 ? `- ${formatCurrency(order.discountAmount).replace('Rp', '').trim()}` : '0'}</td>
+                    <td style={{ padding: '4px 6px', textAlign: 'right' }}>{orderDiscountAmount > 0 ? `- ${formatCurrency(orderDiscountAmount).replace('Rp', '').trim()}` : '0'}</td>
                   </tr>
                   <tr>
                     <td style={{ padding: '6px 6px', fontWeight: 'bold', fontSize: '13px' }}>Total Dibayar</td>

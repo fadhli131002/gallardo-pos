@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getTransactions, getTransactionById, createTransaction, deleteTransaction, updatePaymentStatus, updatePaymentStatusManual, updateTransaction, processPaymentBalance } = require('./transaction.controller');
+const { getTransactions, getTransactionById, getPublicTransactionById, createTransaction, deleteTransaction, updatePaymentStatus, updatePaymentStatusManual, updateTransaction, processPaymentBalance } = require('./transaction.controller');
 const { authenticateToken, authorizeRole } = require('../../middlewares/authMiddleware');
 
+router.get('/public/:id', getPublicTransactionById);
 router.get('/', authenticateToken, getTransactions);
 router.get('/:id', authenticateToken, getTransactionById);
 router.post('/', authenticateToken, createTransaction);

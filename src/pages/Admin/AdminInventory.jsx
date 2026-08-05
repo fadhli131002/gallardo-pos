@@ -35,6 +35,7 @@ const AdminInventory = () => {
     kategori: 'Kaca Film',
     brand: '',
     varian: '',
+    kegelapan: '20%',
     stokUtama: 0,
     stokPecahan: 0,
     harga_modal: 0,
@@ -74,15 +75,6 @@ const AdminInventory = () => {
     return [...variants, '+ Tambah Varian Baru...'];
   };
 
-  const getKegelapanFromVarian = (varian) => {
-    if (!varian) return '';
-    if (varian.includes('70')) return '20%';
-    if (varian.includes('35')) return '40%';
-    if (varian.includes('20')) return '60%';
-    if (varian.includes('05')) return '80%';
-    return '';
-  };
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
 
@@ -97,6 +89,7 @@ const AdminInventory = () => {
         kategori: item.kategori,
         brand: item.brand || '',
         varian: item.varian || '',
+        kegelapan: item.kegelapan || '20%',
         stokUtama: item.stokUtama || 0,
         stokPecahan: item.stokPecahan || 0,
         harga_modal: item.harga_modal || 0,
@@ -118,6 +111,7 @@ const AdminInventory = () => {
         kategori: 'Kaca Film',
         brand: initialBrand,
         varian: availVariants.length > 0 ? availVariants[0] : '',
+        kegelapan: '20%',
         stokUtama: 0,
         stokPecahan: 0,
         harga_modal: 0,
@@ -156,7 +150,7 @@ const AdminInventory = () => {
       stokPecahan: finalPecahan,
       harga_modal: Number(formData.harga_modal) || 0,
       konversi: konversi,
-      ...(formData.kategori === 'Kaca Film' ? { kegelapan: getKegelapanFromVarian(formData.varian) } : {})
+      ...(formData.kategori === 'Kaca Film' ? { kegelapan: formData.kegelapan } : { kegelapan: '' })
     };
 
     if (editingItem) {
@@ -211,6 +205,7 @@ const AdminInventory = () => {
       kategori: val,
       brand: newBrand,
       varian: newVarian,
+      kegelapan: val === 'Kaca Film' ? '20%' : '',
       satuan: newSatuan,
       konversi: newKonversi
     });
@@ -642,7 +637,7 @@ const AdminInventory = () => {
                   </div>
 
                   <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Varian / Kegelapan</label>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Varian</label>
                     {isNewVarian ? (
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <input
@@ -670,6 +665,24 @@ const AdminInventory = () => {
                       </select>
                     )}
                   </div>
+
+                  {formData.kategori === 'Kaca Film' && (
+                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                      <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Kegelapan</label>
+                      <select
+                        value={formData.kegelapan}
+                        onChange={(e) => setFormData({ ...formData, kegelapan: e.target.value })}
+                        required
+                        style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
+                        className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                      >
+                        <option value="20%">20%</option>
+                        <option value="40%">40%</option>
+                        <option value="60%">60%</option>
+                        <option value="80%">80%</option>
+                      </select>
+                    </div>
+                  )}
 
                   <div style={{ gridColumn: 'span 2', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     {formData.kategori === 'Tools & Equipment' ? (

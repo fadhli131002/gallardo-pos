@@ -396,7 +396,7 @@ const POS = () => {
   const netTotal = isMaintenanceOrKomplain ? 0 : Math.max(0, totalPrice - discountAmount + taxAmount);
 
   let modalPaidAmount = 0;
-  if (isMaintenanceOrKomplain) modalPaidAmount = 0;
+  if (isMaintenanceOrKomplain || paymentState.method === 'Penawaran') modalPaidAmount = 0;
   else if (paymentState.type === 'Lunas') modalPaidAmount = netTotal;
   else if (paymentState.type === 'Tanpa DP') modalPaidAmount = 0;
   else if (paymentState.type === 'DP Custom') modalPaidAmount = paymentState.dpAmount || 0;
@@ -614,10 +614,11 @@ const POS = () => {
         installation_time: formData.installationTime || null,
         notes: formData.notes || null,
         total_amount: newOrder.totalPrice,
+        discount: newOrder.discountAmount || 0,
         sisa_tagihan: newOrder.remainingAmount || 0,
-        status_pembayaran: newOrder.paymentType === 'Lunas' ? 'Lunas' : 'Proses',
+        status_pembayaran: newOrder.paymentMethod === 'Penawaran' ? 'Penawaran' : (newOrder.paymentType === 'Lunas' ? 'Lunas' : 'Proses'),
         event: salesEventName || null,
-        payment_type: newOrder.paymentType || null,
+        payment_type: newOrder.paymentMethod === 'Penawaran' ? 'Penawaran' : (newOrder.paymentType || null),
         payment_method: paymentState.method || null,
         payment_proof: paymentState.paymentProof || null,
         items: finalizedCartItems.map(item => ({
@@ -1377,10 +1378,12 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
                   {['Lunas', 'DP 50%', 'DP Custom', 'Tanpa DP'].map(type => {
                     const isActive = paymentState.type === type;
+                    const isPenawaran = paymentState.method === 'Penawaran';
                     return (
                       <div 
                         key={type}
                         onClick={() => {
+                          if (isPenawaran) return;
                           if (type === 'Lunas') setPaymentState(prev => ({ ...prev, type, dpAmount: netTotal }));
                           else if (type === 'DP 50%') setPaymentState(prev => ({ ...prev, type, dpAmount: netTotal / 2 }));
                           else setPaymentState(prev => ({ ...prev, type, dpAmount: 0 }));
@@ -1389,17 +1392,18 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                           padding: '16px', 
                           borderRadius: '12px', 
                           border: isActive ? '2px solid #4f46e5' : '1px solid #d1d5db', 
-                          backgroundColor: isActive ? '#4f46e5' : '#ffffff',
-                          color: isActive ? '#ffffff' : '#374151',
-                          cursor: 'pointer',
+                          backgroundColor: isPenawaran ? '#f3f4f6' : (isActive ? '#4f46e5' : '#ffffff'),
+                          color: isPenawaran ? '#9ca3af' : (isActive ? '#ffffff' : '#374151'),
+                          cursor: isPenawaran ? 'not-allowed' : 'pointer',
                           textAlign: 'center',
                           fontWeight: '600',
                           fontSize: '14px',
                           transition: 'all 0.2s ease',
-                          boxShadow: isActive ? '0 4px 6px -1px rgba(79, 70, 229, 0.2)' : 'none'
+                          boxShadow: isActive && !isPenawaran ? '0 4px 6px -1px rgba(79, 70, 229, 0.2)' : 'none',
+                          opacity: isPenawaran ? 0.6 : 1
                         }}
-                        onMouseOver={e => { if(!isActive) { e.currentTarget.style.borderColor = '#9ca3af'; e.currentTarget.style.backgroundColor = '#f9fafb'; } }}
-                        onMouseOut={e => { if(!isActive) { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.backgroundColor = '#ffffff'; } }}
+                        onMouseOver={e => { if(!isActive && !isPenawaran) { e.currentTarget.style.borderColor = '#9ca3af'; e.currentTarget.style.backgroundColor = '#f9fafb'; } }}
+                        onMouseOut={e => { if(!isActive && !isPenawaran) { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.backgroundColor = '#ffffff'; } }}
                       >
                         {type}
                       </div>
@@ -1465,79 +1469,81 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 </div>
               </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', color: '#374151', marginBottom: '12px' }}>
-                  <Upload size={16} color="#6b7280" /> Upload Bukti Pembayaran
-                </label>
+              {paymentState.method !== 'Penawaran' && (
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', color: '#374151', marginBottom: '12px' }}>
+                    <Upload size={16} color="#6b7280" /> Upload Bukti Pembayaran
+                  </label>
 
-                {!paymentState.paymentProofName ? (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                    onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setIsDragging(false);
-                      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                        const file = e.dataTransfer.files[0];
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setPaymentState(prev => ({ ...prev, paymentProof: reader.result, paymentProofName: file.name }));
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                    style={{ 
-                      border: isDragging ? '2px dashed #4f46e5' : '2px dashed #d1d5db', 
-                      borderRadius: '16px', 
-                      padding: '40px 24px', 
-                      textAlign: 'center', 
-                      backgroundColor: isDragging ? '#eef2ff' : '#f9fafb',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '12px'
-                    }}
-                    onMouseOver={e => { e.currentTarget.style.borderColor = '#4f46e5'; e.currentTarget.style.backgroundColor = '#eef2ff'; }}
-                    onMouseOut={e => { if(!isDragging) { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.backgroundColor = '#f9fafb'; } }}
-                  >
-                    <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*,application/pdf" onChange={handleFileUpload} />
-                    <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '50%', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                      <Upload size={24} color="#4f46e5" />
-                    </div>
-                    <div>
-                      <p style={{ color: '#374151', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>Klik untuk upload atau drag and drop</p>
-                      <p style={{ color: '#6b7280', fontSize: '13px', margin: 0 }}>Maksimal ukuran file: 5MB (JPG, PNG, PDF)</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ backgroundColor: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ backgroundColor: '#10b981', padding: '12px', borderRadius: '8px' }}>
-                      <FileText size={24} color="#ffffff" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ color: '#065f46', fontSize: '14px', fontWeight: 'bold', margin: '0 0 4px 0' }}>{paymentState.paymentProofName}</p>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <CheckCircle size={14} color="#10b981" />
-                        <span style={{ color: '#059669', fontSize: '12px', fontWeight: '500' }}>File siap diunggah</span>
+                  {!paymentState.paymentProofName ? (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                      onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setIsDragging(false);
+                        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                          const file = e.dataTransfer.files[0];
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setPaymentState(prev => ({ ...prev, paymentProof: reader.result, paymentProofName: file.name }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      style={{ 
+                        border: isDragging ? '2px dashed #4f46e5' : '2px dashed #d1d5db', 
+                        borderRadius: '16px', 
+                        padding: '40px 24px', 
+                        textAlign: 'center', 
+                        backgroundColor: isDragging ? '#eef2ff' : '#f9fafb',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '12px'
+                      }}
+                      onMouseOver={e => { e.currentTarget.style.borderColor = '#4f46e5'; e.currentTarget.style.backgroundColor = '#eef2ff'; }}
+                      onMouseOut={e => { if(!isDragging) { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.backgroundColor = '#f9fafb'; } }}
+                    >
+                      <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*,application/pdf" onChange={handleFileUpload} />
+                      <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '50%', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                        <Upload size={24} color="#4f46e5" />
+                      </div>
+                      <div>
+                        <p style={{ color: '#374151', fontSize: '15px', fontWeight: '600', margin: '0 0 4px 0' }}>Klik untuk upload atau drag and drop</p>
+                        <p style={{ color: '#6b7280', fontSize: '13px', margin: 0 }}>Maksimal ukuran file: 5MB (JPG, PNG, PDF)</p>
                       </div>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPaymentState(prev => ({ ...prev, paymentProof: null, paymentProofName: '' }));
-                      }}
-                      style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
-                      onMouseOver={e => { e.currentTarget.style.backgroundColor = '#fef2f2'; e.currentTarget.style.color = '#dc2626'; }}
-                      onMouseOut={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#ef4444'; }}
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                )}
-              </div>
+                  ) : (
+                    <div style={{ backgroundColor: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <div style={{ backgroundColor: '#10b981', padding: '12px', borderRadius: '8px' }}>
+                        <FileText size={24} color="#ffffff" />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ color: '#065f46', fontSize: '14px', fontWeight: 'bold', margin: '0 0 4px 0' }}>{paymentState.paymentProofName}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <CheckCircle size={14} color="#10b981" />
+                          <span style={{ color: '#059669', fontSize: '12px', fontWeight: '500' }}>File siap diunggah</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPaymentState(prev => ({ ...prev, paymentProof: null, paymentProofName: '' }));
+                        }}
+                        style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
+                        onMouseOver={e => { e.currentTarget.style.backgroundColor = '#fef2f2'; e.currentTarget.style.color = '#dc2626'; }}
+                        onMouseOut={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#ef4444'; }}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Footer */}

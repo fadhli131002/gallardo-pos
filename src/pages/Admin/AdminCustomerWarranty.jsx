@@ -393,12 +393,12 @@ const AdminCustomerWarranty = () => {
               filteredOrders.map((order) => {
                 const isRetailOrder = order.type === 'RETAIL';
                 const activeMaintenance = (order.historyMaintenance || []).find(h => h.workStatus === 'Proses' || h.workStatus === 'Aktif');
-                const isPenawaran = order.billType === 'Penawaran' || order.salesCategory === 'Penawaran';
+                const isPenawaran = order.billType === 'Penawaran' || order.salesCategory === 'Penawaran' || order.paymentMethod === 'Penawaran' || order.method === 'Penawaran';
 
-                const displayStatus = isPenawaran ? 'Penawaran' : (isRetailOrder ? 'Selesai' : (activeMaintenance ? 'Maintenance (Proses)' : (order.status === 'Selesai' ? 'Selesai' : 'Proses')));
-                const statusBg = isPenawaran ? '#fff7ed' : (isRetailOrder ? '#f0fdf4' : (activeMaintenance ? '#fefce8' : (order.status === 'Selesai' ? '#f0fdf4' : '#f8fafc')));
-                const statusColor = isPenawaran ? '#f97316' : (isRetailOrder ? '#15803d' : (activeMaintenance ? '#b45309' : (order.status === 'Selesai' ? '#15803d' : '#475569')));
-                const statusBorder = isPenawaran ? '#fdba74' : (isRetailOrder ? '#86efac' : (activeMaintenance ? '#fde047' : (order.status === 'Selesai' ? '#86efac' : '#e2e8f0')));
+                const displayStatus = isPenawaran ? 'PENAWARAN' : (isRetailOrder ? 'Selesai' : (activeMaintenance ? 'Maintenance (Proses)' : (order.status === 'Selesai' ? 'Selesai' : 'Proses')));
+                const statusBg = isPenawaran ? '#4f46e5' : (isRetailOrder ? '#f0fdf4' : (activeMaintenance ? '#fefce8' : (order.status === 'Selesai' ? '#f0fdf4' : '#f8fafc')));
+                const statusColor = isPenawaran ? '#ffffff' : (isRetailOrder ? '#15803d' : (activeMaintenance ? '#b45309' : (order.status === 'Selesai' ? '#15803d' : '#475569')));
+                const statusBorder = isPenawaran ? '#4338ca' : (isRetailOrder ? '#86efac' : (activeMaintenance ? '#fde047' : (order.status === 'Selesai' ? '#86efac' : '#e2e8f0')));
                 const isLunas = (order.paymentType || order.paymentStatus || '').toUpperCase() === 'LUNAS';
                 let remaining = order.remainingAmount !== undefined ? order.remainingAmount : (order.totalPrice - (order.paidAmount || order.dpAmount || 0));
                 

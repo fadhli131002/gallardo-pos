@@ -17,6 +17,7 @@ import Complaints from './pages/Admin/Complaints';
 import OwnerDashboard from './pages/Admin/OwnerDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import InvoicePrintPage from './pages/InvoicePrintPage';
+import PublicInvoicePage from './pages/PublicInvoicePage';
 
 import FinanceLayout from './components/Layout/FinanceLayout';
 import OwnerLayout from './components/Layout/OwnerLayout';
@@ -62,6 +63,9 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<DashboardEntry />} />
+        
+        {/* Public Routes */}
+        <Route path="/public/invoice/:transactionId" element={<PublicInvoicePage />} />
         
         {/* Dedicated Print Route (No Layout/Sidebar) */}
         <Route element={<ProtectedRoute allowedRoles={['sales', 'admin', 'superadmin', 'finance']} />}>

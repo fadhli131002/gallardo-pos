@@ -29,6 +29,39 @@ const getTransactionById = async (req, res, next) => {
   }
 };
 
+const getPublicTransactionById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    let dbId = parseInt(id);
+    if (isNaN(dbId)) {
+      if (typeof id === 'string' && id.includes('-')) {
+        const parts = id.split('-');
+        dbId = parseInt(parts[parts.length - 1], 10);
+      }
+    }
+
+    if (isNaN(dbId)) {
+       return res.status(400).json({ message: 'Format ID Transaksi tidak valid' });
+    }
+
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: dbId },
+      include: {
+        items: true,
+        payments: true
+      }
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ message: 'Invoice tidak ditemukan' });
+    }
+
+    res.json(transaction);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getTransactions = async (req, res, next) => {
   try {
     const { role, user_id, id } = req.user || {};
@@ -170,6 +203,16 @@ const createTransaction = async (req, res, next) => {
       }
 
       // 2. Buat transaksi utama
+      let finalSisaTagihan = sisa_tagihan;
+      let finalStatusPembayaran = status_pembayaran || 'Proses';
+      let finalPaymentType = payment_type || null;
+
+      if (payment_method === 'Penawaran') {
+        finalStatusPembayaran = 'Penawaran';
+        finalPaymentType = 'Penawaran';
+        finalSisaTagihan = total_amount;
+      }
+
       const newTransaction = await tx.transaction.create({
         data: {
           sales_id:          userId,
@@ -178,10 +221,10 @@ const createTransaction = async (req, res, next) => {
           customer_phone:    customer_phone || null,
           total_amount,
           discount,
-          sisa_tagihan,
-          status_pembayaran: status_pembayaran || 'Proses',
+          sisa_tagihan:      finalSisaTagihan,
+          status_pembayaran: finalStatusPembayaran,
           event:             salesEvent || null,
-          payment_type:      payment_type || null,
+          payment_type:      finalPaymentType,
           payment_method:    payment_method || null,
           termin_schedule:   termin_schedule ? JSON.stringify(termin_schedule) : null,
           notes:             notes || null,
@@ -203,10 +246,10 @@ const createTransaction = async (req, res, next) => {
               quantity:     item.quantity     || 1
             }))
           },
-          ...(total_amount > sisa_tagihan ? {
+          ...(total_amount > finalSisaTagihan ? {
             payments: {
               create: [{
-                amount: total_amount - sisa_tagihan,
+                amount: total_amount - finalSisaTagihan,
                 method: payment_method || 'Tunai / Cash',
                 notes: 'Pembayaran Awal',
                 payment_proof: payment_proof || null
@@ -532,6 +575,7 @@ const processPaymentBalance = async (req, res, next) => {
 module.exports = {
   getTransactions,
   getTransactionById,
+  getPublicTransactionById,
   createTransaction,
   deleteTransaction,
   updatePaymentStatus,
