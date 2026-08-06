@@ -92,7 +92,10 @@ const getInventoryLogs = async (req, res, next) => {
 const updateInventoryStock = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { stok_utama, stok_pecahan, min_stok, keterangan, harga_modal } = req.body;
+    const { 
+      stok_utama, stok_pecahan, min_stok, keterangan, harga_modal,
+      kategori, brand, varian, kegelapan, satuan, konversi: konversi_body
+    } = req.body;
     const { name: adminName } = req.user || {};
 
     const existing = await prisma.inventory.findUnique({ where: { id } });
@@ -100,11 +103,11 @@ const updateInventoryStock = async (req, res, next) => {
       return res.status(404).json({ success: false, error: 'Produk tidak ditemukan' });
     }
 
-    let konversi = existing.konversi || 1;
-    if (existing.kategori === 'Kaca Film') konversi = 30;
-    else if (existing.kategori === 'PPF') konversi = 15;
+    let konversi = konversi_body !== undefined ? konversi_body : (existing.konversi || 1);
+    if ((kategori || existing.kategori) === 'Kaca Film') konversi = 30;
+    else if ((kategori || existing.kategori) === 'PPF') konversi = 15;
 
-    const oldBase = (existing.stok_utama * konversi) + existing.stok_pecahan;
+    const oldBase = (existing.stok_utama * existing.konversi) + existing.stok_pecahan;
     const newUtama   = stok_utama   !== undefined ? stok_utama   : existing.stok_utama;
     const newPecahan = stok_pecahan !== undefined ? stok_pecahan : existing.stok_pecahan;
     const newBase    = (newUtama * konversi) + newPecahan;
@@ -115,6 +118,12 @@ const updateInventoryStock = async (req, res, next) => {
       data: {
         stok_utama:   newUtama,
         stok_pecahan: newPecahan,
+        ...(kategori !== undefined && { kategori }),
+        ...(brand !== undefined && { brand }),
+        ...(varian !== undefined && { varian }),
+        ...(kegelapan !== undefined && { kegelapan }),
+        ...(satuan !== undefined && { satuan }),
+        ...(konversi_body !== undefined && { konversi: konversi }),
         ...(min_stok !== undefined && { min_stok }),
         ...(harga_modal !== undefined && { harga_modal: Number(harga_modal) }),
         updated_at: new Date()

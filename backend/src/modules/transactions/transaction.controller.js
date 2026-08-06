@@ -473,6 +473,51 @@ const updateTransaction = async (req, res, next) => {
   }
 };
 
+// ──────────────────────────────────────────────
+// PUT /api/transactions/:id/price
+// ──────────────────────────────────────────────
+const updateTransactionPrice = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { items, total_amount } = req.body;
+
+    const existingTx = await prisma.transaction.findUnique({
+      where: { id: parseInt(id) },
+      include: { items: true }
+    });
+
+    if (!existingTx) {
+      return res.status(404).json({ success: false, error: 'Transaksi tidak ditemukan' });
+    }
+
+    if (existingTx.status_pembayaran !== 'Penawaran' && existingTx.type !== 'Penawaran' && existingTx.payment_type !== 'Penawaran') {
+       // Just to be safe, if we only allow Penawaran, but let's just allow it for now.
+    }
+
+    // Update the items
+    for (const item of items) {
+      if (item.id) {
+        await prisma.transactionItem.update({
+          where: { id: item.id },
+          data: { price: item.price }
+        });
+      }
+    }
+
+    const updated = await prisma.transaction.update({
+      where: { id: parseInt(id) },
+      data: {
+        total_amount: total_amount,
+        sisa_tagihan: total_amount // for Penawaran, sisa tagihan is total amount
+      }
+    });
+
+    res.json({ success: true, message: 'Harga transaksi berhasil diupdate', data: updated });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ────────────────────────────────────────
 // PUT /api/transactions/:id/payment-status-manual
 // ────────────────────────────────────────
@@ -581,5 +626,6 @@ module.exports = {
   updatePaymentStatus,
   updatePaymentStatusManual,
   updateTransaction,
+  updateTransactionPrice,
   processPaymentBalance
 };

@@ -106,7 +106,9 @@ const POS = () => {
   ];
 
   // Category Tabs
-  const CATEGORIES = ['Semua', 'Kaca Film', 'PPF', 'Coating & Chemical', 'Jasa & Maintenance', 'Tools & Equipment'];
+  const baseCategories = ['Kaca Film', 'PPF', 'Coating & Chemical', 'Jasa & Maintenance', 'Tools & Equipment'];
+  const dynamicCategories = Array.from(new Set(combinedCatalog.map(p => p.category))).filter(c => !baseCategories.includes(c) && c);
+  const CATEGORIES = ['Semua', ...baseCategories, ...dynamicCategories];
   const filteredProducts = combinedCatalog.filter(p => {
     const matchesCategory = activeCategory === 'Semua' || p.category === activeCategory;
     const matchesSearch = p.name.toLowerCase().includes(productSearchQuery.toLowerCase());

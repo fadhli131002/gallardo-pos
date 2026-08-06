@@ -207,6 +207,12 @@ export const InventoryProvider = ({ children }) => {
             stok_pecahan: updatedItem.stokPecahan,
             harga_modal: updatedItem.harga_modal || 0,
             min_stok: updatedItem.minStok,
+            kategori: updatedItem.kategori,
+            brand: updatedItem.brand,
+            varian: updatedItem.varian,
+            kegelapan: updatedItem.kegelapan,
+            satuan: updatedItem.satuan,
+            konversi: updatedItem.konversi,
             keterangan: 'Update stok oleh Admin'
           })
         });

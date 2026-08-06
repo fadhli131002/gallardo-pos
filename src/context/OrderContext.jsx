@@ -446,6 +446,47 @@ export const OrderProvider = ({ children }) => {
     }));
   };
 
+  const updateOrderPrice = async (orderId, items, totalAmount) => {
+    const order = orders.find(o => o.id === orderId);
+    if (order && order.dbId) {
+      try {
+        const payload = {
+          items: items.map(item => ({ id: item.dbId, price: item.finalPrice || item.price })),
+          total_amount: totalAmount
+        };
+
+        await fetch(`${window.API_URL}/api/transactions/${order.dbId}/price`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+          },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.error('Error updating transaction price in backend:', err);
+      }
+    }
+
+    setOrders(prev => prev.map(o => {
+      if (o.id === orderId) {
+        return { 
+          ...o, 
+          items: o.items.map((it, i) => {
+            const updatedItem = items.find((_, index) => index === i);
+            if (updatedItem) {
+               return { ...it, finalPrice: updatedItem.finalPrice || updatedItem.price, price: updatedItem.price };
+            }
+            return it;
+          }),
+          totalPrice: totalAmount,
+          remainingAmount: totalAmount
+        };
+      }
+      return o;
+    }));
+  };
+
   const deleteOrder = async (orderId) => {
     const order = orders.find(o => o.id === orderId);
     setOrders(prev => prev.filter(o => o.id !== orderId));
@@ -664,7 +705,7 @@ export const OrderProvider = ({ children }) => {
 
   return (
     <OrderContext.Provider value={{
-      orders, flatOrders, addOrder, completeOrder, updateOrderOperational, deleteOrder, settlePayment, isDateBlocked, getEndDate, getOrderEndDate, refreshOrdersFromApi,
+      orders, flatOrders, addOrder, completeOrder, updateOrderOperational, updateOrderPrice, deleteOrder, settlePayment, isDateBlocked, getEndDate, getOrderEndDate, refreshOrdersFromApi,
       categories,
       addCategory,
       removeCategory,

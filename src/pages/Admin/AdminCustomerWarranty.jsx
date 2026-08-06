@@ -33,7 +33,7 @@ const AdminCustomerWarranty = () => {
       .trim();
 
   const { inventory, deductStock, deductRetailStock, processInventoryDeduction } = useInventory();
-  const { orders, settlePayment, completeOrder, updateOrderOperational, deleteOrder, refreshOrdersFromApi } = useOrders();
+  const { orders, settlePayment, completeOrder, updateOrderOperational, updateOrderPrice, deleteOrder, refreshOrdersFromApi } = useOrders();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -50,6 +50,8 @@ const AdminCustomerWarranty = () => {
   const [pelunasanAmountPaid, setPelunasanAmountPaid] = useState('');
   const [showEditCustomerModal, setShowEditCustomerModal] = useState(false);
   const [editCustomerData, setEditCustomerData] = useState(null);
+  const [showEditPriceModal, setShowEditPriceModal] = useState(false);
+  const [editPriceData, setEditPriceData] = useState(null);
 
   const [showDeleteRetailModal, setShowDeleteRetailModal] = useState(false);
   const [deleteRetailOrder, setDeleteRetailOrder] = useState(null);
@@ -248,7 +250,7 @@ const AdminCustomerWarranty = () => {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedOrder, showHistoryModal, showHistoryPaymentModal, invoiceOrder, settlementOrder, showEditCustomerModal, showComplaintModal]);
+  }, [selectedOrder, showHistoryModal, showHistoryPaymentModal, invoiceOrder, settlementOrder, showEditCustomerModal, showEditPriceModal, showComplaintModal]);
 
   return (
     <>
@@ -770,14 +772,27 @@ const AdminCustomerWarranty = () => {
                           )}
 
                           {isPenawaran && (
-                            <button onClick={(e) => {
-                              e.stopPropagation();
-                              setActiveDropdown(null);
-                              updateOrderOperational(order.id, { billType: 'Walk-In (Workshop)', salesCategory: 'Walk-In (Workshop)' });
-                              toast.success('Penawaran berhasil dikonversi ke Work Order (Deal)!');
-                            }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#2563eb', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#eff6ff'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                              <FileCheck size={16} color="#2563eb" /> Konversi ke Work Order
-                            </button>
+                            <>
+                              <button onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveDropdown(null);
+                                setEditPriceData({
+                                  ...order,
+                                  items: order.items ? order.items.map(it => ({...it})) : []
+                                });
+                                setShowEditPriceModal(true);
+                              }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#10b981', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#ecfdf5'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                <CreditCard size={16} color="#10b981" /> Ubah Harga Penawaran
+                              </button>
+                              <button onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveDropdown(null);
+                                updateOrderOperational(order.id, { billType: 'Walk-In (Workshop)', salesCategory: 'Walk-In (Workshop)' });
+                                toast.success('Penawaran berhasil dikonversi ke Work Order (Deal)!');
+                              }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#2563eb', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#eff6ff'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                <FileCheck size={16} color="#2563eb" /> Konversi ke Work Order
+                              </button>
+                            </>
                           )}
 
                           {/* Destructive Actions Separator */}
@@ -1604,6 +1619,64 @@ const AdminCustomerWarranty = () => {
                 }
                 updateOrderOperational(editCustomerData.id, editCustomerData);
                 setShowEditCustomerModal(false);
+              }}
+            >
+              SIMPAN PERUBAHAN
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Price Modal */}
+      {showEditPriceModal && editPriceData && (
+        <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="modal-content" style={{ width: '500px', maxWidth: '100%', position: 'relative', maxHeight: '90vh', overflowY: 'auto', backgroundColor: '#ffffff', color: '#111827', borderRadius: '16px', padding: '40px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+            <button onClick={() => setShowEditPriceModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: '#f3f4f6', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4b5563', cursor: 'pointer', zIndex: 100, transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#e5e7eb'} onMouseOut={e => e.currentTarget.style.backgroundColor = '#f3f4f6'}>
+              <X size={20} />
+            </button>
+            <div className="text-center mb-8">
+              <CreditCard size={40} color="#10b981" className="mx-auto mb-3" style={{ marginBottom: '12px' }} />
+              <h2 className="font-sans text-2xl font-bold" style={{ color: '#111827', margin: '0' }}>Edit Harga Penawaran</h2>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {editPriceData.items && editPriceData.items.map((item, idx) => (
+                <div key={idx} style={{ padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px', backgroundColor: '#f9fafb' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>{item.name}</div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>Harga Satuan Baru (Rp)</label>
+                  <input 
+                    type="text" 
+                    value={Number(item.finalPrice !== undefined ? item.finalPrice : (item.price || 0)).toLocaleString('id-ID')} 
+                    onChange={e => {
+                      const rawValue = e.target.value.replace(/\D/g, '');
+                      const newItems = [...editPriceData.items];
+                      newItems[idx].finalPrice = Number(rawValue);
+                      setEditPriceData({ ...editPriceData, items: newItems });
+                    }} 
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} 
+                  />
+                </div>
+              ))}
+            </div>
+
+            <button
+              style={{ width: '100%', marginTop: '2rem', padding: '14px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', transition: 'background-color 0.2s' }}
+              onMouseOver={e => e.currentTarget.style.backgroundColor = '#059669'}
+              onMouseOut={e => e.currentTarget.style.backgroundColor = '#10b981'}
+              onClick={async () => {
+                let newTotal = 0;
+                if (editPriceData.items) {
+                   newTotal = editPriceData.items.reduce((sum, item) => sum + (item.finalPrice || item.price) * (item.qty || 1), 0);
+                   // Include tax if applied, here assuming simplified logic
+                   if (editPriceData.taxAmount && editPriceData.taxAmount > 0) {
+                      newTotal += editPriceData.taxAmount;
+                   }
+                } else {
+                   newTotal = editPriceData.totalPrice;
+                }
+                await updateOrderPrice(editPriceData.id, editPriceData.items, newTotal);
+                toast.success('Harga penawaran berhasil diubah');
+                setShowEditPriceModal(false);
               }}
             >
               SIMPAN PERUBAHAN

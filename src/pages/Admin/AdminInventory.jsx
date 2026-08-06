@@ -44,6 +44,9 @@ const AdminInventory = () => {
 
   const [isNewBrand, setIsNewBrand] = useState(false);
   const [isNewVarian, setIsNewVarian] = useState(false);
+  const [isNewKategori, setIsNewKategori] = useState(false);
+  const [isNewKegelapan, setIsNewKegelapan] = useState(false);
+  const [isNewSatuan, setIsNewSatuan] = useState(false);
 
   const getDynamicBrands = (kategori) => {
     const brands = new Set();
@@ -102,6 +105,9 @@ const AdminInventory = () => {
       setEditEceran("");
       setIsNewBrand(false);
       setIsNewVarian(false);
+      setIsNewKategori(false);
+      setIsNewKegelapan(false);
+      setIsNewSatuan(false);
       
       const availBrands = getDynamicBrands('Kaca Film');
       const initialBrand = availBrands.length > 0 ? availBrands[0] : '';
@@ -174,6 +180,14 @@ const AdminInventory = () => {
 
   const handleKategoriChange = (e) => {
     const val = e.target.value;
+    if (val === '+ Tambah Jenis Layanan Baru...') {
+      setIsNewKategori(true);
+      setIsNewBrand(true);
+      setIsNewVarian(true);
+      setFormData({ ...formData, kategori: '', brand: '', varian: '' });
+      return;
+    }
+
     let newBrand = '';
     let newVarian = '';
     let newSatuan = formData.satuan;
@@ -197,7 +211,14 @@ const AdminInventory = () => {
       const availableVariants = getDynamicVariants(val, newBrand);
       if (availableVariants.length > 0) {
         newVarian = availableVariants[0];
+        setIsNewVarian(false);
+      } else {
+        setIsNewVarian(true);
       }
+      setIsNewBrand(false);
+    } else {
+      setIsNewBrand(true);
+      setIsNewVarian(true);
     }
 
     setFormData({
@@ -223,12 +244,15 @@ const AdminInventory = () => {
 
     let newVarian = '';
     const availableVariants = getDynamicVariants(formData.kategori, val);
+    
+    setIsNewBrand(false);
+    
     if (availableVariants.length > 0) {
       newVarian = availableVariants[0];
+      setIsNewVarian(false);
+    } else {
+      setIsNewVarian(true);
     }
-
-    setIsNewBrand(false);
-    setIsNewVarian(false);
 
     setFormData({
       ...formData,
@@ -247,6 +271,28 @@ const AdminInventory = () => {
     
     setIsNewVarian(false);
     setFormData({ ...formData, varian: val });
+  };
+
+  const handleKegelapanChange = (e) => {
+    const val = e.target.value;
+    if (val === '+ Tambah Kegelapan Baru...') {
+      setIsNewKegelapan(true);
+      setFormData({ ...formData, kegelapan: '' });
+      return;
+    }
+    setIsNewKegelapan(false);
+    setFormData({ ...formData, kegelapan: val });
+  };
+
+  const handleSatuanChange = (e) => {
+    const val = e.target.value;
+    if (val === '+ Tambah Satuan Baru...') {
+      setIsNewSatuan(true);
+      setFormData({ ...formData, satuan: '' });
+      return;
+    }
+    setIsNewSatuan(false);
+    setFormData({ ...formData, satuan: val });
   };
 
   const handleDelete = (id) => {
@@ -593,17 +639,33 @@ const AdminInventory = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div className="form-group" style={{ gridColumn: 'span 2' }}>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Jenis Layanan</label>
-                    <select
-                      value={formData.kategori}
-                      onChange={handleKategoriChange}
-                      required
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
-                      className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
-                    >
-                      <option value="Kaca Film">Kaca Film</option>
-                      <option value="PPF">PPF</option>
-                      <option value="Coating">Coating</option>
-                    </select>
+                    {isNewKategori ? (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="text"
+                          value={formData.kategori}
+                          onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
+                          placeholder="Masukkan Layanan Baru..."
+                          required
+                          style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', color: '#111827' }}
+                          className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                        />
+                        <button type="button" onClick={() => { setIsNewKategori(false); setFormData({...formData, kategori: 'Kaca Film'}); }} style={{ padding: '0 16px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#374151', cursor: 'pointer' }}>Batal</button>
+                      </div>
+                    ) : (
+                      <select
+                        value={formData.kategori}
+                        onChange={handleKategoriChange}
+                        required
+                        style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
+                        className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                      >
+                        {Array.from(new Set(['Kaca Film', 'PPF', 'Coating', 'Tools & Equipment', ...inventory.map(i => i.kategori)])).filter(Boolean).map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                        <option value="+ Tambah Jenis Layanan Baru...">+ Tambah Jenis Layanan Baru...</option>
+                      </select>
+                    )}
                   </div>
 
                   <div className="form-group" style={{ gridColumn: 'span 2' }}>
@@ -669,18 +731,33 @@ const AdminInventory = () => {
                   {formData.kategori === 'Kaca Film' && (
                     <div className="form-group" style={{ gridColumn: 'span 2' }}>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Kegelapan</label>
-                      <select
-                        value={formData.kegelapan}
-                        onChange={(e) => setFormData({ ...formData, kegelapan: e.target.value })}
-                        required
-                        style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
-                        className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
-                      >
-                        <option value="20%">20%</option>
-                        <option value="40%">40%</option>
-                        <option value="60%">60%</option>
-                        <option value="80%">80%</option>
-                      </select>
+                      {isNewKegelapan ? (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <input
+                            type="text"
+                            value={formData.kegelapan}
+                            onChange={(e) => setFormData({ ...formData, kegelapan: e.target.value })}
+                            placeholder="Masukkan Kegelapan Baru..."
+                            required
+                            style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', color: '#111827' }}
+                            className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                          />
+                          <button type="button" onClick={() => { setIsNewKegelapan(false); setFormData({...formData, kegelapan: '20%'}); }} style={{ padding: '0 16px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#374151', cursor: 'pointer' }}>Batal</button>
+                        </div>
+                      ) : (
+                        <select
+                          value={formData.kegelapan}
+                          onChange={handleKegelapanChange}
+                          required
+                          style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
+                          className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                        >
+                          {Array.from(new Set(['20%', '40%', '60%', '80%', ...inventory.filter(i => i.kegelapan).map(i => i.kegelapan)])).filter(Boolean).map(keg => (
+                            <option key={keg} value={keg}>{keg}</option>
+                          ))}
+                          <option value="+ Tambah Kegelapan Baru...">+ Tambah Kegelapan Baru...</option>
+                        </select>
+                      )}
                     </div>
                   )}
 
@@ -728,18 +805,33 @@ const AdminInventory = () => {
                     )}
                     <div className="form-group" style={{ gridColumn: 'span 2' }}>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Satuan</label>
-                      <select
-                        value={formData.satuan}
-                        onChange={(e) => setFormData({ ...formData, satuan: e.target.value })}
-                        required
-                        style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
-                        className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
-                      >
-                        <option value="Roll">Roll</option>
-                        <option value="Botol">Botol</option>
-                        <option value="Pcs">Pcs</option>
-                        <option value="Unit">Unit</option>
-                      </select>
+                      {isNewSatuan ? (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <input
+                            type="text"
+                            value={formData.satuan}
+                            onChange={(e) => setFormData({ ...formData, satuan: e.target.value })}
+                            placeholder="Masukkan Satuan Baru..."
+                            required
+                            style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', color: '#111827' }}
+                            className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                          />
+                          <button type="button" onClick={() => { setIsNewSatuan(false); setFormData({...formData, satuan: 'Roll'}); }} style={{ padding: '0 16px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#374151', cursor: 'pointer' }}>Batal</button>
+                        </div>
+                      ) : (
+                        <select
+                          value={formData.satuan}
+                          onChange={handleSatuanChange}
+                          required
+                          style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '15px', backgroundColor: 'white', color: '#111827' }}
+                          className="focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                        >
+                          {Array.from(new Set(['Roll', 'Botol', 'Pcs', 'Unit', ...inventory.map(i => i.satuan)])).filter(Boolean).map(sat => (
+                            <option key={sat} value={sat}>{sat}</option>
+                          ))}
+                          <option value="+ Tambah Satuan Baru...">+ Tambah Satuan Baru...</option>
+                        </select>
+                      )}
                     </div>
                     
                     {(isSuperOrOwner) && (
