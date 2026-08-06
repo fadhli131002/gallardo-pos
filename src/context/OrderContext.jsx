@@ -288,8 +288,16 @@ export const OrderProvider = ({ children }) => {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ name: item })
       });
-      if (response.ok) await refreshVariantsFromApi();
-    } catch (err) { console.error(err); }
+      if (response.ok) {
+        await refreshVariantsFromApi();
+      } else {
+        const errorData = await response.json();
+        alert(`Gagal menambahkan posisi: ${errorData.error || 'Terjadi kesalahan'}`);
+      }
+    } catch (err) { 
+      console.error(err); 
+      alert('Gagal menambahkan posisi.');
+    }
   };
   const removePosisiPemasangan = async (id) => {
     try {
@@ -308,8 +316,16 @@ export const OrderProvider = ({ children }) => {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ name: item })
       });
-      if (response.ok) await refreshVariantsFromApi();
-    } catch (err) { console.error(err); }
+      if (response.ok) {
+        await refreshVariantsFromApi();
+      } else {
+        const errorData = await response.json();
+        alert(`Gagal menambahkan posisi partial: ${errorData.error || 'Terjadi kesalahan'}`);
+      }
+    } catch (err) { 
+      console.error(err); 
+      alert('Gagal menambahkan posisi partial.');
+    }
   };
   const removePosisiPartial = async (id) => {
     try {

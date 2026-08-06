@@ -51,10 +51,19 @@ const VehicleMaster = () => {
   const [activeVariantType, setActiveVariantType] = useState('peruntukan'); // peruntukan, kegelapan, posisi, partial
   const [newVariantValue, setNewVariantValue] = useState('');
 
-  const handleAddVariantItem = () => {
+  const handleAddVariantItem = async () => {
     if (!newVariantValue.trim()) return;
-    if (activeVariantType === 'posisi') addPosisiPemasangan(newVariantValue.trim());
-    else if (activeVariantType === 'partial') addPosisiPartial(newVariantValue.trim());
+    
+    try {
+      if (activeVariantType === 'posisi') {
+        await addPosisiPemasangan(newVariantValue.trim());
+      } else if (activeVariantType === 'partial') {
+        await addPosisiPartial(newVariantValue.trim());
+      }
+    } catch (e) {
+      console.error('Error saat menambah: ' + e.message);
+    }
+    
     setNewVariantValue('');
   };
 

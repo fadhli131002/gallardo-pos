@@ -42,11 +42,16 @@ exports.getPosisi = async (req, res) => {
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
 exports.createPosisi = async (req, res) => {
+  console.log("=== Menerima POST /api/variants/posisi ===", req.body);
   try {
     const { name } = req.body;
     const data = await prisma.posisiPemasangan.create({ data: { name } });
+    console.log("=== Berhasil membuat posisi ===", data);
     res.status(201).json(data);
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { 
+    console.error("=== Error membuat posisi ===", error.message);
+    res.status(500).json({ error: error.message }); 
+  }
 };
 exports.deletePosisi = async (req, res) => {
   try {

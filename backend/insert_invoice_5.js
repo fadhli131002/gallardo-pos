@@ -1,0 +1,88 @@
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log("Memasukkan data invoice sesungguhnya (Invoice ke-5)...");
+
+  const trx = await prisma.transaction.create({
+    data: {
+      id: 41, // Sesuai dengan WRK/26080030041
+      sales_id: 1, // ROSYID
+      customer_name: "ALDY PRAKOSO WIRATAMA",
+      customer_phone: "08111941308",
+      customer_address: "Jl Percetakan Negara IX No. 7, Rawasari, Cempaka Putih, Jakarta Pusat 10570",
+      car_brand: "BYD",
+      car_model: "M6",
+      plate_number: "-",
+      chassis_number: "LC0CE4CB2S0349382",
+      engine_number: null,
+      car_year: "-",
+      car_color: "Harbour Grey",
+      installation_date: "2026-08-01", // Dari EST Tgl Pasang: 01 Aug 2026
+      installation_time: null,
+      total_amount: 21730000,
+      sales_commission: null,
+      discount: 0,
+      sisa_tagihan: 0,
+      status_pembayaran: "Lunas", 
+      type: "WORKSHOP",
+      event: "ROSYID", 
+      payment_type: "Lunas", 
+      payment_method: "Transfer Bank (BCA 6050733252 a.n GALLARDO UTAMA SENTOSA PT)",
+      notes: "-",
+      additional_discount: 0,
+      refund_amount: 0,
+      created_at: new Date("2026-08-06T10:00:00.000Z"), // Tanggal Order: 06 Aug 2026
+      updated_at: new Date("2026-08-06T10:00:00.000Z"),
+      
+      items: {
+        create: [
+          {
+            product_name: "VANSGARD ARMOR (FULL BODY MOBIL)",
+            product_note: "-",
+            price: 21730000,
+            quantity: 1
+          }
+        ]
+      },
+      
+      payments: {
+        create: [
+          {
+            amount: 21730000,
+            method: "Transfer Bank",
+            notes: "Transfer Bank (BCA 6050733252 a.n GALLARDO UTAMA SENTOSA PT)",
+            payment_date: new Date("2026-08-06T10:00:00.000Z")
+          }
+        ]
+      }
+    },
+    include: {
+      items: true,
+      payments: true
+    }
+  });
+
+  // Tambahkan CashFlow Log
+  await prisma.cashFlowLog.create({
+    data: {
+      type: "IN",
+      amount: 21730000,
+      description: `Pembayaran Lunas untuk Transaksi #${trx.id} (ALDY PRAKOSO WIRATAMA)`,
+      referenceId: String(trx.id),
+      date: new Date("2026-08-06T10:00:00.000Z")
+    }
+  });
+
+  console.log("✅ Berhasil memasukkan invoice ke-5!");
+  console.log(trx);
+}
+
+main()
+  .catch(e => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
