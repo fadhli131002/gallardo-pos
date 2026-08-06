@@ -420,7 +420,11 @@ export const OrderProvider = ({ children }) => {
           car_year: updates.carYear,
           installation_date: updates.installationDate,
           installation_time: updates.installationTime,
-          notes: updates.notes
+          notes: updates.notes,
+          status_pembayaran: updates.paymentStatus,
+          payment_type: updates.paymentType,
+          type: updates.type || updates.billType,
+          payment_method: updates.paymentMethod
         };
         // Remove undefined fields so we only send what is changed
         Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);

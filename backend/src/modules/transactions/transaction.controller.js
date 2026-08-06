@@ -436,7 +436,11 @@ const updateTransaction = async (req, res, next) => {
       installation_date,
       installation_time,
       notes,
-      event
+      event,
+      status_pembayaran,
+      payment_type,
+      type,
+      payment_method
     } = req.body;
 
     const existingTx = await prisma.transaction.findUnique({
@@ -463,7 +467,11 @@ const updateTransaction = async (req, res, next) => {
         installation_date: installation_date !== undefined ? installation_date : existingTx.installation_date,
         installation_time: installation_time !== undefined ? installation_time : existingTx.installation_time,
         notes: notes !== undefined ? notes : existingTx.notes,
-        event: event !== undefined ? event : existingTx.event
+        event: event !== undefined ? event : existingTx.event,
+        status_pembayaran: status_pembayaran !== undefined ? status_pembayaran : existingTx.status_pembayaran,
+        payment_type: payment_type !== undefined ? payment_type : existingTx.payment_type,
+        type: type !== undefined ? type : existingTx.type,
+        payment_method: payment_method !== undefined ? payment_method : existingTx.payment_method,
       }
     });
 

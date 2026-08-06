@@ -787,7 +787,14 @@ const AdminCustomerWarranty = () => {
                               <button onClick={(e) => {
                                 e.stopPropagation();
                                 setActiveDropdown(null);
-                                updateOrderOperational(order.id, { billType: 'Walk-In (Workshop)', salesCategory: 'Walk-In (Workshop)' });
+                                updateOrderOperational(order.id, { 
+                                  billType: 'Walk-In (Workshop)', 
+                                  salesCategory: 'Walk-In (Workshop)',
+                                  paymentStatus: 'Belum Bayar',
+                                  paymentType: 'Belum Bayar',
+                                  type: 'WORKSHOP',
+                                  paymentMethod: 'Penagihan'
+                                });
                                 toast.success('Penawaran berhasil dikonversi ke Work Order (Deal)!');
                               }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#2563eb', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#eff6ff'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                 <FileCheck size={16} color="#2563eb" /> Konversi ke Work Order
