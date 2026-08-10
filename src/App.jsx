@@ -18,6 +18,7 @@ import OwnerDashboard from './pages/Admin/OwnerDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import InvoicePrintPage from './pages/InvoicePrintPage';
 import PublicInvoicePage from './pages/PublicInvoicePage';
+import AdminMonthlyReport from './pages/Admin/AdminMonthlyReport';
 
 import FinanceLayout from './components/Layout/FinanceLayout';
 import OwnerLayout from './components/Layout/OwnerLayout';
@@ -99,6 +100,7 @@ function App() {
             <Route path="inventory" element={<AdminInventory />} />
             <Route path="customer-ranking" element={<CustomerRanking />} />
             <Route path="complaints" element={<Complaints />} />
+            <Route path="monthly-report" element={<AdminMonthlyReport />} />
           </Route>
         </Route>
 

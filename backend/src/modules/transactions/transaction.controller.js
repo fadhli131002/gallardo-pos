@@ -148,7 +148,7 @@ const createTransaction = async (req, res, next) => {
 
       if (Array.isArray(inventory_items) && inventory_items.length > 0) {
         for (const invItem of inventory_items) {
-          const { inventory_id, quantity } = invItem;
+          let { inventory_id, quantity, is_ppf, ukuran_potongan_ppf, peruntukan_potongan_ppf } = invItem;
           if (!inventory_id || !quantity) continue;
 
           // Ambil data produk dari DB
@@ -158,6 +158,24 @@ const createTransaction = async (req, res, next) => {
 
           if (!product) {
             throw new Error(`Produk dengan ID ${inventory_id} tidak ditemukan di inventaris!`);
+          }
+
+          if (is_ppf) {
+            if (!ukuran_potongan_ppf || !peruntukan_potongan_ppf) {
+              throw new Error("Pilihan ukuran dan peruntukan potongan PPF wajib disertakan.");
+            }
+            
+            // Cari data master potongan matrix secara spesifik (harus 100% cocok)
+            let ppfMaster = await tx.masterPotonganPPF.findFirst({
+              where: { ukuranKendaraan: ukuran_potongan_ppf, peruntukan: peruntukan_potongan_ppf }
+            });
+
+            if (!ppfMaster) {
+              throw new Error(`Master data potongan untuk kombinasi '${ukuran_potongan_ppf}' dan '${peruntukan_potongan_ppf}' tidak ditemukan di database. Pastikan data tidak terhapus.`);
+            }
+            
+            // potonganCm dibagi 100 untuk menjadi satuan meter
+            quantity = (ppfMaster.potonganCm / 100) * quantity;
           }
 
           // Hitung total stok dalam satuan dasar (meter/ml/pcs)
@@ -176,9 +194,9 @@ const createTransaction = async (req, res, next) => {
           }
 
           // ── Rumus Stok Baru = Stok Saat Ini - Qty Terjual ────────────
-          const newTotalBase   = totalBaseStock - quantity;
+          const newTotalBase   = Math.round((totalBaseStock - quantity) * 100) / 100;
           const newStokUtama   = Math.floor(newTotalBase / konversi);
-          const newStokPecahan = newTotalBase % konversi;
+          const newStokPecahan = Math.round((newTotalBase % konversi) * 100) / 100;
 
           // Update stok di DB
           await tx.inventory.update({
@@ -440,7 +458,8 @@ const updateTransaction = async (req, res, next) => {
       status_pembayaran,
       payment_type,
       type,
-      payment_method
+      payment_method,
+      created_at
     } = req.body;
 
     const existingTx = await prisma.transaction.findUnique({
@@ -472,6 +491,7 @@ const updateTransaction = async (req, res, next) => {
         payment_type: payment_type !== undefined ? payment_type : existingTx.payment_type,
         type: type !== undefined ? type : existingTx.type,
         payment_method: payment_method !== undefined ? payment_method : existingTx.payment_method,
+        created_at: created_at ? new Date(created_at) : existingTx.created_at,
       }
     });
 

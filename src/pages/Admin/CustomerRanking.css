@@ -1,27 +1,31 @@
 .ranking-container {
-  padding: 1.5rem;
+  padding: 2rem;
+  background-color: #F8FAFC;
+  min-height: 100vh;
   animation: fadeIn 0.5s ease-out;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Inter', 'Plus Jakarta Sans', sans-serif;
 }
 
-.ranking-header {
+.page-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1.5rem;
+  align-items: center;
+  margin-bottom: 2rem;
 }
 
-.ranking-title h1 {
-  font-family: var(--font-sans);
+.page-title {
+  font-family: inherit;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-black);
-  margin-bottom: 0.25rem;
+  color: #0F172A;
+  margin-bottom: 0.375rem;
 }
 
-.ranking-title p {
-  font-family: var(--font-mono-ui);
+.page-subtitle {
+  font-family: inherit;
   font-size: 0.875rem;
-  color: var(--color-gray-500);
+  color: #64748B;
+  margin: 0;
 }
 
 .ranking-actions {
@@ -29,56 +33,59 @@
   gap: 0.75rem;
 }
 
-.btn-excel {
+.btn-primary {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: var(--success);
-  color: white;
-  padding: 0.5rem 1rem;
+  background-color: #0F172A;
+  color: #FFFFFF;
+  padding: 0.625rem 1.25rem;
   border-radius: 6px;
   border: none;
   cursor: pointer;
-  font-family: var(--font-mono-ui);
-  font-weight: 600;
+  font-family: inherit;
+  font-weight: 500;
   font-size: 0.875rem;
-  transition: opacity 0.2s;
+  transition: background-color 0.2s;
 }
 
-.btn-excel:hover { opacity: 0.9; }
+.btn-primary:hover {
+  background-color: #1E293B;
+}
 
-.btn-pdf {
+.btn-secondary {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   background-color: transparent;
-  color: var(--color-black);
-  border: 1px solid var(--color-black);
-  padding: 0.5rem 1rem;
+  color: #0F172A;
+  border: 1px solid #E2E8F0;
+  padding: 0.625rem 1.25rem;
   border-radius: 6px;
   cursor: pointer;
-  font-family: var(--font-mono-ui);
-  font-weight: 600;
+  font-family: inherit;
+  font-weight: 500;
   font-size: 0.875rem;
   transition: all 0.2s;
 }
 
-.btn-pdf:hover {
-  background-color: var(--color-gray-100);
+.btn-secondary:hover {
+  background-color: #F1F5F9;
+  border-color: #CBD5E1;
 }
 
 .ranking-card {
-  background-color: var(--color-white);
-  border: 1px solid var(--color-gray-200);
-  border-radius: 8px;
-  box-shadow: var(--shadow-sm);
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
   overflow: hidden;
 }
 
 .ranking-toolbar {
-  padding: 1rem;
-  border-bottom: 1px solid var(--color-gray-200);
-  background-color: var(--color-gray-50);
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #E2E8F0;
+  background-color: #FFFFFF;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -87,44 +94,60 @@
 .search-box {
   display: flex;
   align-items: center;
-  background-color: var(--color-white);
-  border: 1px solid var(--color-gray-300);
-  border-radius: 4px;
-  padding: 0.35rem 0.75rem;
-  width: 320px;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 9999px;
+  padding: 0.625rem 1.25rem;
+  width: 360px;
+  transition: border-color 0.2s;
+}
+
+.search-box:focus-within {
+  border-color: #94A3B8;
 }
 
 .search-box input {
   border: none;
   outline: none;
   width: 100%;
-  padding: 0.25rem;
-  font-family: var(--font-mono-ui);
+  font-family: inherit;
   font-size: 0.875rem;
   background: transparent;
+  color: #334155;
+}
+
+.search-box input::placeholder {
+  color: #94A3B8;
 }
 
 .filter-box {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1.5rem;
 }
 
 .filter-box label {
-  font-family: var(--font-mono-ui);
+  font-family: inherit;
   font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-gray-700);
+  font-weight: 500;
+  color: #475569;
 }
 
 .filter-box select {
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--color-gray-300);
-  border-radius: 4px;
-  font-family: var(--font-mono-ui);
+  padding: 0.5rem 2.25rem 0.5rem 1rem;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  font-family: inherit;
   font-size: 0.875rem;
+  color: #0F172A;
   outline: none;
-  background-color: var(--color-white);
+  background-color: #FFFFFF;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
 }
 
 .ranking-table-wrapper {
@@ -139,75 +162,142 @@
 }
 
 .ranking-table th {
-  padding: 1rem;
-  font-family: var(--font-mono-ui);
+  padding: 1rem 1.5rem;
+  font-family: inherit;
   font-weight: 600;
-  color: var(--color-gray-600);
-  background-color: var(--color-gray-100);
-  border-bottom: 1px solid var(--color-gray-200);
-  font-size: 0.875rem;
+  color: #64748B;
+  background-color: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .ranking-table td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--color-gray-100);
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #F1F5F9;
   vertical-align: middle;
 }
 
 .ranking-table tbody tr:hover {
-  background-color: var(--color-gray-50);
+  background-color: #F8FAFC;
 }
 
-.rank-badge {
-  display: flex;
-  justify-content: center;
+.ranking-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rank-cell {
+  text-align: center;
+}
+
+.ranking-container .rank-pill {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.875rem;
 }
 
-.rank-text {
-  font-weight: bold;
-  color: var(--color-gray-500);
+.ranking-container .rank-1 {
+  background-color: #FEF3C7;
+  color: #D97706;
+}
+
+.ranking-container .rank-2 {
+  background-color: #F1F5F9;
+  color: #475569;
+}
+
+.ranking-container .rank-3 {
+  background-color: #FFEDD5;
+  color: #C2410C;
+}
+
+.ranking-container .rank-other {
+  background-color: transparent;
+  color: #94A3B8;
 }
 
 .customer-info .name {
   font-weight: 600;
-  color: var(--color-gray-900);
+  color: #2563EB;
   margin-bottom: 0.25rem;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+
+.customer-info .name:hover {
+  color: #1D4ED8;
 }
 
 .customer-info .tx-count {
   font-size: 0.75rem;
-  color: var(--color-gray-500);
-  font-family: var(--font-mono-ui);
+  color: #94A3B8;
+  font-family: inherit;
 }
 
 .phone-text {
-  font-family: var(--font-mono-ui);
+  font-family: inherit;
   font-size: 0.875rem;
-  color: var(--color-gray-600);
+  color: #475569;
 }
 
 .roll-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
   padding: 0.25rem 0.75rem;
-  background-color: #e0f2fe;
-  color: #0369a1;
+  background-color: #EFF6FF;
+  color: #2563EB;
   border-radius: 9999px;
-  font-family: var(--font-mono-num);
-  font-weight: 700;
+  font-family: inherit;
+  font-weight: 600;
   font-size: 0.875rem;
 }
 
 .omzet-text {
-  font-family: var(--font-mono-num);
+  font-family: inherit;
   font-weight: 700;
-  color: var(--color-gray-900);
+  color: #0F172A;
   text-align: right;
+  font-size: 0.9375rem;
+}
+
+.btn-detail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  background-color: transparent;
+  color: #64748B;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-detail:hover {
+  background-color: #F1F5F9;
+  color: #0F172A;
+  border-color: #E2E8F0;
 }
 
 .empty-state {
-  padding: 2rem;
+  padding: 3rem;
   text-align: center;
-  color: var(--color-gray-500);
-  font-family: var(--font-mono-ui);
+  color: #94A3B8;
+  font-family: inherit;
+  font-size: 0.875rem;
 }

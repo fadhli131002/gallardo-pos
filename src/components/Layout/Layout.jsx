@@ -177,6 +177,15 @@ const Layout = () => {
               </NavLink>
 
               <NavLink 
+                to="/admin/monthly-report" 
+                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                style={{ justifyContent: isExpanded ? 'flex-start' : 'center', padding: isExpanded ? '1rem 1.25rem' : '1rem 0' }}
+              >
+                <PieChart size={22} style={{ flexShrink: 0 }} />
+                <NavText>Laporan Bulanan</NavText>
+              </NavLink>
+
+              <NavLink 
                 to="/admin/vehicle-master" 
                 className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                 style={{ justifyContent: isExpanded ? 'flex-start' : 'center', padding: isExpanded ? '1rem 1.25rem' : '1rem 0' }}

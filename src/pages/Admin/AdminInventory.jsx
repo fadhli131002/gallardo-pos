@@ -333,7 +333,8 @@ const AdminInventory = () => {
       filename: filename,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+      pagebreak: { mode: ['css', 'legacy'] }
     };
 
     html2pdf().set(opt).from(element).save().then(() => {
@@ -363,7 +364,8 @@ const AdminInventory = () => {
       filename: filename,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+      pagebreak: { mode: ['css', 'legacy'] }
     };
 
     html2pdf().set(opt).from(element).save().then(() => {
@@ -517,7 +519,7 @@ const AdminInventory = () => {
                         <span style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--color-black)' }}>
                           {item.kategori === 'Coating'
                             ? `${item.stokUtama} Botol (${item.stokPecahan} ml)`
-                            : `${item.stokUtama} Roll + ${item.stokPecahan} Meter`}
+                            : `${item.stokUtama} Roll + ${Math.round(item.stokPecahan * 100) / 100} Meter`}
                         </span>
                       )}
 
@@ -938,7 +940,7 @@ const AdminInventory = () => {
           </thead>
           <tbody>
             {inventory.map((item, index) => (
-              <tr key={item.id} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+              <tr key={item.id} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb', pageBreakInside: 'avoid' }}>
                 <td style={{ border: '1px solid #000', padding: '16px 8px' }}>{item.id}</td>
                 <td style={{ border: '1px solid #000', padding: '16px 8px' }}>{item.kategori}</td>
                 <td style={{ border: '1px solid #000', padding: '16px 8px' }}>{item.brand || '-'}</td>
@@ -951,7 +953,7 @@ const AdminInventory = () => {
                     ? `${item.stokUtama} ${item.satuan}`
                     : item.kategori === 'Coating'
                       ? `${item.stokUtama} Botol (${item.stokPecahan} ml)`
-                      : `${item.stokUtama} Roll + ${item.stokPecahan} Meter`}
+                      : `${item.stokUtama} Roll + ${Math.round(item.stokPecahan * 100) / 100} Meter`}
                 </td>
                 <td style={{ border: '1px solid #000', padding: '16px 8px', textAlign: 'center' }}>
                   <div style={{ width: '20px', height: '20px', border: '2px solid #000', margin: '0 auto' }}></div>
@@ -1000,7 +1002,7 @@ const AdminInventory = () => {
           <tbody>
             {filteredLogs.length > 0 ? (
               filteredLogs.map((log, index) => (
-                <tr key={log.id} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+                <tr key={log.id} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb', pageBreakInside: 'avoid' }}>
                   <td style={{ border: '1px solid #000', padding: '12px 8px' }}>{new Date(log.date).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
                   <td style={{ border: '1px solid #000', padding: '12px 8px' }}>{log.orderId}</td>
                   <td style={{ border: '1px solid #000', padding: '12px 8px' }}>

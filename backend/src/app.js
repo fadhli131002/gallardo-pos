@@ -15,6 +15,8 @@ const salesMasterRoutes = require('./modules/salesMaster/salesMaster.routes');
 const variantRoutes = require('./modules/variants/variant.routes');
 const ownerRoutes = require('./modules/owner/owner.routes');
 const financeRoutes = require('./modules/finance/finance.routes');
+const ppfMasterRoutes = require('./modules/ppfMaster/ppfMaster.routes');
+const reportsRoutes = require('./modules/reports/reports.routes');
 
 const app = express();
 
@@ -44,6 +46,8 @@ app.use('/api/sales-master', salesMasterRoutes);
 app.use('/api/variants', variantRoutes);
 app.use('/api/owner', ownerRoutes);
 app.use('/api/finance', financeRoutes);
+app.use('/api/master-ppf', ppfMasterRoutes);
+app.use('/api/reports', reportsRoutes);
 
 // Error Handler
 app.use(errorHandler);

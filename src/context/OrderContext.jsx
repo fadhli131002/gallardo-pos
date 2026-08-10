@@ -440,7 +440,8 @@ export const OrderProvider = ({ children }) => {
           status_pembayaran: updates.paymentStatus,
           payment_type: updates.paymentType,
           type: updates.type || updates.billType,
-          payment_method: updates.paymentMethod
+          payment_method: updates.paymentMethod,
+          created_at: updates.created_at
         };
         // Remove undefined fields so we only send what is changed
         Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
@@ -460,7 +461,7 @@ export const OrderProvider = ({ children }) => {
 
     setOrders(prev => prev.map(o => {
       if (o.id === orderId) {
-        return { ...o, ...updates };
+        return { ...o, ...updates, date: updates.created_at || o.date };
       }
       return o;
     }));

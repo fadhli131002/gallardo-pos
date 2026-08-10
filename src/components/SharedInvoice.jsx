@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { formatCurrency } from '../data/mockData';
 import logoGallardo from '../assets/logo-gallardo.png';
 import RetailInvoice from './RetailInvoice';
+import { formatTransactionId } from '../utils/formatId';
 
 const angkaToTerbilang = (angka) => {
   const huruf = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
@@ -117,7 +118,7 @@ export default function SharedInvoice({ order }) {
           </div>
           <div style={{ textAlign: 'right' }}>
             <h2 style={{ fontSize: '28px', fontWeight: 'bold', margin: '0 0 5px 0', color: '#111', letterSpacing: '2px' }}>INVOICE</h2>
-            <p style={{ margin: 0, fontSize: '14px', fontWeight: 'bold' }}>{order.id || order.invoiceId}</p>
+            <p style={{ margin: 0, fontSize: '14px', fontWeight: 'bold' }}>{formatTransactionId(order)}</p>
           </div>
         </div>
 

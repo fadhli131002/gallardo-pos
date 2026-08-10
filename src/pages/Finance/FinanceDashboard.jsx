@@ -569,7 +569,7 @@ const FinanceDashboard = () => {
                 <span className={`text-xs font-semibold flex items-center ${summary.labaRugi >= 0 ? 'text-indigo-700' : 'text-red-700'}`}>
                   {summary.labaRugi >= 0 ? 'Profit' : 'Loss'}
                 </span>
-                <span className="text-[10px] text-gray-400 uppercase tracking-wide">Standar (Omset - HPP)</span>
+                <span className="text-[10px] text-gray-400 uppercase tracking-wide">Kas - PO - Komisi - Beban - HPP</span>
               </div>
             </div>
           </div>

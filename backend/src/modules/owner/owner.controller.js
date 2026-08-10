@@ -44,8 +44,10 @@ const getDashboardSummary = async (req, res, next) => {
     transactions.forEach(trx => {
       totalOmset += trx.total_amount;
       
-      const COMMISSION_RATE = 0.05;
-      totalKomisi += trx.sales_commission !== null ? trx.sales_commission : (trx.total_amount * COMMISSION_RATE);
+      if (trx.status_pembayaran === 'Lunas') {
+        const COMMISSION_RATE = 0.05;
+        totalKomisi += trx.sales_commission !== null ? trx.sales_commission : (trx.total_amount * COMMISSION_RATE);
+      }
       
       // Hitung HPP dari inventory logs
       trx.inventory_logs.forEach(log => {
@@ -104,21 +106,6 @@ const getDashboardSummary = async (req, res, next) => {
       }
     });
 
-    // Laba Bersih
-    const labaBersih = totalOmset - totalHPP - totalKomisi - totalExpense - totalKerugianKomplain;
-
-    console.log("=== DEBUG DASHBOARD OWNER ===");
-    console.log("Transactions Count:", transactions.length);
-    console.log("Expenses Count:", expenses.length);
-    console.log("Complaints Count:", complaints.length);
-    console.log("Total Omset:", totalOmset);
-    console.log("Total HPP:", totalHPP);
-    console.log("Total Komisi:", totalKomisi);
-    console.log("Total Expense:", totalExpense);
-    console.log("Total Kerugian Komplain:", totalKerugianKomplain);
-    console.log("Laba Bersih:", labaBersih);
-    console.log("=============================");
-
     // D. Cash Flow (Arus Kas Bersih)
     const cashFlows = await prisma.cashFlowLog.findMany({
       where: {
@@ -128,14 +115,31 @@ const getDashboardSummary = async (req, res, next) => {
         }
       }
     });
-    
+
     let cashIn = 0;
     let cashOut = 0;
     cashFlows.forEach(cf => {
       if (cf.type === 'IN') cashIn += cf.amount;
       if (cf.type === 'OUT') cashOut += cf.amount;
     });
+
     const netCashFlow = cashIn - cashOut;
+
+    // Laba Bersih (Disamakan dengan Cash Basis / Kas Masuk Finance)
+    const labaBersih = cashIn - totalHPP - totalKomisi - totalExpense - totalKerugianKomplain;
+
+    console.log("=== DEBUG DASHBOARD OWNER ===");
+    console.log("Transactions Count:", transactions.length);
+    console.log("Expenses Count:", expenses.length);
+    console.log("Complaints Count:", complaints.length);
+    console.log("Total Omset:", totalOmset);
+    console.log("Total HPP:", totalHPP);
+    console.log("Total Komisi (Lunas):", totalKomisi);
+    console.log("Total Expense:", totalExpense);
+    console.log("Total Kerugian Komplain:", totalKerugianKomplain);
+    console.log("Kas Masuk:", cashIn);
+    console.log("Laba Bersih (Cash Basis):", labaBersih);
+    console.log("=============================");
 
     // E. Operational Metrics
     let topSalesMap = {};

@@ -65,7 +65,7 @@ const POSRetail = () => {
     terminNotes: ''
   });
 
-  const { orders, addOrder, isDateBlocked, getEndDate, categories, peruntukanItems, posisiPemasangan, posisiPartial, vehicles } = useOrders();
+  const { orders, addOrder, isDateBlocked, getEndDate, categories, peruntukanItems, posisiPemasangan, posisiPartial, vehicles, salesItems } = useOrders();
   const { inventory, processInventoryDeduction } = useInventory();
 
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -236,7 +236,7 @@ const POSRetail = () => {
 
         const quantityInBaseUnits = product.isMeteran ? newTotalQty : (newTotalQty * konversi);
         if (quantityInBaseUnits > totalBaseStock) {
-          toast.warning(`Stok ${product.baseName || product.name} tidak mencukupi! Sisa: ${product.stokUtama} Roll + ${product.stokPecahan || 0} Meter.`);
+          toast.warning(`Stok ${product.baseName || product.name} tidak mencukupi! Sisa: ${product.stokUtama} Roll + ${Math.round((product.stokPecahan || 0) * 100) / 100} Meter.`);
           return prev;
         }
       }
@@ -1081,7 +1081,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                                 ? `Tersedia: ${product.stokUtama} ${product.satuan || ''}`
                                 : product.category === 'Coating & Chemical'
                                   ? `Tersedia: ${product.stokUtama} Botol (${product.stokPecahan} ml)`
-                                  : `Tersedia: ${product.stokUtama} Roll + ${product.stokPecahan} Meter`)
+                                  : `Tersedia: ${product.stokUtama} Roll + ${Math.round(product.stokPecahan * 100) / 100} Meter`)
                               : 'Tanpa Stok'}
                           </div>
                           {product.category === 'Kaca Film' && product.kegelapan && (
@@ -1231,6 +1231,40 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
 
             {/* Body */}
             <div style={{ padding: '32px' }}>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#4b5563' }}>Sales</label>
+                  <select
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '14px', backgroundColor: '#fff', color: '#111827', outline: 'none', transition: 'border-color 0.2s, box-shadow 0.2s' }}
+                    onFocus={e => { e.target.style.borderColor = '#4f46e5'; e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.1)' }}
+                    onBlur={e => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none' }}
+                    value={paymentState.spgName}
+                    onChange={e => setPaymentState(prev => ({ ...prev, spgName: e.target.value }))}
+                  >
+                    <option value="">-- Pilih Nama Sales --</option>
+                    {salesItems && salesItems.map((sales) => (
+                      <option key={sales.id} value={sales.nama}>{sales.nama}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#4b5563' }}>Kategori Penjualan</label>
+                  <select 
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '14px', backgroundColor: '#fff', color: '#111827', outline: 'none', transition: 'border-color 0.2s, box-shadow 0.2s' }}
+                    onFocus={e => { e.target.style.borderColor = '#4f46e5'; e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.1)' }}
+                    onBlur={e => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none' }}
+                    value={paymentState.billType} 
+                    onChange={e => setPaymentState(prev => ({ ...prev, billType: e.target.value }))}
+                  >
+                    <option value="Reseller (Pembelian Roll)">Reseller (Pembelian Roll)</option>
+                    <option value="Retail (Grosir)">Retail (Grosir)</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               
               <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e5e7eb', padding: '24px', marginBottom: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
                 <h3 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ringkasan Finansial</h3>

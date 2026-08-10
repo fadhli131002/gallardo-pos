@@ -101,8 +101,8 @@ export const InventoryProvider = ({ children }) => {
               deductedStr = `${totalDeducted} ml`;
             } else {
               deductedStr = deductedUtama > 0
-                ? `${deductedUtama} Roll ${deductedPecahan > 0 ? `+ ${deductedPecahan} Meter` : ''}`
-                : `${totalDeducted} Meter`;
+                ? `${deductedUtama} Roll ${deductedPecahan > 0 ? `+ ${Math.round(deductedPecahan * 100) / 100} Meter` : ''}`
+                : `${Math.round(totalDeducted * 100) / 100} Meter`;
             }
 
             const remUtama = Math.floor(log.stok_sesudah / konversi);
@@ -115,7 +115,7 @@ export const InventoryProvider = ({ children }) => {
             } else if (inv.kategori === 'Coating') {
               remainingStr = `${remUtama} Botol (${remPecahan} ml)`;
             } else {
-              remainingStr = `${remUtama} Roll + ${remPecahan} Meter`;
+              remainingStr = `${remUtama} Roll + ${Math.round(remPecahan * 100) / 100} Meter`;
             }
 
             let serviceName = '';

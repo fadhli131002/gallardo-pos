@@ -80,6 +80,24 @@ const POS = () => {
   const { orders, addOrder, isDateBlocked, getEndDate, categories, peruntukanItems, posisiPemasangan, posisiPartial, salesItems, vehicles } = useOrders();
   const { inventory, consumeStock, deductStock, deductRetailStock } = useInventory();
 
+  const [ppfMasters, setPpfMasters] = useState([]);
+  useEffect(() => {
+    fetch(window.API_URL + '/api/master-ppf')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setPpfMasters(data);
+        } else {
+          setPpfMasters([]);
+          console.error("Invalid PPF master data:", data);
+        }
+      })
+      .catch(e => {
+        console.error("Failed to fetch PPF masters", e);
+        setPpfMasters([]);
+      });
+  }, []);
+
   const getProductName = (inv) => {
     if (inv.kategori === 'Tools' || inv.kategori === 'Jasa' || inv.kategori === 'Chemical') return inv.varian;
     return `${inv.brand} ${inv.varian}`.trim();
@@ -156,6 +174,8 @@ const POS = () => {
       baseName: selectedProductForModal.name,
       posisi: modalVariantState.posisi || '',
       peruntukan: modalVariantState.peruntukan || '',
+      ukuran_potongan_ppf: modalVariantState.ukuran_potongan_ppf || null,
+      peruntukan_potongan_ppf: modalVariantState.peruntukan_potongan_ppf || null,
       catatan: modalVariantState.catatan || ''
     };
 
@@ -645,11 +665,11 @@ const POS = () => {
             }
 
             let baseDeduct = 1;
-            if (item.category === 'PPF' || item.name?.toUpperCase().includes('VANSGARD') || item.name?.toUpperCase().includes('PPF')) {
-              if (formData.carSize === 'Small' || formData.carSize === 'Medium') baseDeduct = 15;
-              else if (formData.carSize === 'Large') baseDeduct = 17;
-              else if (formData.carSize === 'Extra Large / Supercar' || formData.carSize === 'XL/Luxury') baseDeduct = 18;
-              else baseDeduct = 15;
+            const isPPF = item.category === 'PPF' || item.name?.toUpperCase().includes('VANSGARD') || item.name?.toUpperCase().includes('PPF');
+            
+            if (isPPF) {
+              // Untuk PPF, perhitungan stok akan dilakukan dinamis oleh backend berdasarkan MasterPotonganPPF
+              baseDeduct = 1; 
             } else if (item.category === 'Coating & Chemical' || item.name?.toUpperCase().includes('COATING') || item.name?.toUpperCase().includes('RANTIZ')) {
               baseDeduct = 17; // 17ml rounded
             } else if (item.category === 'Kaca Film' || item.name?.toUpperCase().includes('KACA FILM') || item.name?.toUpperCase().includes('PERFORMANTE') || item.name?.toUpperCase().includes('DELUXE')) {
@@ -658,7 +678,12 @@ const POS = () => {
 
             return {
               inventory_id: realInventoryId,
-              quantity: baseDeduct * (item.qty || 1)
+              quantity: baseDeduct * (item.qty || 1),
+              is_ppf: isPPF,
+              ukuran_potongan_ppf: item.ukuran_potongan_ppf || null,
+              peruntukan_potongan_ppf: item.peruntukan_potongan_ppf || null,
+              ukuran_kendaraan: formData.carSize || 'Semua Ukuran',
+              peruntukan: item.varian || item.name || ''
             };
           })
       };
@@ -1032,7 +1057,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                                         ? `Tersedia: ${product.stokUtama} ${product.satuan || ''}`
                                         : product.category === 'Coating & Chemical'
                                           ? `Tersedia: ${product.stokUtama} Botol (${product.stokPecahan} ml)`
-                                          : `Tersedia: ${product.stokUtama} Roll + ${product.stokPecahan} Meter`)
+                                          : `Tersedia: ${product.stokUtama} Roll + ${Math.round(product.stokPecahan * 100) / 100} Meter`)
                                       : 'Tanpa Stok'}
                                   </div>
                                   {product.category === 'Kaca Film' && product.kegelapan && (
@@ -1719,34 +1744,70 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                     <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700', color: '#1e293b', letterSpacing: '0.025em' }}>PERUNTUKAN / BAGIAN</h3>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-                    {peruntukanItems.filter(p => (p.kategori || '').toLowerCase().trim() === (selectedProductForModal.type || '').toLowerCase().trim()).map(val => {
-                      const cleanName = val.nama.replace(/RANTIZ /i, '');
-                      const nUpper = cleanName.toUpperCase();
-                      let IconComponent = Car;
-                      if (nUpper.includes('MOTOR')) IconComponent = Bike;
-                      else if (nUpper.includes('LEATHER') || nUpper.includes('INTERIOR')) IconComponent = Armchair;
-                      else if (nUpper.includes('GLASS') || nUpper.includes('COATING')) IconComponent = Sparkles;
-                      else if (nUpper.includes('MAINTENANCE')) IconComponent = Settings;
-                      else if (nUpper.includes('PARTIAL')) IconComponent = CarFront;
+                    {selectedProductForModal.category === 'PPF' 
+                      ? ppfMasters.map(val => {
+                          const cleanName = `${val.ukuranKendaraan} ${val.peruntukan}`;
+                          const isSelected = modalVariantState.ukuran_potongan_ppf === val.ukuranKendaraan && modalVariantState.peruntukan_potongan_ppf === val.peruntukan;
+                          let IconComponent = Car;
+                          return (
+                            <div key={val.id} 
+                              className={`option-card ${isSelected ? 'selected' : ''}`}
+                              onClick={() => setModalVariantState(prev => ({ ...prev, ukuran_potongan_ppf: val.ukuranKendaraan, peruntukan_potongan_ppf: val.peruntukan, peruntukan: cleanName }))}
+                              style={{ 
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '16px', 
+                                border: isSelected ? '2px solid #2563eb' : '1px solid #e2e8f0', 
+                                backgroundColor: isSelected ? '#eff6ff' : '#ffffff', 
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontWeight: isSelected ? '700' : '600', color: isSelected ? '#1e40af' : '#334155', fontSize: '0.95rem' }}>{val.ukuranKendaraan}</span>
+                                <span style={{ 
+                                  backgroundColor: '#4763E4', 
+                                  color: '#ffffff', 
+                                  padding: '4px 10px', 
+                                  borderRadius: '6px', 
+                                  fontSize: '0.8rem', 
+                                  fontWeight: '600'
+                                }}>
+                                  {val.peruntukan}
+                                </span>
+                              </div>
+                              <div style={{ flexShrink: 0, width: '22px', height: '22px', borderRadius: '50%', border: isSelected ? 'none' : '2px solid #cbd5e1', backgroundColor: isSelected ? '#2563eb' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {isSelected && <CheckCircle size={14} color="#ffffff" strokeWidth={3} />}
+                              </div>
+                            </div>
+                          )
+                        })
+                      : peruntukanItems.filter(p => (p.kategori || '').toLowerCase().trim() === (selectedProductForModal.type || '').toLowerCase().trim()).map(val => {
+                          const cleanName = val.nama.replace(/RANTIZ /i, '');
+                          const nUpper = cleanName.toUpperCase();
+                          let IconComponent = Car;
+                          if (nUpper.includes('MOTOR')) IconComponent = Bike;
+                          else if (nUpper.includes('LEATHER') || nUpper.includes('INTERIOR')) IconComponent = Armchair;
+                          else if (nUpper.includes('GLASS') || nUpper.includes('COATING')) IconComponent = Sparkles;
+                          else if (nUpper.includes('MAINTENANCE')) IconComponent = Settings;
+                          else if (nUpper.includes('PARTIAL')) IconComponent = CarFront;
 
-                      return (
-                        <div key={val.id} 
-                          className={`option-card ${modalVariantState.peruntukan === val.nama ? 'selected' : ''}`}
-                          onClick={() => setModalVariantState(prev => ({ ...prev, peruntukan: val.nama }))}
-                          style={{ 
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '16px', 
-                            border: modalVariantState.peruntukan === val.nama ? '2px solid #2563eb' : '1px solid #e2e8f0', 
-                            backgroundColor: modalVariantState.peruntukan === val.nama ? '#eff6ff' : '#ffffff', 
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <span style={{ fontWeight: modalVariantState.peruntukan === val.nama ? '700' : '600', color: modalVariantState.peruntukan === val.nama ? '#1e40af' : '#334155', fontSize: '0.95rem', display: 'block' }}>{cleanName}</span>
-                          <div style={{ flexShrink: 0, width: '22px', height: '22px', borderRadius: '50%', border: modalVariantState.peruntukan === val.nama ? 'none' : '2px solid #cbd5e1', backgroundColor: modalVariantState.peruntukan === val.nama ? '#2563eb' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {modalVariantState.peruntukan === val.nama && <CheckCircle size={14} color="#ffffff" strokeWidth={3} />}
-                          </div>
-                        </div>
-                      )
-                    })}
+                          return (
+                            <div key={val.id} 
+                              className={`option-card ${modalVariantState.peruntukan === val.nama ? 'selected' : ''}`}
+                              onClick={() => setModalVariantState(prev => ({ ...prev, peruntukan: val.nama }))}
+                              style={{ 
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '16px', 
+                                border: modalVariantState.peruntukan === val.nama ? '2px solid #2563eb' : '1px solid #e2e8f0', 
+                                backgroundColor: modalVariantState.peruntukan === val.nama ? '#eff6ff' : '#ffffff', 
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <span style={{ fontWeight: modalVariantState.peruntukan === val.nama ? '700' : '600', color: modalVariantState.peruntukan === val.nama ? '#1e40af' : '#334155', fontSize: '0.95rem', display: 'block' }}>{cleanName}</span>
+                              <div style={{ flexShrink: 0, width: '22px', height: '22px', borderRadius: '50%', border: modalVariantState.peruntukan === val.nama ? 'none' : '2px solid #cbd5e1', backgroundColor: modalVariantState.peruntukan === val.nama ? '#2563eb' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {modalVariantState.peruntukan === val.nama && <CheckCircle size={14} color="#ffffff" strokeWidth={3} />}
+                              </div>
+                            </div>
+                          )
+                        })
+                    }
                   </div>
                 </div>
               )}

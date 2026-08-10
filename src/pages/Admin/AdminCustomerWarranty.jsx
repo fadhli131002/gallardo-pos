@@ -231,7 +231,34 @@ const AdminCustomerWarranty = () => {
   };
 
   const handleExportPDF = () => {
-    window.print();
+    const element = document.getElementById('transaction-pdf-content');
+    if (!element) return;
+    
+    // Simpan class asli agar bisa dikembalikan nanti
+    const originalClassName = element.className;
+    
+    // Hapus class hidden (Tailwind) dan paksa tampil sementara untuk html2pdf
+    element.className = originalClassName.replace('hidden', '');
+    element.style.display = 'block';
+
+    const today = new Date();
+    const formattedDate = `${today.getDate().toString().padStart(2, '0')}_${(today.getMonth() + 1).toString().padStart(2, '0')}_${today.getFullYear()}`;
+    const filename = `Laporan_Customer_Transaksi_${formattedDate}.pdf`;
+
+    const opt = {
+      margin: 10,
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+      // Kembalikan ke class asli (hidden)
+      element.style.display = '';
+      element.className = originalClassName;
+    });
   };
 
   useEffect(() => {
@@ -702,7 +729,8 @@ const AdminCustomerWarranty = () => {
                               engineNumber: order.engineNumber || '',
                               installationDate: order.installationDate || '',
                               installationTime: order.installationTime || '',
-                              notes: order.notes || ''
+                              notes: order.notes || '',
+                              created_at: order.date ? (new Date(new Date(order.date).getTime() - (new Date().getTimezoneOffset() * 60000))).toISOString().slice(0, 16) : ''
                             });
                             setShowEditCustomerModal(true);
                           }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
@@ -1217,10 +1245,13 @@ const AdminCustomerWarranty = () => {
       {/* PRINT ONLY LAYOUT */}
       <style>{`
         @media print {
-          @page { size: landscape; }
+          @page { size: A4 landscape; margin: 15mm; }
+          table { page-break-inside: auto; width: 100%; }
+          tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+          td, th { page-break-inside: avoid !important; break-inside: avoid !important; }
         }
       `}</style>
-      <div className="hidden print:block print:w-full print:bg-white print:text-black print:p-0">
+      <div id="transaction-pdf-content" className="hidden print:block print:w-full print:bg-white print:text-black print:p-0">
         <div style={{ textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid black', paddingBottom: '10px' }}>
           <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', textTransform: 'uppercase' }}>LAPORAN CUSTOMER & TRANSAKSI</h1>
           <h2 style={{ fontSize: '14px', margin: '4px 0 0 0', fontWeight: 'bold' }}>PT GALLARDO UTAMA SENTOSA</h2>
@@ -1259,7 +1290,7 @@ const AdminCustomerWarranty = () => {
                     const isLunas = order.paymentType === 'Lunas';
 
                     return (
-                      <tr key={order.id} style={{ pageBreakInside: 'avoid' }}>
+                      <tr key={order.id} style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
                         <td style={{ border: '1px solid black', padding: '6px', textAlign: 'center', verticalAlign: 'top' }}>{idx + 1}</td>
                         <td style={{ border: '1px solid black', padding: '6px', verticalAlign: 'top' }}>
                           <div style={{ fontWeight: 'bold' }}>{order.id}</div>
@@ -1552,7 +1583,11 @@ const AdminCustomerWarranty = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '1.25rem' }}>
-              <div className="form-group" style={{ gridColumn: 'span 6' }}>
+              <div className="form-group" style={{ gridColumn: 'span 3' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Tanggal Masuk Invoice <span className="text-red-500">*</span></label>
+                <input type="datetime-local" value={editCustomerData.created_at || ''} onChange={e => setEditCustomerData({ ...editCustomerData, created_at: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+              </div>
+              <div className="form-group" style={{ gridColumn: 'span 3' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Nama Lengkap <span className="text-red-500">*</span></label>
                 <input type="text" value={editCustomerData.customerName} onChange={e => setEditCustomerData({ ...editCustomerData, customerName: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>

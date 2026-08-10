@@ -131,12 +131,10 @@ const CustomerRanking = () => {
   };
 
   const getRankIcon = (rank) => {
-    switch (rank) {
-      case 1: return <Trophy color="#facc15" size={24} />; // yellow-400
-      case 2: return <Medal color="#9ca3af" size={24} />; // gray-400
-      case 3: return <Award color="#d97706" size={24} />; // amber-600
-      default: return <span className="rank-text">#{rank}</span>;
-    }
+    if (rank === 1) return <span className="rank-pill rank-1">#{rank}</span>;
+    if (rank === 2) return <span className="rank-pill rank-2">#{rank}</span>;
+    if (rank === 3) return <span className="rank-pill rank-3">#{rank}</span>;
+    return <span className="rank-pill rank-other">#{rank}</span>;
   };
 
   return (
@@ -201,12 +199,12 @@ const CustomerRanking = () => {
             <table className="ranking-table">
               <thead>
                 <tr>
-                  <th style={{ textAlign: 'center', width: '80px' }}>Peringkat</th>
-                  <th>Nama Customer</th>
-                  <th>No. WhatsApp</th>
-                  <th style={{ textAlign: 'center' }}>Total Roll</th>
-                  <th style={{ textAlign: 'right' }}>Total Pembelian</th>
-                  <th style={{ textAlign: 'center', width: '100px' }}>Aksi</th>
+                  <th style={{ textAlign: 'center', width: '90px' }}>PERINGKAT</th>
+                  <th>NAMA CUSTOMER</th>
+                  <th>NO. WHATSAPP</th>
+                  <th style={{ textAlign: 'center' }}>TOTAL ROLL</th>
+                  <th style={{ textAlign: 'right' }}>TOTAL PEMBELIAN</th>
+                  <th style={{ textAlign: 'center', width: '100px' }}>AKSI</th>
                 </tr>
               </thead>
               <tbody>
@@ -219,13 +217,12 @@ const CustomerRanking = () => {
                 ) : (
                   filteredRankings.map((r, idx) => (
                     <tr key={idx}>
-                      <td className="rank-badge">
+                      <td className="rank-cell">
                         {getRankIcon(r.rank)}
                       </td>
                       <td className="customer-info">
                         <div
                           className="name"
-                          style={{ cursor: 'pointer', color: '#2563eb', textDecoration: 'underline' }}
                           onClick={() => { setSelectedCustomer(r); setShowHistoryModal(true); }}
                         >
                           {r.customerName}
@@ -247,19 +244,6 @@ const CustomerRanking = () => {
                         <button
                           onClick={() => { setSelectedCustomer(r); setShowHistoryModal(true); }}
                           className="btn-detail"
-                          style={{
-                            padding: '6px 12px',
-                            backgroundColor: '#eff6ff',
-                            color: '#2563eb',
-                            border: '1px solid #bfdbfe',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontSize: '12px',
-                            fontWeight: '500',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
                         >
                           <Eye size={14} /> Detail
                         </button>

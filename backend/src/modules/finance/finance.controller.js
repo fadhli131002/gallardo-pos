@@ -48,15 +48,17 @@ exports.getDashboardSummary = async (req, res, next) => {
 
     // 3. Laba/Rugi Standar
     const transactions = await prisma.transaction.findMany({
-      where: { created_at: createdFilter },
-      select: { total_amount: true, sales_commission: true }
+      where: { created_at: createdFilter, status_pembayaran: { not: 'Batal' } },
+      select: { total_amount: true, sales_commission: true, status_pembayaran: true }
     });
 
     let totalOmset = 0;
     let totalKomisi = 0;
     transactions.forEach(t => {
       totalOmset += t.total_amount || 0;
-      totalKomisi += t.sales_commission !== null ? t.sales_commission : ((t.total_amount || 0) * 0.05);
+      if (t.status_pembayaran === 'Lunas') {
+        totalKomisi += t.sales_commission !== null ? t.sales_commission : ((t.total_amount || 0) * 0.05);
+      }
     });
 
     const inventoryLogs = await prisma.inventoryLog.findMany({
@@ -82,7 +84,16 @@ exports.getDashboardSummary = async (req, res, next) => {
     });
     const totalExpense = expenses._sum.amount || 0;
 
-    const labaRugi = totalOmset - totalHpp - totalKomisi - totalExpense;
+    // Laporan Pembelian (Purchase Orders)
+    const purchaseOrders = await prisma.purchaseOrder.aggregate({
+      _sum: { totalAmount: true },
+      where: { date: dateFilter }
+    });
+    const totalPembelian = purchaseOrders._sum.totalAmount || 0;
+
+    // Rumus Laba/Rugi Cash-Basis + HPP sesuai permintaan user:
+    // Laba Bersih = Kas Masuk - Laporan Pembelian - Komisi Sales - Beban Operasional - HPP
+    const labaRugi = totalKasMasuk - totalPembelian - totalKomisi - totalExpense - totalHpp;
 
     res.json({
       totalKasMasuk,
@@ -91,7 +102,8 @@ exports.getDashboardSummary = async (req, res, next) => {
       totalOmset,
       totalHpp,
       totalKomisi,
-      totalExpense
+      totalExpense,
+      totalPembelian
     });
   } catch (error) {
     next(error);
@@ -130,7 +142,7 @@ exports.getDashboardDetails = async (req, res, next) => {
       return res.json(receivables);
     } else if (type === 'omset' || type === 'laba-rugi') {
       const transactions = await prisma.transaction.findMany({
-        where: { created_at: createdFilter },
+        where: { created_at: createdFilter, status_pembayaran: { not: 'Batal' } },
         include: {
           inventory_logs: {
             where: { jenis: 'DEDUCT' },

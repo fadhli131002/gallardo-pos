@@ -259,10 +259,10 @@ export default function OwnerDashboard() {
     <div className={`owner-dashboard ${isDarkMode ? 'dark-theme' : ''}`}>
 
       {/* HEADER */}
-      <div className="page-header">
+      <div className="dashboard-header">
         <div>
-          <h1 className="page-title">Halo, {userName} 👋</h1>
-          <p className="page-subtitle">Executive Dashboard - Ringkasan kinerja bisnis, pendapatan, dan efisiensi operasional</p>
+          <h1 className="page-title font-bold text-slate-900" style={{ color: '#0F172A', fontWeight: 'bold' }}>Halo, {userName} 👋</h1>
+          <p className="page-subtitle text-slate-500" style={{ marginTop: '4px' }}>Executive Dashboard - Ringkasan kinerja bisnis, pendapatan, dan efisiensi operasional</p>
         </div>
         <div className="header-actions">
           <button onClick={toggleTheme} className="btn-icon theme-toggle-btn" title="Toggle Theme">
@@ -465,13 +465,13 @@ export default function OwnerDashboard() {
                   <h3 className="ops-summary-title">
                     <Package size={16} /> Status Order / Transaksi
                   </h3>
-                  <div className="ops-summary-row">
+                  <div className="ops-summary-row items-center">
                     <span className="ops-summary-label">Selesai / Lunas</span>
-                    <span className="ops-summary-value">{summaryData.orderStats?.lunas || 0}</span>
+                    <span className="badge-emerald">{summaryData.orderStats?.lunas || 0}</span>
                   </div>
-                  <div className="ops-summary-row">
+                  <div className="ops-summary-row items-center mt-2">
                     <span className="ops-summary-label">Proses / Pending</span>
-                    <span className="ops-summary-value">{summaryData.orderStats?.pending || 0}</span>
+                    <span className="badge-amber">{summaryData.orderStats?.pending || 0}</span>
                   </div>
                   {summaryData.orderStats?.pendingIds && summaryData.orderStats.pendingIds.length > 0 && (
                     <div className="ops-summary-pending-ids">
@@ -509,14 +509,14 @@ export default function OwnerDashboard() {
                     <p className="empty-state-text">Belum ada data sales.</p>
                   ) : (
                     summaryData.topSales.map((sales, index) => (
-                      <div key={index} className="list-item">
+                      <div key={index} className={`list-item ${index === 0 ? 'rank-1-row' : ''}`}>
                         <div className="list-item-left">
                           <div className={`rank-badge ${index === 0 ? 'rank-1' : 'rank-other'}`}>
                             {index + 1}
                           </div>
-                          <span className="list-item-name">{sales.name}</span>
+                          <span className="list-item-name font-semibold">{sales.name}</span>
                         </div>
-                        <span className="list-item-val">{formatCurrency(sales.omset)}</span>
+                        <span className="list-item-val font-bold text-slate-900">{formatCurrency(sales.omset)}</span>
                       </div>
                     ))
                   )}
@@ -534,8 +534,8 @@ export default function OwnerDashboard() {
                   ) : (
                     summaryData.topCustomers.map((cust, index) => (
                       <div key={index} className="list-item">
-                        <span className="list-item-name">{cust.name}</span>
-                        <span className="list-item-val">{formatCurrency(cust.omset)}</span>
+                        <span className="list-item-name font-medium">{cust.name}</span>
+                        <span className="list-item-val font-semibold">{formatCurrency(cust.omset)}</span>
                       </div>
                     ))
                   )}
@@ -549,12 +549,15 @@ export default function OwnerDashboard() {
                 </h2>
                 <div>
                   {(!summaryData.topRetail || summaryData.topRetail.length === 0) ? (
-                    <p className="empty-state-text">Belum ada data retail/grosir.</p>
+                    <div className="flex flex-col items-center justify-center py-8">
+                      <ShoppingCart size={40} className="text-slate-200 mb-3" />
+                      <p className="empty-state-text m-0">Belum ada data retail/grosir untuk periode ini.</p>
+                    </div>
                   ) : (
-                    summaryData.topRetail.map((retail, index) => (
+                    summaryData.topRetail.map((ret, index) => (
                       <div key={index} className="list-item">
-                        <span className="list-item-name">{retail.name}</span>
-                        <span className="list-item-val">{formatCurrency(retail.omset)}</span>
+                        <span className="list-item-name font-medium">{ret.name}</span>
+                        <span className="list-item-val font-semibold">{formatCurrency(ret.omset)}</span>
                       </div>
                     ))
                   )}

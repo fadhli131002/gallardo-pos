@@ -1,6 +1,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import logoGallardo from '../assets/logo-gallardo.png';
+import { formatTransactionId } from '../utils/formatId';
 
 const angkaToTerbilang = (angka) => {
   const huruf = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
@@ -48,91 +49,101 @@ export default function RetailInvoice({ order }) {
   return (
     <div id="invoice-content-to-print" className="flex flex-col min-h-[800px] print:!min-h-[27cm] print:!p-0 print:!m-0 print:!border-none print:!shadow-none print:!w-full print:!max-w-none print:!h-auto print:scale-[0.95] print:origin-top" style={{ backgroundColor: '#ffffff', padding: '40px', color: '#000', width: '100%', minWidth: '100%', maxWidth: '100%', boxSizing: 'border-box', position: 'relative' }}>
       
-      {/* HEADER */}
-      <div className="flex justify-between items-start mb-6">
-        <div className="flex items-center" style={{ gap: '60px' }}>
-          <img src={logoGallardo} alt="Gallardo Autosport" style={{ height: '32px', objectFit: 'contain' }} />
-          <div>
-            <div className="font-bold uppercase m-0 leading-tight whitespace-nowrap" style={{ fontSize: '14px' }}>PT GALLARDO UTAMA SENTOSA</div>
-            <p className="m-0 leading-snug" style={{ fontSize: '12px', marginTop: '4px' }}>Ruko allicante blok D9-D10<br/>Kab. Tangerang Banten<br/>Indonesia</p>
-          </div>
-        </div>
-        
-        <div className="w-80">
-          <div className="font-bold text-center mb-2" style={{ fontSize: '16px' }}>Faktur Penjualan</div>
-          <table className="w-full border-collapse border border-black text-left" style={{ borderCollapse: 'collapse', border: '1px solid black', fontSize: '12px' }}>
-            <tbody>
-              <tr>
-                <td className="border border-black px-2 py-1 w-1/2" style={{ border: '1px solid black' }}>
-                  <div className="text-xs">Tanggal</div>
-                  <div className="font-bold">{format(date, 'dd MMM yyyy')}</div>
-                </td>
-                <td className="border border-black px-2 py-1 w-1/2" style={{ border: '1px solid black' }}>
-                  <div className="text-xs">Nomor</div>
-                  <div className="font-bold">RTL-{order.id.replace(/[^0-9]/g, '').slice(-8)}</div>
-                </td>
-              </tr>
-              <tr>
-                <td className="border border-black px-2 py-1" colSpan="2" style={{ border: '1px solid black' }}>
-                  <div className="text-xs">Syarat Pembayaran</div>
-                  <div className="font-bold">{order.paymentType || order.paymentMethod || 'C.O.D'}</div>
-                  {(order.paymentType === 'Kredit Dagang' || order.paymentType === 'Kredit Dagang (Credit Term)') && (
-                    <div className="mt-1 text-xs" style={{ borderTop: '1px dashed #000', paddingTop: '4px', marginTop: '4px' }}>
-                      <div className="font-semibold mb-1">Batas Waktu Pelunasan:</div>
-                      {order.terminSchedule && order.terminSchedule.length > 0 ? (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2px' }}>
-                          {order.terminSchedule.map((t, idx) => (
-                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px' }}>
-                              <span>{t.terminIndex === 1 && t.status === 'Lunas' ? 'DP Awal' : 'Pelunasan'}: {new Date(t.dueDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                              <span>{t.amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
+      {/* HEADER & KEPADA */}
+      <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none', marginBottom: '24px' }}>
+        <tbody>
+          <tr>
+            {/* LEFT SIDE */}
+            <td style={{ width: '60%', verticalAlign: 'top', paddingRight: '20px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none', marginBottom: '24px' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ width: '140px', verticalAlign: 'top', paddingRight: '16px' }}>
+                      <img src={logoGallardo} alt="Gallardo Autosport" style={{ width: '100%', objectFit: 'contain' }} />
+                    </td>
+                    <td style={{ verticalAlign: 'top' }}>
+                      <div className="font-bold uppercase m-0 leading-tight" style={{ fontSize: '18px' }}>PT GALLARDO UTAMA<br/>SENTOSA</div>
+                      <p className="m-0 leading-snug" style={{ fontSize: '12px', marginTop: '6px' }}>Ruko allicante blok D9-D10<br/>Kab. Tangerang Banten<br/>Indonesia</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* KEPADA SECTION */}
+              <div style={{ width: '85%' }}>
+                <div style={{ borderTop: '2px solid black', borderBottom: '1px solid black', padding: '4px 0', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '12px' }}>Kepada :</span>
+                </div>
+                <div style={{ fontSize: '14px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                  {order.customerName || order.supplierName || 'CUSTOMER RETAIL'}
+                </div>
+                {(order.customerAddress || order.customerHp) && (
+                  <div style={{ fontSize: '12px', marginTop: '4px' }}>
+                    {order.customerAddress && order.customerAddress !== '-' ? order.customerAddress : ''}
+                    {order.customerHp && order.customerHp !== '-' ? ` (Telp: ${order.customerHp})` : ''}
+                  </div>
+                )}
+              </div>
+            </td>
+
+            {/* RIGHT SIDE */}
+            <td style={{ width: '40%', verticalAlign: 'top', paddingLeft: '20px' }}>
+              <div className="text-center mb-2" style={{ fontSize: '18px' }}>Faktur Penjualan</div>
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black', fontSize: '12px' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ borderBottom: '1px dashed black', borderRight: '1px dashed black', padding: '4px 8px', width: '50%', verticalAlign: 'top' }}>
+                      <div className="text-xs">Tanggal</div>
+                      <div className="font-bold">{format(date, 'dd MMM yyyy')}</div>
+                    </td>
+                    <td style={{ borderBottom: '1px dashed black', padding: '4px 8px', width: '50%', verticalAlign: 'top' }}>
+                      <div className="text-xs">Nomor</div>
+                      <div className="font-bold">{formatTransactionId(order)}</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan="2" style={{ padding: '4px 8px' }}>
+                      <div className="text-xs">Syarat Pembayaran</div>
+                      <div className="font-bold">{order.paymentType || order.paymentMethod || 'C.O.D'}</div>
+                      {(order.paymentType === 'Kredit Dagang' || order.paymentType === 'Kredit Dagang (Credit Term)') && (
+                        <div className="mt-1 text-xs" style={{ borderTop: '1px dashed #000', paddingTop: '4px', marginTop: '4px' }}>
+                          <div className="font-semibold mb-1">Batas Waktu Pelunasan:</div>
+                          {order.terminSchedule && order.terminSchedule.length > 0 ? (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2px' }}>
+                              {order.terminSchedule.map((t, idx) => (
+                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px' }}>
+                                  <span>{t.terminIndex === 1 && t.status === 'Lunas' ? 'DP Awal' : 'Pelunasan'}: {new Date(t.dueDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                                  <span>{t.amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}</span>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div>
-                          <div>Jatuh Tempo: {order.terminStartDate ? new Date(order.terminStartDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</div>
-                          <div>Catatan: {order.terminNotes || '-'}</div>
+                          ) : (
+                            <div>
+                              <div>Jatuh Tempo: {order.terminStartDate ? new Date(order.terminStartDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</div>
+                              <div>Catatan: {order.terminNotes || '-'}</div>
+                            </div>
+                          )}
                         </div>
                       )}
-                    </div>
-                  )}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <hr className="border-t-2 border-black mb-1" />
-      <hr className="border-t border-black mb-4" />
-
-      {/* KEPADA */}
-      <div className="mb-4 text-sm" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <div style={{ display: 'flex' }}>
-          <div style={{ width: '60px' }}>Kepada</div>
-          <div style={{ width: '15px' }}>:</div>
-          <div className="font-bold uppercase">{order.customerName || order.supplierName || 'CUSTOMER RETAIL'}</div>
-        </div>
-        <div style={{ display: 'flex' }}>
-          <div style={{ width: '60px' }}>Alamat</div>
-          <div style={{ width: '15px' }}>:</div>
-          <div>
-            {order.customerAddress || 'Alamat tidak tersedia'}
-            {order.customerHp ? ` (Telp: ${order.customerHp})` : ''}
-          </div>
-        </div>
-      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       {/* TABEL RINCIAN */}
-      <table className="w-full border-collapse border border-black text-sm mb-4" style={{ borderCollapse: 'collapse', border: '1px solid black' }}>
+      <table className="w-full border-collapse border border-black text-sm mb-4" style={{ borderCollapse: 'collapse', border: '1px solid black', width: '100%' }}>
         <thead>
           <tr className="border border-black">
-            <th className="border border-black px-2 py-1 font-normal text-center w-24" style={{ border: '1px solid black' }}>Kode Barang</th>
+            <th className="border border-black px-2 py-1 font-normal text-center w-24" style={{ border: '1px solid black', width: '96px' }}>Kode Barang</th>
             <th className="border border-black px-2 py-1 font-normal text-center" style={{ border: '1px solid black' }}>Nama Barang</th>
-            <th className="border border-black px-2 py-1 font-normal text-center w-16" style={{ border: '1px solid black' }}>Meter</th>
-            <th className="border border-black px-2 py-1 font-normal text-center w-24" style={{ border: '1px solid black' }}>@Harga</th>
-            <th className="border border-black px-2 py-1 font-normal text-center w-24" style={{ border: '1px solid black' }}>Diskon</th>
-            <th className="border border-black px-2 py-1 font-normal text-center w-32" style={{ border: '1px solid black' }}>Total Harga</th>
+            <th className="border border-black px-2 py-1 font-normal text-center w-16" style={{ border: '1px solid black', width: '64px' }}>Meter</th>
+            <th className="border border-black px-2 py-1 font-normal text-center w-24" style={{ border: '1px solid black', width: '96px' }}>@Harga</th>
+            <th className="border border-black px-2 py-1 font-normal text-center w-24" style={{ border: '1px solid black', width: '96px' }}>Diskon</th>
+            <th className="border border-black px-2 py-1 font-normal text-center w-32" style={{ border: '1px solid black', width: '128px' }}>Total Harga</th>
           </tr>
         </thead>
         <tbody>
@@ -195,22 +206,22 @@ export default function RetailInvoice({ order }) {
       </table>
 
       {/* TERBILANG & KALKULASI */}
-      <div className="flex text-sm mb-4 gap-4">
-        <div className="flex-1 flex flex-col gap-4">
-          <div className="flex flex-col space-y-1">
+      <div className="flex text-sm mb-4 gap-4" style={{ display: 'flex', fontSize: '14px', marginBottom: '16px', gap: '16px', alignItems: 'flex-start' }}>
+        <div className="flex-1 flex flex-col gap-4" style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="flex flex-col space-y-1" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <div className="whitespace-nowrap font-bold">Terbilang :</div>
             <div className="w-full py-1 italic">
               {getTerbilang(grandTotal)}
             </div>
           </div>
-          <div className="flex flex-col space-y-1">
+          <div className="flex flex-col space-y-1" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <div className="whitespace-nowrap font-bold">Keterangan :</div>
             <div className="py-1 min-h-[80px] w-full italic">
               {getKeterangan()}
             </div>
           </div>
           {order.paymentHistory && order.paymentHistory.length > 0 && (
-            <div className="flex flex-col space-y-1 mt-4">
+            <div className="flex flex-col space-y-1 mt-4" style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '16px' }}>
               <div className="whitespace-nowrap font-bold">Riwayat Pembayaran :</div>
               <table className="w-full border-collapse border border-black text-xs" style={{ borderCollapse: 'collapse', border: '1px solid black' }}>
                 <thead>
@@ -234,8 +245,8 @@ export default function RetailInvoice({ order }) {
           )}
         </div>
         
-        <div className="w-72">
-          <table className="w-full border-collapse border border-black text-sm" style={{ borderCollapse: 'collapse', border: '1px solid black' }}>
+        <div className="w-72" style={{ width: '288px', minWidth: '288px' }}>
+          <table className="w-full border-collapse border border-black text-sm" style={{ borderCollapse: 'collapse', border: '1px solid black', width: '100%' }}>
             <tbody>
               <tr>
                 <td className="border border-black px-2 py-1" style={{ border: '1px solid black' }}>Sub Total</td>
@@ -279,7 +290,7 @@ export default function RetailInvoice({ order }) {
       </div>
 
       {/* TANDA TANGAN & PERHATIAN */}
-      <div className="flex text-sm mt-auto w-full items-end justify-between">
+      <div className="flex text-sm mt-auto w-full items-end justify-between" style={{ display: 'flex', fontSize: '14px', marginTop: 'auto', width: '100%', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', width: '60%', marginTop: '32px', paddingRight: '20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ textAlign: 'center', marginBottom: '64px' }}>Disiapkan Oleh</div>

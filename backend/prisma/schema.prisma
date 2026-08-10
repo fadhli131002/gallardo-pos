@@ -193,3 +193,13 @@ model SalesMaster {
   updated_at DateTime @updatedAt
 }
 
+model MasterPotonganPPF {
+  id              Int      @id @default(autoincrement())
+  ukuranKendaraan String   // e.g., "Small", "Medium", "Large", "Semua Ukuran"
+  peruntukan      String   // e.g., "Full Body Mobil", "Partial", "Raket Padel"
+  potonganCm      Float
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@unique([ukuranKendaraan, peruntukan])
+}

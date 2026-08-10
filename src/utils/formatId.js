@@ -30,5 +30,5 @@ export const formatTransactionId = (trx) => {
   // Gunakan ID database asli untuk memastikan konsistensi di semua halaman
   const seqNum = String(trx.id || 0).padStart(4, '0');
   
-  return `${prefix}/${yy}${mm}${prodIdStr}${seqNum}`;
+  return `${prefix}/${yy}-${mm}-${prodIdStr}-${seqNum}`;
 };

@@ -3,6 +3,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
 import { Users, ShoppingBag, CheckCircle, Clock } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useOrders } from '../../context/OrderContext';
+import { toast } from 'sonner';
+import { formatTransactionId } from '../../utils/formatId';
 import { format } from 'date-fns';
 import './Dashboard.css';
 
@@ -244,7 +246,7 @@ const Dashboard = () => {
                           </span>
                         </td>
                         <td className="text-gray-500 font-mono-ui text-sm">
-                          {order.id}
+                          {formatTransactionId(order)}
                         </td>
                       </tr>
                     );
@@ -267,12 +269,21 @@ const Dashboard = () => {
             <h3 className="font-sans font-semibold mb-4 text-primary">Produk Terlaris</h3>
             <div className="flex-1 min-h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topProducts} margin={{ top: 20, right: 10, left: -20, bottom: 20 }}>
+                <BarChart data={topProducts} margin={{ top: 20, right: 10, left: -20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} axisLine={false} tickLine={false} interval={0} />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 10, fill: '#6b7280' }} 
+                    axisLine={false} 
+                    tickLine={false} 
+                    interval={0} 
+                    angle={-45} 
+                    textAnchor="end"
+                    tickFormatter={(val) => val.length > 12 ? val.substring(0, 12) + '...' : val}
+                  />
                   <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <RechartsTooltip cursor={{ fill: '#F3F4F6' }} formatter={(value) => [`${value} Unit`, 'Total Terjual']} />
-                  <Bar dataKey="sales" fill="var(--accent-color)" radius={[4, 4, 0, 0]} barSize={40} />
+                  <Bar dataKey="sales" fill="var(--accent-color)" radius={[4, 4, 0, 0]} barSize={30} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

@@ -149,6 +149,79 @@ const VehicleMaster = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // PPF Master State
+  const [ppfMasters, setPpfMasters] = useState([]);
+  const [newUkuran, setNewUkuran] = useState('');
+  const [newPeruntukan, setNewPeruntukan] = useState('');
+  const [newPpfValue, setNewPpfValue] = useState('');
+  const [editingPpfId, setEditingPpfId] = useState(null);
+  const [editingUkuran, setEditingUkuran] = useState('');
+  const [editingPeruntukan, setEditingPeruntukan] = useState('');
+  const [editingPpfValue, setEditingPpfValue] = useState('');
+
+  const fetchPpfMasters = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/master-ppf');
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setPpfMasters(data);
+        } else {
+          setPpfMasters([]);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch PPF Master', e);
+    }
+  };
+
+  useEffect(() => {
+    fetchPpfMasters();
+  }, []);
+
+  const handleAddPpfMaster = async () => {
+    if (!newUkuran.trim() || !newPeruntukan.trim() || !newPpfValue) return;
+    try {
+      await fetch('http://localhost:5000/api/master-ppf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ukuranKendaraan: newUkuran.trim(), peruntukan: newPeruntukan.trim(), potonganCm: newPpfValue })
+      });
+      fetchPpfMasters();
+      setNewUkuran('');
+      setNewPeruntukan('');
+      setNewPpfValue('');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleUpdatePpfMaster = async (id) => {
+    if (!editingUkuran.trim() || !editingPeruntukan.trim() || !editingPpfValue) return;
+    try {
+      await fetch(`http://localhost:5000/api/master-ppf/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ukuranKendaraan: editingUkuran.trim(), peruntukan: editingPeruntukan.trim(), potonganCm: editingPpfValue })
+      });
+      fetchPpfMasters();
+      setEditingPpfId(null);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeletePpfMaster = async (id) => {
+    try {
+      await fetch(`http://localhost:5000/api/master-ppf/${id}`, {
+        method: 'DELETE'
+      });
+      fetchPpfMasters();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const normalizeText = (text) => {
     if (!text) return '';
     return text.trim().split(' ').filter(w => w).join(' ');
@@ -362,9 +435,10 @@ const VehicleMaster = () => {
             <button onClick={() => setActiveVariantType('peruntukan')} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', backgroundColor: activeVariantType === 'peruntukan' ? '#111' : '#e5e7eb', color: activeVariantType === 'peruntukan' ? '#fff' : '#4b5563', cursor: 'pointer', fontWeight: '600', fontSize: '0.875rem' }}>Peruntukan Produk (Semua)</button>
             <button onClick={() => setActiveVariantType('posisi')} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', backgroundColor: activeVariantType === 'posisi' ? '#111' : '#e5e7eb', color: activeVariantType === 'posisi' ? '#fff' : '#4b5563', cursor: 'pointer', fontWeight: '600', fontSize: '0.875rem' }}>Posisi Pemasangan (Kaca Film)</button>
             <button onClick={() => setActiveVariantType('partial')} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', backgroundColor: activeVariantType === 'partial' ? '#111' : '#e5e7eb', color: activeVariantType === 'partial' ? '#fff' : '#4b5563', cursor: 'pointer', fontWeight: '600', fontSize: '0.875rem' }}>Posisi Partial (Kaca Film)</button>
+            <button onClick={() => setActiveVariantType('ppfMaster')} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', backgroundColor: activeVariantType === 'ppfMaster' ? '#111' : '#e5e7eb', color: activeVariantType === 'ppfMaster' ? '#fff' : '#4b5563', cursor: 'pointer', fontWeight: '600', fontSize: '0.875rem' }}>Potongan Stok (PPF)</button>
           </div>
 
-          {activeVariantType === 'peruntukan' ? (
+          {activeVariantType === 'peruntukan' && (
             <>
               <div className="premium-card mb-6" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb', flexWrap: 'nowrap' }}>
                 <div style={{ position: 'relative', flex: 1, minWidth: '0' }}>
@@ -455,7 +529,9 @@ const VehicleMaster = () => {
             </table>
           </div>
           </>
-          ) : (
+          )}
+          
+          {(activeVariantType === 'posisi' || activeVariantType === 'partial') && (
             <>
               <div className="premium-card mb-6" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
                 <input 
@@ -499,6 +575,116 @@ const VehicleMaster = () => {
                       <tr>
                         <td colSpan="3" style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>
                           Belum ada opsi terdaftar.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {activeVariantType === 'ppfMaster' && (
+            <>
+              <div className="premium-card mb-6" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+                <input
+                  list="ukuran-options"
+                  value={newUkuran}
+                  onChange={(e) => setNewUkuran(e.target.value)}
+                  placeholder="-- Pilih atau Ketik Ukuran --"
+                  style={{ flex: 1, border: '1px solid #d1d5db', padding: '10px 16px', borderRadius: '8px', outline: 'none' }}
+                />
+                <datalist id="ukuran-options">
+                  <option value="Small" />
+                  <option value="Medium" />
+                  <option value="Large" />
+                  <option value="Extra Large" />
+                  <option value="Semua Ukuran" />
+                </datalist>
+                <input 
+                  type="text" 
+                  placeholder="Peruntukan (contoh: Full Body Mobil, Raket Padel)"
+                  style={{ flex: 1.5, border: '1px solid #d1d5db', padding: '10px 16px', borderRadius: '8px', outline: 'none' }}
+                  value={newPeruntukan}
+                  onChange={(e) => setNewPeruntukan(e.target.value)}
+                />
+                <input 
+                  type="number" 
+                  placeholder="Potongan (cm)"
+                  style={{ flex: 1, border: '1px solid #d1d5db', padding: '10px 16px', borderRadius: '8px', outline: 'none' }}
+                  value={newPpfValue}
+                  onChange={(e) => setNewPpfValue(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddPpfMaster()}
+                />
+                <button 
+                  onClick={handleAddPpfMaster}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#111', color: '#fff', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', border: 'none', fontWeight: '600' }}
+                >
+                  <Plus size={18} /> Tambah
+                </button>
+              </div>
+
+              <div className="premium-card" style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+                <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                      <th style={{ padding: '16px', color: '#6b7280', fontWeight: '600' }}>Kategori Ukuran Mobil</th>
+                      <th style={{ padding: '16px', color: '#6b7280', fontWeight: '600' }}>Peruntukan Produk</th>
+                      <th style={{ padding: '16px', color: '#6b7280', fontWeight: '600' }}>Potongan Aktual Stok (cm)</th>
+                      <th style={{ padding: '16px', color: '#6b7280', fontWeight: '600', textAlign: 'right' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ppfMasters.map((val) => (
+                      <tr key={val.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                        <td style={{ padding: '16px', fontWeight: '600', color: '#111' }}>
+                          {editingPpfId === val.id ? (
+                            <input
+                              list="ukuran-options"
+                              value={editingUkuran}
+                              onChange={(e) => setEditingUkuran(e.target.value)}
+                              placeholder="-- Pilih atau Ketik Ukuran --"
+                              style={{ border: '1px solid #d1d5db', padding: '6px', borderRadius: '4px', width: '100%' }}
+                            />
+                          ) : val.ukuranKendaraan}
+                        </td>
+                        <td style={{ padding: '16px', fontWeight: '600', color: '#111' }}>
+                          {editingPpfId === val.id ? (
+                            <input type="text" value={editingPeruntukan} onChange={(e) => setEditingPeruntukan(e.target.value)} style={{ border: '1px solid #d1d5db', padding: '6px', borderRadius: '4px', width: '100%' }} />
+                          ) : val.peruntukan}
+                        </td>
+                        <td style={{ padding: '16px', color: '#111' }}>
+                          {editingPpfId === val.id ? (
+                            <input type="number" value={editingPpfValue} onChange={(e) => setEditingPpfValue(e.target.value)} style={{ border: '1px solid #d1d5db', padding: '6px', borderRadius: '4px' }} />
+                          ) : (
+                            <span style={{ padding: '4px 12px', backgroundColor: '#eef2ff', color: '#4f46e5', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '600' }}>
+                              {val.potonganCm.toLocaleString('id-ID')} cm ({(val.potonganCm / 100).toLocaleString('id-ID')} meter)
+                            </span>
+                          )}
+                        </td>
+                        <td style={{ padding: '16px', textAlign: 'right' }}>
+                          {editingPpfId === val.id ? (
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                              <button onClick={() => handleUpdatePpfMaster(val.id)} style={{ padding: '6px 12px', color: '#fff', backgroundColor: '#10b981', border: 'none', cursor: 'pointer', borderRadius: '4px', fontSize: '0.75rem' }}>Simpan</button>
+                              <button onClick={() => setEditingPpfId(null)} style={{ padding: '6px 12px', color: '#374151', backgroundColor: '#e5e7eb', border: 'none', cursor: 'pointer', borderRadius: '4px', fontSize: '0.75rem' }}>Batal</button>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                              <button onClick={() => { setEditingPpfId(val.id); setEditingUkuran(val.ukuranKendaraan); setEditingPeruntukan(val.peruntukan); setEditingPpfValue(val.potonganCm); }} style={{ padding: '6px', color: '#2563eb', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }} title="Edit">
+                                <Edit2 size={16} />
+                              </button>
+                              <button onClick={() => handleDeletePpfMaster(val.id)} style={{ padding: '6px', color: '#dc2626', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }} title="Hapus">
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {ppfMasters.length === 0 && (
+                      <tr>
+                        <td colSpan="4" style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>
+                          Belum ada data Potongan PPF.
                         </td>
                       </tr>
                     )}
