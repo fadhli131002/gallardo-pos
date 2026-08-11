@@ -161,7 +161,7 @@ const VehicleMaster = () => {
 
   const fetchPpfMasters = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/master-ppf');
+      const response = await fetch(window.API_URL + '/api/master-ppf');
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -169,6 +169,8 @@ const VehicleMaster = () => {
         } else {
           setPpfMasters([]);
         }
+      } else {
+        console.error('PPF Master API Error:', response.status);
       }
     } catch (e) {
       console.error('Failed to fetch PPF Master', e);
@@ -177,12 +179,16 @@ const VehicleMaster = () => {
 
   useEffect(() => {
     fetchPpfMasters();
+    const interval = setInterval(() => {
+      fetchPpfMasters();
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleAddPpfMaster = async () => {
     if (!newUkuran.trim() || !newPeruntukan.trim() || !newPpfValue) return;
     try {
-      await fetch('http://localhost:5000/api/master-ppf', {
+      await fetch(window.API_URL + '/api/master-ppf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ukuranKendaraan: newUkuran.trim(), peruntukan: newPeruntukan.trim(), potonganCm: newPpfValue })
@@ -199,7 +205,7 @@ const VehicleMaster = () => {
   const handleUpdatePpfMaster = async (id) => {
     if (!editingUkuran.trim() || !editingPeruntukan.trim() || !editingPpfValue) return;
     try {
-      await fetch(`http://localhost:5000/api/master-ppf/${id}`, {
+      await fetch(`${window.API_URL}/api/master-ppf/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ukuranKendaraan: editingUkuran.trim(), peruntukan: editingPeruntukan.trim(), potonganCm: editingPpfValue })
@@ -213,7 +219,7 @@ const VehicleMaster = () => {
 
   const handleDeletePpfMaster = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/master-ppf/${id}`, {
+      await fetch(`${window.API_URL}/api/master-ppf/${id}`, {
         method: 'DELETE'
       });
       fetchPpfMasters();

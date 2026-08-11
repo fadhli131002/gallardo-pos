@@ -573,6 +573,7 @@ export const OrderProvider = ({ children }) => {
           await refreshOrdersFromApi();
         } else {
           const errData = await response.json();
+          console.error("Backend validation failed with errData:", errData);
           throw new Error(errData.message || 'Gagal melunasi tagihan');
         }
       } catch (e) {

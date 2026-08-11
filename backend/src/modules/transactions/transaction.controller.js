@@ -594,12 +594,33 @@ const processPaymentBalance = async (req, res, next) => {
       return res.status(400).json({ message: 'Tagihan sudah lunas' });
     }
 
-    const currentSisa = transaction.sisa_tagihan;
-    const maxPayable = currentSisa - discount;
-    const actualPayment = amount_paid !== undefined ? Number(amount_paid) : maxPayable;
+    // Recalculate real sisa tagihan in case it's bugged as 0 in DB
+    const payments = await prisma.payment.findMany({ where: { transaction_id: Number(id) } });
+    const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+    let realSisa = Math.max(0, transaction.total_amount - totalPaid);
 
-    if (actualPayment < 0 || actualPayment > maxPayable) {
-      return res.status(400).json({ message: 'Nominal pembayaran tidak valid' });
+    let currentSisa = Math.round(transaction.sisa_tagihan);
+    if (currentSisa <= 0 && realSisa > 0) {
+        currentSisa = Math.round(realSisa);
+    }
+
+    if (realSisa <= 0) {
+        // Data is corrupted: payment history covers total amount, but status is not Lunas. Auto-correct it!
+        await prisma.transaction.update({
+            where: { id: Number(id) },
+            data: { sisa_tagihan: 0, status_pembayaran: 'LUNAS', payment_type: 'Lunas' }
+        });
+        return res.json({ message: 'Pelunasan berhasil (Sistem otomatis memperbaiki status karena tagihan telah dibayar lunas sebelumnya)', actualPayment: 0 });
+    }
+
+    const maxPayable = currentSisa - Math.round(discount);
+    const actualPayment = amount_paid !== undefined ? Math.round(Number(amount_paid)) : maxPayable;
+
+    if (isNaN(actualPayment) || actualPayment < 0 || actualPayment > maxPayable) {
+      return res.status(400).json({ 
+        message: 'Nominal pembayaran tidak valid', 
+        debug: { actualPayment, maxPayable, currentSisa, realSisa, discount, amount_paid } 
+      });
     }
 
     await prisma.$transaction(async (tx) => {
