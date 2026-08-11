@@ -33,7 +33,7 @@ const AdminCustomerWarranty = () => {
       .trim();
 
   const { inventory, deductStock, deductRetailStock, processInventoryDeduction } = useInventory();
-  const { orders, settlePayment, completeOrder, updateOrderOperational, updateOrderPrice, deleteOrder, refreshOrdersFromApi } = useOrders();
+  const { orders, settlePayment, completeOrder, updateOrderOperational, updateOrderPrice, deleteOrder, refreshOrdersFromApi, updatePaymentHistory } = useOrders();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -61,6 +61,8 @@ const AdminCustomerWarranty = () => {
   const [complaintOrderData, setComplaintOrderData] = useState(null);
 
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showEditHistoryPaymentModal, setShowEditHistoryPaymentModal] = useState(false);
+  const [editHistoryPaymentData, setEditHistoryPaymentData] = useState(null);
 
   const [filterStatus, setFilterStatus] = useState('Semua Status');
   const [filterTransactionType, setFilterTransactionType] = useState('Semua Transaksi');
@@ -277,7 +279,7 @@ const AdminCustomerWarranty = () => {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedOrder, showHistoryModal, showHistoryPaymentModal, invoiceOrder, settlementOrder, showEditCustomerModal, showEditPriceModal, showComplaintModal]);
+  }, [selectedOrder, showHistoryModal, showHistoryPaymentModal, showEditHistoryPaymentModal, invoiceOrder, settlementOrder, showEditCustomerModal, showEditPriceModal, showComplaintModal]);
 
   return (
     <>
@@ -1093,6 +1095,9 @@ const AdminCustomerWarranty = () => {
                       <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #e5e7eb', color: '#374151', fontWeight: 'bold' }}>Metode</th>
                       <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #e5e7eb', color: '#374151', fontWeight: 'bold' }}>Catatan</th>
                       <th style={{ textAlign: 'left', padding: '12px', borderBottom: '2px solid #e5e7eb', color: '#374151', fontWeight: 'bold' }}>Bukti</th>
+                      {userRole === 'sales' && (
+                        <th style={{ textAlign: 'center', padding: '12px', borderBottom: '2px solid #e5e7eb', color: '#374151', fontWeight: 'bold' }}>Aksi</th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -1129,6 +1134,16 @@ const AdminCustomerWarranty = () => {
                             <span style={{ color: '#9ca3af', fontSize: '12px' }}>-</span>
                           )}
                         </td>
+                        {userRole === 'sales' && (
+                          <td style={{ padding: '12px', textAlign: 'center' }}>
+                            <button onClick={() => {
+                              setEditHistoryPaymentData(hist);
+                              setShowEditHistoryPaymentModal(true);
+                            }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 12px', backgroundColor: '#f3f4f6', color: '#4b5563', borderRadius: '6px', border: '1px solid #e5e7eb', cursor: 'pointer', fontSize: '12px', fontWeight: '500' }}>
+                              Edit
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -1139,6 +1154,71 @@ const AdminCustomerWarranty = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit History Pembayaran Modal */}
+      {showEditHistoryPaymentModal && editHistoryPaymentData && (
+        <div className="modal-overlay animate-fade-in" onClick={() => setShowEditHistoryPaymentModal(false)} style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(2px)' }}>
+          <div className="modal-content animate-fade-in" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', width: '95%', backgroundColor: '#ffffff', borderRadius: '24px', padding: '0', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden' }}>
+            <div style={{ padding: '24px 32px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', backgroundColor: '#f8fafc' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: '#111827' }}>Edit History Pembayaran</h3>
+              </div>
+              <button onClick={() => setShowEditHistoryPaymentModal(false)} style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4b5563' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.target;
+              
+              if (!editHistoryPaymentData.id) {
+                 toast.error('Gagal, data payment tidak memiliki ID dari database.');
+                 return;
+              }
+
+              try {
+                const formData = new FormData(form);
+                const payment_date = formData.get('payment_date');
+                const isoDate = new Date(payment_date).toISOString();
+                
+                await updatePaymentHistory(editHistoryPaymentData.id, {
+                  payment_date: isoDate
+                });
+                
+                toast.success('History pembayaran berhasil diupdate!');
+                setShowEditHistoryPaymentModal(false);
+                setEditHistoryPaymentData(null);
+                refreshOrdersFromApi();
+              } catch (error) {
+                toast.error(error.message || 'Gagal mengubah history pembayaran');
+              }
+            }} style={{ padding: '32px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Tanggal Pembayaran</label>
+                  <input
+                    type="datetime-local"
+                    name="payment_date"
+                    required
+                    defaultValue={format(new Date(editHistoryPaymentData.date), "yyyy-MM-dd'T'HH:mm")}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px', boxSizing: 'border-box', color: '#111827', backgroundColor: '#ffffff' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+                <button type="button" onClick={() => setShowEditHistoryPaymentModal(false)} style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#fff', color: '#374151', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
+                  Batal
+                </button>
+                <button type="submit" style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#10b981', color: '#fff', fontSize: '14px', fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Save size={16} /> Simpan Perubahan
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

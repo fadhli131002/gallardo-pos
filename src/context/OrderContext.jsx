@@ -105,7 +105,8 @@ export const OrderProvider = ({ children }) => {
               notes: item.product_note
             })),
             paymentHistory: (trx.payments || []).map(p => ({
-              date: p.created_at || new Date().toISOString(),
+              id: p.id,
+              date: p.payment_date || p.created_at || new Date().toISOString(),
               amount: p.amount,
               method: p.method,
               notes: p.notes,
@@ -523,6 +524,29 @@ export const OrderProvider = ({ children }) => {
     }
   };
 
+  const updatePaymentHistory = async (paymentId, updatedData) => {
+    if (!token) return;
+    try {
+      const response = await fetch(`${window.API_URL}/api/payments/${paymentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedData)
+      });
+      if (response.ok) {
+        await refreshOrdersFromApi();
+      } else {
+        const errData = await response.json();
+        throw new Error(errData.message || errData.error || 'Gagal mengubah payment');
+      }
+    } catch (e) {
+      console.error('Error updating payment history:', e);
+      throw e;
+    }
+  };
+
   const settlePayment = async (orderId, amountPaid, method, notes = '', paymentProof = null, additionalDiscount = 0) => {
     const order = orders.find(o => o.id === orderId);
     let apiSuccess = false;
@@ -726,7 +750,7 @@ export const OrderProvider = ({ children }) => {
 
   return (
     <OrderContext.Provider value={{
-      orders, flatOrders, addOrder, completeOrder, updateOrderOperational, updateOrderPrice, deleteOrder, settlePayment, isDateBlocked, getEndDate, getOrderEndDate, refreshOrdersFromApi,
+      orders, flatOrders, addOrder, completeOrder, updateOrderOperational, updateOrderPrice, deleteOrder, updatePaymentHistory, settlePayment, isDateBlocked, getEndDate, getOrderEndDate, refreshOrdersFromApi,
       categories,
       addCategory,
       removeCategory,

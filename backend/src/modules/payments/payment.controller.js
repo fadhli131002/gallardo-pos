@@ -66,4 +66,36 @@ const createPayment = async (req, res, next) => {
   }
 };
 
-module.exports = { createPayment };
+const updatePayment = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { payment_date, amount, method, notes } = req.body;
+
+    const payment = await prisma.payment.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!payment) {
+      return res.status(404).json({ success: false, error: 'Payment not found' });
+    }
+
+    const updatedPayment = await prisma.payment.update({
+      where: { id: parseInt(id) },
+      data: {
+        payment_date: payment_date ? new Date(payment_date) : undefined,
+        amount: amount !== undefined ? parseFloat(amount) : undefined,
+        method: method,
+        notes: notes
+      }
+    });
+
+    res.json({
+      success: true,
+      data: updatedPayment
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { createPayment, updatePayment };
