@@ -801,8 +801,7 @@ const AdminCustomerWarranty = () => {
                             </>
                           )}
 
-                          {isPenawaran && (
-                            <>
+                          {(userRole === 'sales' || isSuperOrOwner || isPenawaran) && (
                               <button onClick={(e) => {
                                 e.stopPropagation();
                                 setActiveDropdown(null);
@@ -812,8 +811,12 @@ const AdminCustomerWarranty = () => {
                                 });
                                 setShowEditPriceModal(true);
                               }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#10b981', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#ecfdf5'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                <CreditCard size={16} color="#10b981" /> Ubah Harga Penawaran
+                                <CreditCard size={16} color="#10b981" /> {isPenawaran ? 'Ubah Harga Penawaran' : 'Ubah Harga Transaksi'}
                               </button>
+                          )}
+
+                          {isPenawaran && (
+                            <>
                               <button onClick={(e) => {
                                 e.stopPropagation();
                                 setActiveDropdown(null);
@@ -1758,7 +1761,7 @@ const AdminCustomerWarranty = () => {
             </button>
             <div className="text-center mb-8">
               <CreditCard size={40} color="#10b981" className="mx-auto mb-3" style={{ marginBottom: '12px' }} />
-              <h2 className="font-sans text-2xl font-bold" style={{ color: '#111827', margin: '0' }}>Edit Harga Penawaran</h2>
+              <h2 className="font-sans text-2xl font-bold" style={{ color: '#111827', margin: '0' }}>Edit Harga Transaksi</h2>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -1797,7 +1800,7 @@ const AdminCustomerWarranty = () => {
                    newTotal = editPriceData.totalPrice;
                 }
                 await updateOrderPrice(editPriceData.id, editPriceData.items, newTotal);
-                toast.success('Harga penawaran berhasil diubah');
+                toast.success('Harga transaksi berhasil diubah');
                 setShowEditPriceModal(false);
               }}
             >

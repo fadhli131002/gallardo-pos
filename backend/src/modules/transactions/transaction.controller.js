@@ -532,11 +532,14 @@ const updateTransactionPrice = async (req, res, next) => {
       }
     }
 
+    const paidAmount = existingTx.total_amount - existingTx.sisa_tagihan;
+    const newSisaTagihan = Math.max(0, total_amount - paidAmount);
+
     const updated = await prisma.transaction.update({
       where: { id: parseInt(id) },
       data: {
         total_amount: total_amount,
-        sisa_tagihan: total_amount // for Penawaran, sisa tagihan is total amount
+        sisa_tagihan: newSisaTagihan
       }
     });
 

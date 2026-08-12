@@ -470,6 +470,8 @@ export const OrderProvider = ({ children }) => {
 
   const updateOrderPrice = async (orderId, items, totalAmount) => {
     const order = orders.find(o => o.id === orderId);
+    let apiSuccess = false;
+    
     if (order && order.dbId) {
       try {
         const payload = {
@@ -477,7 +479,7 @@ export const OrderProvider = ({ children }) => {
           total_amount: totalAmount
         };
 
-        await fetch(`${window.API_URL}/api/transactions/${order.dbId}/price`, {
+        const response = await fetch(`${window.API_URL}/api/transactions/${order.dbId}/price`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -485,28 +487,35 @@ export const OrderProvider = ({ children }) => {
           },
           body: JSON.stringify(payload)
         });
+        
+        if (response.ok) {
+          apiSuccess = true;
+          await refreshOrdersFromApi();
+        }
       } catch (err) {
         console.error('Error updating transaction price in backend:', err);
       }
     }
 
-    setOrders(prev => prev.map(o => {
-      if (o.id === orderId) {
-        return { 
-          ...o, 
-          items: o.items.map((it, i) => {
-            const updatedItem = items.find((_, index) => index === i);
-            if (updatedItem) {
-               return { ...it, finalPrice: updatedItem.finalPrice || updatedItem.price, price: updatedItem.price };
-            }
-            return it;
-          }),
-          totalPrice: totalAmount,
-          remainingAmount: totalAmount
-        };
-      }
-      return o;
-    }));
+    if (!apiSuccess) {
+      setOrders(prev => prev.map(o => {
+        if (o.id === orderId) {
+          return { 
+            ...o, 
+            items: o.items.map((it, i) => {
+              const updatedItem = items.find((_, index) => index === i);
+              if (updatedItem) {
+                 return { ...it, finalPrice: updatedItem.finalPrice || updatedItem.price, price: updatedItem.price };
+              }
+              return it;
+            }),
+            totalPrice: totalAmount,
+            remainingAmount: Math.max(0, totalAmount - (o.paidAmount || 0))
+          };
+        }
+        return o;
+      }));
+    }
   };
 
   const deleteOrder = async (orderId) => {
