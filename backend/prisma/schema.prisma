@@ -80,7 +80,8 @@ model Inventory {
   brand        String
   varian       String
   kegelapan    String?
-  harga_modal  Float          @default(0)   // HPP per unit (ditambahkan untuk laporan keuangan owner)
+  harga_jual   Float          @default(0)   // Harga Jual dari perusahaan / Super Admin
+  harga_modal  Float          @default(0)   // HPP per unit (diinput dari dashboard finance untuk laporan laba/rugi)
   stok_utama   Int            @default(0)   // stok dalam satuan utama (Roll / Botol / Pcs)
   stok_pecahan Float          @default(0)   // sisa dalam satuan pecahan (meter/ml/dll)
   satuan       String         @default("Pcs")

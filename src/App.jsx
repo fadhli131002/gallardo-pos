@@ -26,6 +26,7 @@ import FinanceDashboard from './pages/Finance/FinanceDashboard';
 import FinanceReceivables from './pages/Finance/FinanceReceivables';
 import FinanceRefunds from './pages/Finance/FinanceRefunds';
 import FinanceCommissions from './pages/Finance/FinanceCommissions';
+import FinanceHpp from './pages/Finance/FinanceHpp';
 
 import { Toaster } from 'sonner';
 
@@ -112,6 +113,7 @@ function App() {
             <Route path="receivables" element={<FinanceReceivables />} />
             <Route path="refunds" element={<FinanceRefunds />} />
             <Route path="commissions" element={<FinanceCommissions />} />
+            <Route path="hpp" element={<FinanceHpp />} />
           </Route>
         </Route>
 

@@ -21,8 +21,16 @@ exports.addSalesMaster = async (req, res) => {
     let sid = sales_id;
     if (!sid) {
       // Auto-generate ID if not provided
-      const count = await prisma.salesMaster.count();
-      sid = `#S${String(count + 1).padStart(2, '0')}`;
+      const allSales = await prisma.salesMaster.findMany({ select: { sales_id: true } });
+      let maxNum = 0;
+      allSales.forEach(s => {
+        const match = s.sales_id ? s.sales_id.match(/#S(\d+)/i) : null;
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num > maxNum) maxNum = num;
+        }
+      });
+      sid = `#S${String(maxNum + 1).padStart(2, '0')}`;
     }
 
     const newSales = await prisma.salesMaster.create({

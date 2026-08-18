@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, LogOut, Wallet, FileText, Receipt, PieChart, Search, Bell, Calendar, Settings, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, LogOut, Wallet, FileText, Receipt, PieChart, Search, Bell, Calendar, Settings, Sun, Moon, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import logoGallardo from '../../assets/logo-gallardo.png';
 import logoNewRatu from '../../assets/logo-new-ratu.png';
@@ -11,17 +11,10 @@ import { useAuth } from '../../context/AuthContext';
 const FinanceLayout = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [userBranch, setUserBranch] = useState('Global');
-  const [notifCount, setNotifCount] = useState(10);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout: authLogout, loading } = useAuth();
-
-  useEffect(() => {
-    if (location.pathname.includes('receivables')) {
-      setNotifCount(0);
-    }
-  }, [location.pathname]);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -121,9 +114,6 @@ const FinanceLayout = () => {
           <NavLink to="/finance/receivables" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <Wallet size={20} className="flex-shrink-0" />
             <NavText>Piutang Pelanggan</NavText>
-            {isExpanded && notifCount > 0 && (
-              <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{notifCount}</span>
-            )}
           </NavLink>
 
           <NavLink to="/finance/refunds" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
@@ -134,6 +124,11 @@ const FinanceLayout = () => {
           <NavLink to="/finance/commissions" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <PieChart size={20} className="flex-shrink-0" />
             <NavText>Laporan Komisi</NavText>
+          </NavLink>
+
+          <NavLink to="/finance/hpp" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <ShieldCheck size={20} className="flex-shrink-0" />
+            <NavText>Harga Modal (HPP)</NavText>
           </NavLink>
         </nav>
 
@@ -212,7 +207,8 @@ const FinanceLayout = () => {
               {location.pathname === '/finance' ? 'Dashboard Keuangan' : 
                location.pathname.includes('receivables') ? 'Piutang Pelanggan' :
                location.pathname.includes('refunds') ? 'Riwayat Refund' :
-               location.pathname.includes('commissions') ? 'Laporan Komisi' : 'Finance'}
+               location.pathname.includes('commissions') ? 'Laporan Komisi' :
+               location.pathname.includes('hpp') ? 'Atur Harga Modal (HPP)' : 'Finance'}
             </h2>
           </div>
           

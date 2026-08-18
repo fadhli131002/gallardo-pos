@@ -38,7 +38,7 @@ const AdminInventory = () => {
     kegelapan: '20%',
     stokUtama: 0,
     stokPecahan: 0,
-    harga_modal: 0,
+    harga_jual: 0,
     satuan: 'Roll'
   });
 
@@ -95,7 +95,7 @@ const AdminInventory = () => {
         kegelapan: item.kegelapan || '20%',
         stokUtama: item.stokUtama || 0,
         stokPecahan: item.stokPecahan || 0,
-        harga_modal: item.harga_modal || 0,
+        harga_jual: item.harga_jual || 0,
         satuan: item.satuan,
         konversi: item.konversi || 1
       });
@@ -120,7 +120,7 @@ const AdminInventory = () => {
         kegelapan: '20%',
         stokUtama: 0,
         stokPecahan: 0,
-        harga_modal: 0,
+        harga_jual: 0,
         satuan: 'Roll',
         konversi: 30
       });
@@ -154,7 +154,7 @@ const AdminInventory = () => {
       ...formData,
       stokUtama: finalUtama,
       stokPecahan: finalPecahan,
-      harga_modal: Number(formData.harga_modal) || 0,
+      harga_jual: Number(formData.harga_jual) || 0,
       konversi: konversi,
       ...(formData.kategori === 'Kaca Film' ? { kegelapan: formData.kegelapan } : { kegelapan: '' })
     };
@@ -163,13 +163,14 @@ const AdminInventory = () => {
       updateStock(editingItem, payload);
     } else {
       const isDuplicate = inventory.some(item =>
-        item.kategori === formData.kategori &&
-        item.brand === formData.brand &&
-        item.varian === formData.varian
+        (item.kategori || '').trim().toLowerCase() === (formData.kategori || '').trim().toLowerCase() &&
+        (item.brand || '').trim().toLowerCase() === (formData.brand || '').trim().toLowerCase() &&
+        (item.varian || '').trim().toLowerCase() === (formData.varian || '').trim().toLowerCase() &&
+        (formData.kategori !== 'Kaca Film' || (item.kegelapan || '').trim() === (formData.kegelapan || '').trim())
       );
 
       if (isDuplicate) {
-        alert('Gagal: Barang dengan spesifikasi varian ini sudah ada di inventaris. Gunakan fitur Edit untuk memperbarui stok.');
+        alert('Gagal: Barang dengan spesifikasi varian dan kegelapan ini sudah ada di inventaris. Gunakan fitur Edit untuk memperbarui stok.');
         return;
       }
 
@@ -476,7 +477,7 @@ const AdminInventory = () => {
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>BRAND & SERIES</th>
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>VARIAN / KEGELAPAN</th>
               {(isSuperOrOwner) && (
-                <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>HARGA MODAL</th>
+                <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>HARGA JUAL</th>
               )}
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>STOK TERSEDIA</th>
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600, textAlign: 'center' }}>AKSI</th>
@@ -503,7 +504,7 @@ const AdminInventory = () => {
                   </td>
                   {(isSuperOrOwner) && (
                     <td style={{ padding: '1rem', fontWeight: 600 }}>
-                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_modal || 0)}
+                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_jual || 0)}
                     </td>
                   )}
                   <td style={{ padding: '1rem' }}>
@@ -838,13 +839,13 @@ const AdminInventory = () => {
                     
                     {(isSuperOrOwner) && (
                       <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Harga Modal (Rp)</label>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Harga Jual (Rp)</label>
                         <input 
                           type="text" 
-                          value={formData.harga_modal ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(formData.harga_modal) : ''} 
+                          value={formData.harga_jual ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(formData.harga_jual) : ''} 
                           onChange={(e) => {
                             const val = e.target.value.replace(/\D/g, '');
-                            setFormData({ ...formData, harga_modal: val ? Number(val) : '' });
+                            setFormData({ ...formData, harga_jual: val ? Number(val) : '' });
                           }} 
                           required 
                           placeholder="Rp 0"

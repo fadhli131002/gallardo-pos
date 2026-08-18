@@ -45,13 +45,14 @@ export const InventoryProvider = ({ children }) => {
 
   const refreshInventoryFromApi = async () => {
     try {
-      if (!token) {
+      const activeToken = token || sessionStorage.getItem('token');
+      if (!activeToken) {
         return;
       }
 
       // 1. Fetch inventory items
       const res = await fetch(window.API_URL + '/api/inventory', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${activeToken}` }
       });
       if (res.ok) {
         const json = await res.json();
@@ -64,6 +65,7 @@ export const InventoryProvider = ({ children }) => {
             kegelapan: item.kegelapan || '',
             stokUtama: item.stok_utama,
             stokPecahan: item.stok_pecahan,
+            harga_jual: Number(item.harga_jual) || 0,
             harga_modal: Number(item.harga_modal) || 0,
             satuan: item.satuan,
             branch: item.branch,
@@ -75,7 +77,7 @@ export const InventoryProvider = ({ children }) => {
       }
 
       // 2. Fetch inventory logs (Hanya untuk role yang diizinkan)
-      if (user && ['admin', 'superadmin', 'owner'].includes(user.role)) {
+      if (user && ['admin', 'superadmin', 'owner', 'finance'].includes(user.role)) {
         const resLogs = await fetch(window.API_URL + '/api/inventory/logs', {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -164,13 +166,13 @@ export const InventoryProvider = ({ children }) => {
 
   const addStock = async (item) => {
     try {
-      setInventory((prev) => [...prev, { ...item, id: `INV-${String(prev.length + 1).padStart(3, '0')}` }]);
-      if (token) {
-        await fetch(window.API_URL + '/api/inventory', {
+      const activeToken = token || sessionStorage.getItem('token');
+      if (activeToken) {
+        const res = await fetch(window.API_URL + '/api/inventory', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${activeToken}`
           },
           body: JSON.stringify({
             kategori: item.kategori,
@@ -179,32 +181,45 @@ export const InventoryProvider = ({ children }) => {
             kegelapan: item.kegelapan,
             stok_utama: item.stokUtama,
             stok_pecahan: item.stokPecahan,
+            harga_jual: item.harga_jual || 0,
             harga_modal: item.harga_modal || 0,
             satuan: item.satuan,
             branch: item.branch || 'Gallardo',
             konversi: item.konversi || 15
           })
         });
+        const json = await res.json();
+        if (!res.ok || json.success === false) {
+          throw new Error(json.message || 'Gagal menyimpan item ke server');
+        }
         await refreshInventoryFromApi();
+        return { success: true, data: json.data };
+      } else {
+        setInventory((prev) => [...prev, { ...item, id: `INV-${String(prev.length + 1).padStart(3, '0')}` }]);
+        return { success: true };
       }
     } catch (err) {
       console.error('Error addStock API:', err);
+      alert('Gagal menambahkan produk: ' + (err.message || 'Terjadi kesalahan'));
+      return { success: false, error: err.message };
     }
   };
 
   const updateStock = async (id, updatedItem) => {
     try {
+      const activeToken = token || sessionStorage.getItem('token');
       setInventory((prev) => prev.map((item) => (item.id === id ? { ...item, ...updatedItem } : item)));
-      if (token) {
-        await fetch(`${window.API_URL}/api/inventory/${id}`, {
+      if (activeToken) {
+        const res = await fetch(`${window.API_URL}/api/inventory/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${activeToken}`
           },
           body: JSON.stringify({
             stok_utama: updatedItem.stokUtama,
             stok_pecahan: updatedItem.stokPecahan,
+            harga_jual: updatedItem.harga_jual !== undefined ? updatedItem.harga_jual : (updatedItem.hargaJual || 0),
             harga_modal: updatedItem.harga_modal || 0,
             min_stok: updatedItem.minStok,
             kategori: updatedItem.kategori,
@@ -216,27 +231,67 @@ export const InventoryProvider = ({ children }) => {
             keterangan: 'Update stok oleh Admin'
           })
         });
+        const json = await res.json();
+        if (!res.ok || json.success === false) {
+          throw new Error(json.message || 'Gagal memperbarui stok di server');
+        }
         await refreshInventoryFromApi();
+        return { success: true, data: json.data };
       }
+      return { success: true };
     } catch (err) {
       console.error('Error updateStock API:', err);
+      alert('Gagal memperbarui produk: ' + (err.message || 'Terjadi kesalahan'));
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updateHargaModal = async (id, harga_modal) => {
+    try {
+      const activeToken = token || sessionStorage.getItem('token');
+      setInventory((prev) => prev.map((item) => (item.id === id ? { ...item, harga_modal: Number(harga_modal) || 0 } : item)));
+      if (activeToken) {
+        const res = await fetch(`${window.API_URL}/api/inventory/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${activeToken}`
+          },
+          body: JSON.stringify({
+            harga_modal: Number(harga_modal) || 0,
+            keterangan: 'Update Harga Modal (HPP) oleh Finance'
+          })
+        });
+        await refreshInventoryFromApi();
+        return res.ok;
+      }
+      return true;
+    } catch (err) {
+      console.error('Error updateHargaModal API:', err);
+      return false;
     }
   };
 
   const deleteStock = async (id) => {
     try {
+      const activeToken = token || sessionStorage.getItem('token');
       setInventory((prev) => prev.filter((item) => item.id !== id));
-      if (token) {
-        await fetch(`${window.API_URL}/api/inventory/${id}`, {
+      if (activeToken) {
+        const res = await fetch(`${window.API_URL}/api/inventory/${id}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${activeToken}`
           }
         });
+        const json = await res.json();
+        if (!res.ok || json.success === false) {
+          throw new Error(json.message || 'Gagal menghapus item dari server');
+        }
         await refreshInventoryFromApi();
       }
     } catch (err) {
       console.error('Error deleteStock API:', err);
+      alert('Gagal menghapus produk: ' + (err.message || 'Terjadi kesalahan'));
     }
   };
 
@@ -463,7 +518,7 @@ export const InventoryProvider = ({ children }) => {
   };
 
   return (
-    <InventoryContext.Provider value={{ inventory, inventoryLogs, addStock, updateStock, deleteStock, deductStock, deductRetailStock, processInventoryDeduction, refreshInventoryFromApi }}>
+    <InventoryContext.Provider value={{ inventory, inventoryLogs, addStock, updateStock, updateHargaModal, deleteStock, deductStock, deductRetailStock, processInventoryDeduction, refreshInventoryFromApi }}>
       {children}
     </InventoryContext.Provider>
   );

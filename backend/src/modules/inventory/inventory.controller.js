@@ -93,7 +93,7 @@ const updateInventoryStock = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { 
-      stok_utama, stok_pecahan, min_stok, keterangan, harga_modal,
+      stok_utama, stok_pecahan, min_stok, keterangan, harga_modal, harga_jual,
       kategori, brand, varian, kegelapan, satuan, konversi: konversi_body
     } = req.body;
     const { name: adminName } = req.user || {};
@@ -125,6 +125,7 @@ const updateInventoryStock = async (req, res, next) => {
         ...(satuan !== undefined && { satuan }),
         ...(konversi_body !== undefined && { konversi: konversi }),
         ...(min_stok !== undefined && { min_stok }),
+        ...(harga_jual !== undefined && { harga_jual: Number(harga_jual) }),
         ...(harga_modal !== undefined && { harga_modal: Number(harga_modal) }),
         updated_at: new Date()
       }
@@ -157,10 +158,19 @@ const updateInventoryStock = async (req, res, next) => {
 // POST /api/inventory — tambah item inventaris baru
 const createInventoryItem = async (req, res, next) => {
   try {
-    const { kategori, brand, varian, kegelapan, stok_utama, stok_pecahan, satuan, branch, konversi, min_stok, harga_modal } = req.body;
+    const { kategori, brand, varian, kegelapan, stok_utama, stok_pecahan, satuan, branch, konversi, min_stok, harga_modal, harga_jual } = req.body;
     
-    const count = await prisma.inventory.count();
-    const newId = `INV-${String(count + 1).padStart(3, '0')}`;
+    // Find the highest existing numeric ID (e.g. INV-034 -> 34) to avoid primary key duplicate conflicts
+    const allItems = await prisma.inventory.findMany({ select: { id: true } });
+    let maxNum = 0;
+    allItems.forEach(item => {
+      const match = item.id ? item.id.match(/^INV-(\d+)$/i) : null;
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) maxNum = num;
+      }
+    });
+    const newId = `INV-${String(maxNum + 1).padStart(3, '0')}`;
 
     const created = await prisma.inventory.create({
       data: {
@@ -175,6 +185,7 @@ const createInventoryItem = async (req, res, next) => {
         branch:       branch || 'Gallardo',
         konversi:     kategori === 'Kaca Film' ? 30 : (kategori === 'PPF' ? 15 : (Number(konversi) || 1)),
         min_stok:     Number(min_stok) || 2,
+        harga_jual:   harga_jual ? Number(harga_jual) : 0,
         harga_modal:  harga_modal ? Number(harga_modal) : 0
       }
     });

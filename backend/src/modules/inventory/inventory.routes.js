@@ -11,12 +11,12 @@ const { authenticateToken, authorizeRole } = require('../../middlewares/authMidd
 
 const router = express.Router();
 
-// GET /api/inventory — data inventaris dapat dibaca oleh sales, admin, superadmin, owner
-router.get('/',          authenticateToken, authorizeRole(['sales', 'admin', 'superadmin', 'owner']), getInventory);
-router.get('/low-stock', authenticateToken, authorizeRole(['admin', 'superadmin']), getLowStockAlert);
-router.get('/logs',      authenticateToken, authorizeRole(['admin', 'superadmin', 'owner']), getInventoryLogs);
+// GET /api/inventory — data inventaris dapat dibaca oleh sales, admin, superadmin, owner, finance
+router.get('/',          authenticateToken, authorizeRole(['sales', 'admin', 'superadmin', 'owner', 'finance']), getInventory);
+router.get('/low-stock', authenticateToken, authorizeRole(['admin', 'superadmin', 'owner', 'finance']), getLowStockAlert);
+router.get('/logs',      authenticateToken, authorizeRole(['admin', 'superadmin', 'owner', 'finance']), getInventoryLogs);
 router.post('/',         authenticateToken, authorizeRole(['admin', 'superadmin']), createInventoryItem);
-router.put('/:id',       authenticateToken, authorizeRole(['admin', 'superadmin']), updateInventoryStock);
+router.put('/:id',       authenticateToken, authorizeRole(['admin', 'superadmin', 'owner', 'finance']), updateInventoryStock);
 router.delete('/:id',    authenticateToken, authorizeRole(['admin', 'superadmin']), deleteInventoryItem);
 
 module.exports = router;
