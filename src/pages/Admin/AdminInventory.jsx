@@ -38,7 +38,7 @@ const AdminInventory = () => {
     kegelapan: '20%',
     stokUtama: 0,
     stokPecahan: 0,
-    harga_jual: 0,
+    harga_modal: 0,
     satuan: 'Roll'
   });
 
@@ -95,7 +95,7 @@ const AdminInventory = () => {
         kegelapan: item.kegelapan || '20%',
         stokUtama: item.stokUtama || 0,
         stokPecahan: item.stokPecahan || 0,
-        harga_jual: item.harga_jual || 0,
+        harga_modal: item.harga_modal || 0,
         satuan: item.satuan,
         konversi: item.konversi || 1
       });
@@ -120,7 +120,7 @@ const AdminInventory = () => {
         kegelapan: '20%',
         stokUtama: 0,
         stokPecahan: 0,
-        harga_jual: 0,
+        harga_modal: 0,
         satuan: 'Roll',
         konversi: 30
       });
@@ -154,7 +154,7 @@ const AdminInventory = () => {
       ...formData,
       stokUtama: finalUtama,
       stokPecahan: finalPecahan,
-      harga_jual: Number(formData.harga_jual) || 0,
+      harga_modal: Number(formData.harga_modal) || 0,
       konversi: konversi,
       ...(formData.kategori === 'Kaca Film' ? { kegelapan: formData.kegelapan } : { kegelapan: '' })
     };
@@ -477,7 +477,7 @@ const AdminInventory = () => {
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>BRAND & SERIES</th>
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>VARIAN / KEGELAPAN</th>
               {(isSuperOrOwner) && (
-                <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>HARGA JUAL</th>
+                <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>HARGA MODAL</th>
               )}
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600 }}>STOK TERSEDIA</th>
               <th style={{ padding: '1rem', color: 'var(--color-secondary)', fontSize: '0.75rem', letterSpacing: '0.05em', fontWeight: 600, textAlign: 'center' }}>AKSI</th>
@@ -504,7 +504,7 @@ const AdminInventory = () => {
                   </td>
                   {(isSuperOrOwner) && (
                     <td style={{ padding: '1rem', fontWeight: 600 }}>
-                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_jual || 0)}
+                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_modal || 0)}
                     </td>
                   )}
                   <td style={{ padding: '1rem' }}>
@@ -839,13 +839,13 @@ const AdminInventory = () => {
                     
                     {(isSuperOrOwner) && (
                       <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Harga Jual (Rp)</label>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Harga Modal (Rp)</label>
                         <input 
                           type="text" 
-                          value={formData.harga_jual ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(formData.harga_jual) : ''} 
+                          value={formData.harga_modal ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(formData.harga_modal) : ''} 
                           onChange={(e) => {
                             const val = e.target.value.replace(/\D/g, '');
-                            setFormData({ ...formData, harga_jual: val ? Number(val) : '' });
+                            setFormData({ ...formData, harga_modal: val ? Number(val) : '' });
                           }} 
                           required 
                           placeholder="Rp 0"
