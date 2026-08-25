@@ -726,6 +726,7 @@ const AdminCustomerWarranty = () => {
                               customerProvince: order.customerProvince || '',
                               customerZip: order.customerZip || '',
                               carColor: order.carColor || '',
+                              carYear: order.carYear || '',
                               plateNumber: order.plateNumber || '',
                               chassisNumber: order.chassisNumber || '',
                               engineNumber: order.engineNumber || '',
@@ -1706,6 +1707,10 @@ const AdminCustomerWarranty = () => {
               <div className="form-group" style={{ gridColumn: 'span 3' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Warna Kendaraan</label>
                 <input type="text" value={editCustomerData.carColor} onChange={e => setEditCustomerData({ ...editCustomerData, carColor: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+              </div>
+              <div className="form-group" style={{ gridColumn: 'span 3' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Tahun Kendaraan</label>
+                <input type="text" placeholder="Contoh: 2024" value={editCustomerData.carYear || ''} onChange={e => setEditCustomerData({ ...editCustomerData, carYear: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: '14px', outline: 'none' }} onFocus={e => e.target.style.borderColor = '#10b981'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 3' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Nomor Polisi</label>

@@ -15,8 +15,8 @@ const InvoicePrintPage = () => {
     if (orders && transactionId) {
       // transactionId di URL mungkin ID asli yg ada slash (WRK-26080010038)
       // Kita perlu mencari order yang cocok
-      const found = orders.find(o => 
-        String(o.id).replace(/\//g, '-') === transactionId || 
+      const found = orders.find(o =>
+        String(o.id).replace(/\//g, '-') === transactionId ||
         String(o.id) === transactionId ||
         String(o.dbId) === transactionId ||
         String(o.transaction_id) === transactionId
@@ -30,10 +30,10 @@ const InvoicePrintPage = () => {
     if (order) {
       const customerName = (order.customerName || order.customer_name || 'Customer').replace(/[^a-zA-Z0-9]/g, '_');
       const invoiceNo = String(order.id || 'INV').replace(/\//g, '-').replace(/[^a-zA-Z0-9-]/g, '_');
-      
+
       document.title = `Invoice_${invoiceNo}_${customerName}`;
     }
-    
+
     return () => {
       document.title = "POS Gallardo";
     };
@@ -51,7 +51,7 @@ const InvoicePrintPage = () => {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-gray-100">
         <p className="text-red-500 font-bold mb-4">Invoice tidak ditemukan!</p>
-        <button 
+        <button
           onClick={() => window.close()}
           className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900"
         >
@@ -79,12 +79,12 @@ const InvoicePrintPage = () => {
       order.sisa_tagihan !== undefined
         ? order.sisa_tagihan
         : (order.cart || order.items || []).reduce((sum, item) => sum + item.price * (item.quantity || 1), 0) -
-          (order.discount || 0) +
-          (order.tax || 0) -
-          (order.amountPaid || 0);
+        (order.discount || 0) +
+        (order.tax || 0) -
+        (order.amountPaid || 0);
     const cleanId = String(order.id).replace(/\//g, '-');
     const custName = order.customerName || order.customer_name || '';
-    
+
     // Create public link
     const baseUrl = import.meta.env.VITE_PUBLIC_URL || window.location.origin;
     const publicLink = `${baseUrl}/public/invoice/${cleanId}`;
@@ -162,19 +162,19 @@ Terima kasih telah mempercayakan kendaraan Anda kepada kami!`;
           Invoice Print Mode
         </div>
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={handlePrint}
             className="flex items-center gap-2 bg-gray-800 hover:bg-black text-white px-4 py-2 rounded font-medium transition-colors"
           >
             <Printer size={16} /> Cetak / Simpan PDF
           </button>
-          <button 
+          <button
             onClick={handleWhatsApp}
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium transition-colors"
           >
             <MessageCircle size={16} /> Kirim ke WhatsApp
           </button>
-          <button 
+          <button
             onClick={() => window.close()}
             className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-medium transition-colors"
           >
