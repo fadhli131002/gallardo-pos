@@ -106,13 +106,9 @@ const PrintWarrantyHandler = ({ isOpen, onClose, transaction }) => {
         backgroundColor: '#ffffff'
       });
 
-      
-      if (originalParent) {
-        if (originalNextSibling) {
-          originalParent.insertBefore(element, originalNextSibling);
-        } else {
-          originalParent.appendChild(element);
-        }
+      // 4. Bersihkan clone
+      if (document.body.contains(clone)) {
+        document.body.removeChild(clone);
       }
       window.scrollTo(0, originalScrollY);
 
@@ -146,39 +142,76 @@ const PrintWarrantyHandler = ({ isOpen, onClose, transaction }) => {
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    const element = printRef.current;
+    if (!element) return;
     setIsGeneratingPDF(true);
-    setTimeout(() => {
-      const originalTitle = document.title;
-      document.title = getDynamicFileName();
-      
-      const style = document.createElement('style');
-      style.id = 'print-warranty-style';
-      style.innerHTML = `
-        @media print {
-          @page { size: A6 portrait; margin: 8mm; }
-          body * { visibility: hidden; }
-          #printable-warranty-wrapper, #printable-warranty-wrapper * { visibility: visible; }
-          #printable-warranty-wrapper {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-        }
-      `;
-      document.head.appendChild(style);
-      
-      window.print();
-      
-      document.head.removeChild(style);
-      document.title = originalTitle;
-      
+
+    try {
+      // 1. Render warranty template ke canvas (gambar)
+      const canvas = await html2canvas(element, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+
+      // 2. Buka popup window baru berisi hanya gambar garansi
+      const popup = window.open('', '_blank', 'width=420,height=620,scrollbars=no');
+      if (!popup) {
+        alert('Popup diblokir browser. Izinkan popup untuk mencetak.');
+        setIsGeneratingPDF(false);
+        return;
+      }
+
+      popup.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${getDynamicFileName()}</title>
+            <style>
+              @page {
+                size: 105mm 148mm;
+                margin: 0;
+              }
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              html, body {
+                width: 105mm;
+                height: 148mm;
+                background: white;
+                overflow: hidden;
+              }
+              img {
+                display: block;
+                width: 105mm;
+                height: 148mm;
+                object-fit: contain;
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${imgData}" />
+            <script>
+              window.onload = function() {
+                window.focus();
+                window.print();
+                setTimeout(function() { window.close(); }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      popup.document.close();
+
+    } catch (err) {
+      console.error('Gagal print garansi:', err);
+      alert('Gagal mencetak garansi');
+    } finally {
       setIsGeneratingPDF(false);
       onClose();
-    }, 500);
+    }
   };
 
   const handleWhatsApp = () => {
@@ -199,7 +232,13 @@ const PrintWarrantyHandler = ({ isOpen, onClose, transaction }) => {
     const { expiryDate } = getWarrantyDetails(productName, installationDate);
     const validUntil = format(expiryDate, 'dd MMM yyyy', { locale: localeId });
 
-    const msg = `Halo Bapak/Ibu ${customerName}, berikut adalah informasi Garansi Digital dari Gallardo Autosport untuk kendaraan ${brandModel.trim()} (${plate}). Garansi ini berlaku hingga ${validUntil} untuk layanan/produk ${productName}. Terima kasih telah mempercayakan kendaraan Anda kepada kami!`;
+    const warrantyLink = `${window.location.origin}/public/warranty/${order.id || order.transactionId || order.transaction_id || ''}`;
+    const msg = `Halo Bapak/Ibu ${customerName}, berikut adalah informasi Garansi Digital dari Gallardo Autosport untuk kendaraan ${brandModel.trim()} (${plate}). Garansi ini berlaku hingga ${validUntil} untuk layanan/produk ${productName}.
+
+Akses Garansi Digital Anda melalui link berikut:
+${warrantyLink}
+
+Terima kasih telah mempercayakan kendaraan Anda kepada kami!`;
 
     const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
     window.open(waUrl, '_blank');
@@ -220,7 +259,7 @@ const PrintWarrantyHandler = ({ isOpen, onClose, transaction }) => {
       />
 
       {/* Hidden Warranty Template */}
-      <div id="printable-warranty-wrapper" style={{ position: 'fixed', top: 0, left: 0 }}>
+      <div id="printable-warranty-wrapper" className="print-warranty-hide" style={{ position: 'absolute' }}>
         <div 
           ref={printRef}
           className="bg-white text-black relative w-[420px] min-h-[595px] flex flex-col justify-between shrink-0 box-border"

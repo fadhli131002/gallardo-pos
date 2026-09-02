@@ -18,6 +18,7 @@ import OwnerDashboard from './pages/Admin/OwnerDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import InvoicePrintPage from './pages/InvoicePrintPage';
 import PublicInvoicePage from './pages/PublicInvoicePage';
+import PublicWarrantyPage from './pages/PublicWarrantyPage';
 import AdminMonthlyReport from './pages/Admin/AdminMonthlyReport';
 
 import FinanceLayout from './components/Layout/FinanceLayout';
@@ -68,6 +69,7 @@ function App() {
         
         {/* Public Routes */}
         <Route path="/public/invoice/:transactionId" element={<PublicInvoicePage />} />
+        <Route path="/public/warranty/:transactionId" element={<PublicWarrantyPage />} />
         
         {/* Dedicated Print Route (No Layout/Sidebar) */}
         <Route element={<ProtectedRoute allowedRoles={['sales', 'admin', 'superadmin', 'finance']} />}>

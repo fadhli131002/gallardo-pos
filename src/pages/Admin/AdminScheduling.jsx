@@ -41,6 +41,9 @@ const AdminScheduling = () => {
   
   const [newEstimasiDate, setNewEstimasiDate] = useState('');
   const [newEstimasiTime, setNewEstimasiTime] = useState('');
+  
+  const [isDailyOrdersModalOpen, setIsDailyOrdersModalOpen] = useState(false);
+  const [selectedDateForOrders, setSelectedDateForOrders] = useState(null);
 
   const { flatOrders: orders, getEndDate, getOrderEndDate, updateOrderOperational, isDateBlocked } = useOrders();
 
@@ -255,6 +258,12 @@ const AdminScheduling = () => {
               return (
                 <div 
                   key={idx} 
+                  onClick={() => {
+                    if (hasOrders && sameMonth) {
+                      setSelectedDateForOrders(day);
+                      setIsDailyOrdersModalOpen(true);
+                    }
+                  }}
                   style={{
                     ...cellStyle,
                     minHeight: '100px',
@@ -263,8 +272,9 @@ const AdminScheduling = () => {
                     borderBottom: sameMonth && hasOrders && !isFull ? '2px solid #111' : '1px solid #e5e7eb',
                     display: 'flex',
                     flexDirection: 'column',
+                    cursor: (hasOrders && sameMonth) ? 'pointer' : 'default',
                   }}
-                  className="transition-colors"
+                  className="transition-colors hover:bg-gray-50"
                 >
                   <span style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '8px', display: 'block' }}>
                     {format(day, 'd')}
@@ -570,8 +580,8 @@ const AdminScheduling = () => {
       )}
 
       {isDetailModalOpen && selectedOrderForDetail && createPortal(
-        <div className="fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center bg-black/50" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', padding: '16px' }}>
-          <div className="animate-fade-in" style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', width: '100%', maxWidth: '672px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        <div className="fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center bg-black/50" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', padding: '16px' }} onClick={() => setIsDetailModalOpen(false)}>
+          <div className="animate-fade-in" style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', width: '100%', maxWidth: '672px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', position: 'relative' }} onClick={e => e.stopPropagation()}>
             <button onClick={() => setIsDetailModalOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', padding: '8px', color: '#9ca3af', backgroundColor: 'transparent', border: 'none', borderRadius: '50%', cursor: 'pointer' }}>
               <X size={20}/>
             </button>
@@ -614,6 +624,66 @@ const AdminScheduling = () => {
             
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
               <button onClick={() => setIsDetailModalOpen(false)} style={{ backgroundColor: '#2563eb', color: '#ffffff', padding: '8px 24px', borderRadius: '8px', border: 'none', fontWeight: '500', cursor: 'pointer' }}>Tutup SPK</button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* MODAL KENDARAAN MASUK (DAILY ORDERS) */}
+      {isDailyOrdersModalOpen && selectedDateForOrders && createPortal(
+        <div className="fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center bg-black/50" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', padding: '16px' }} onClick={() => setIsDailyOrdersModalOpen(false)}>
+          <div className="animate-fade-in" style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', width: '100%', maxWidth: '672px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', position: 'relative' }} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setIsDailyOrdersModalOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', padding: '8px', color: '#9ca3af', backgroundColor: 'transparent', border: 'none', borderRadius: '50%', cursor: 'pointer' }}>
+              <X size={20}/>
+            </button>
+            
+            <div style={{ marginBottom: '16px', paddingRight: '32px' }}>
+              <h3 style={{ fontWeight: 'bold', fontSize: '20px', marginBottom: '4px', color: '#1f2937', marginTop: 0 }}>Daftar Kendaraan Terjadwal</h3>
+              <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Tanggal: <strong style={{ color: '#374151' }}>{format(selectedDateForOrders, 'dd MMMM yyyy', { locale: id })}</strong> di cabang <strong>{bookingSlotBranch}</strong></p>
+            </div>
+            
+            <div style={{ overflowY: 'auto', paddingRight: '8px', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {(() => {
+                const dayOrders = orders.filter(o => {
+                  if (o.type === 'RETAIL') return false;
+                  if (o.location !== bookingSlotBranch) return false;
+                  const start = new Date(o.date);
+                  start.setHours(0, 0, 0, 0);
+                  const end = getOrderEndDate(o);
+                  end.setHours(0, 0, 0, 0);
+                  const check = new Date(selectedDateForOrders);
+                  check.setHours(0, 0, 0, 0);
+                  return check >= start && check <= end;
+                });
+
+                if (dayOrders.length === 0) {
+                   return <p style={{ color: '#6b7280', fontSize: '14px', fontStyle: 'italic', backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px', textAlign: 'center', border: '1px dashed #d1d5db', margin: 0 }}>Tidak ada kendaraan pada tanggal ini.</p>;
+                }
+
+                return dayOrders.map((order, idx) => (
+                  <div key={idx} style={{ padding: '16px', backgroundColor: '#f9fafb', borderRadius: '12px', border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <p style={{ fontWeight: 'bold', fontSize: '16px', color: '#111827', margin: 0 }}>{order.carBrand} {order.carModel}</p>
+                      {getStatusBadge(order.status)}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+                      <div>
+                        <p style={{ fontSize: '14px', color: '#4b5563', margin: 0 }}>Customer: <span style={{ fontWeight: '600', color: '#1f2937' }}>{order.customerName}</span></p>
+                        <p style={{ fontSize: '14px', color: '#4b5563', margin: 0 }}>Plat Nomor: <span style={{ fontWeight: '600', color: '#1f2937' }}>{order.plateNumber}</span></p>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <p style={{ fontSize: '14px', color: '#4b5563', margin: 0 }}>Layanan: <span style={{ fontWeight: '600', color: '#1f2937' }}>{order.serviceType}</span></p>
+                        {order.product && <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>{order.product}</p>}
+                      </div>
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
+              <button onClick={() => setIsDailyOrdersModalOpen(false)} style={{ backgroundColor: '#2563eb', color: '#ffffff', padding: '8px 24px', borderRadius: '8px', border: 'none', fontWeight: '500', cursor: 'pointer' }}>Tutup</button>
             </div>
           </div>
         </div>,

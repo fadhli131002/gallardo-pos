@@ -72,43 +72,53 @@ const WarrantyModal = ({ order, onClose }) => {
       // Jeda agar DOM merender clone
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const canvas = await html2canvas(clone, {
-        scale: 3, // Perbesar scale agar resolusi tinggi
-        useCORS: true,
-        backgroundColor: '#ffffff'
-      });
+      try {
+        const canvas = await html2canvas(clone, {
+          scale: 3, // Perbesar scale agar resolusi tinggi
+          useCORS: true,
+          backgroundColor: '#ffffff'
+        });
 
-      // 4. Bersihkan clone
-      document.body.removeChild(clone);
+        // 4. Bersihkan clone
+        if (document.body.contains(clone)) {
+          document.body.removeChild(clone);
+        }
 
-      // Kembalikan scroll ke posisi semula
-      window.scrollTo(0, originalScrollY);
+        // Kembalikan scroll ke posisi semula
+        window.scrollTo(0, originalScrollY);
 
-      const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/png');
 
-      // Inisialisasi jsPDF ukuran A6 kembali
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a6' });
+        // Inisialisasi jsPDF ukuran A6 kembali
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a6' });
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      // Tambahkan margin fisik (8mm) agar gambar tidak menempel ke ujung kertas PDF
-      const pdfMargin = 8;
-      const safePdfWidth = pdfWidth - (pdfMargin * 2);
-      const safePdfHeight = pdfHeight - (pdfMargin * 2);
+        // Tambahkan margin fisik (8mm) agar gambar tidak menempel ke ujung kertas PDF
+        const pdfMargin = 8;
+        const safePdfWidth = pdfWidth - (pdfMargin * 2);
+        const safePdfHeight = pdfHeight - (pdfMargin * 2);
 
-      const imgProps = pdf.getImageProperties(imgData);
-      const ratio = Math.min(safePdfWidth / imgProps.width, safePdfHeight / imgProps.height);
+        const imgProps = pdf.getImageProperties(imgData);
+        const ratio = Math.min(safePdfWidth / imgProps.width, safePdfHeight / imgProps.height);
 
-      const finalWidth = imgProps.width * ratio;
-      const finalHeight = imgProps.height * ratio;
+        const finalWidth = imgProps.width * ratio;
+        const finalHeight = imgProps.height * ratio;
 
-      // Letakkan di tengah (otomatis menyisakan ruang/spasi di atas dan bawah)
-      const marginX = (pdfWidth - finalWidth) / 2;
-      const marginY = (pdfHeight - finalHeight) / 2;
+        // Letakkan di tengah (otomatis menyisakan ruang/spasi di atas dan bawah)
+        const marginX = (pdfWidth - finalWidth) / 2;
+        const marginY = (pdfHeight - finalHeight) / 2;
 
-      // Tempel gambar dan langsung simpan (tanpa garis potong)
-      pdf.addImage(imgData, 'PNG', marginX, marginY, finalWidth, finalHeight);
+        // Tempel gambar dan langsung simpan (tanpa garis potong)
+        pdf.addImage(imgData, 'PNG', marginX, marginY, finalWidth, finalHeight);
+      } catch (err) {
+        if (document.body.contains(clone)) {
+          document.body.removeChild(clone);
+        }
+        window.scrollTo(0, originalScrollY);
+        throw err;
+      }
 
       // Generate Nama File Dinamis (Sesuaikan variabel order Anda)
       const customerName = order.customerName || 'TanpaNama';
