@@ -91,9 +91,9 @@ const InvoicePrintPage = () => {
 
     const msg = `Halo Bapak/Ibu ${custName}, berikut adalah rincian Invoice ${cleanId} Anda dari Gallardo Autosport.
 
-Klik link berikut untuk melihat/mengunduh Invoice resmi Anda:
 ${publicLink}
 
+Klik link di atas untuk melihat/mengunduh Invoice resmi Anda.
 Sisa Tagihan: ${remaining > 0 ? formatCurrency(remaining) : 'Lunas'}.
 Terima kasih telah mempercayakan kendaraan Anda kepada kami!`;
     const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;

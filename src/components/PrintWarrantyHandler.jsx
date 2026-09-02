@@ -234,12 +234,13 @@ const PrintWarrantyHandler = ({ isOpen, onClose, transaction }) => {
 
     const cleanId = String(order.id || order.transactionId || order.transaction_id || '').replace(/\//g, '-');
     const warrantyLink = `${window.location.origin}/public/warranty/${cleanId}`;
-    const msg = `Halo Bapak/Ibu ${customerName}, berikut adalah informasi Garansi Digital dari Gallardo Autosport untuk kendaraan ${brandModel.trim()} (${plate}). Garansi ini berlaku hingga ${validUntil} untuk layanan/produk ${productName}.
+    const msg = `Halo Bapak/Ibu ${customerName}, berikut adalah informasi Garansi Digital dari Gallardo Autosport untuk kendaraan ${brandModel.trim()} (${plate}).
 
-Akses Garansi Digital Anda melalui link berikut:
+Garansi berlaku hingga ${validUntil} untuk layanan/produk ${productName}.
+
 ${warrantyLink}
 
-Terima kasih telah mempercayakan kendaraan Anda kepada kami!`;
+Klik link di atas untuk melihat & mengunduh Sertifikat Garansi Digital Anda. Terima kasih telah mempercayakan kendaraan Anda kepada kami!`;
 
     const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
     window.open(waUrl, '_blank');
