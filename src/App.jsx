@@ -68,8 +68,8 @@ function App() {
         <Route path="/" element={<DashboardEntry />} />
         
         {/* Public Routes */}
-        <Route path="/public/invoice/:transactionId" element={<PublicInvoicePage />} />
-        <Route path="/public/warranty/:transactionId" element={<PublicWarrantyPage />} />
+        <Route path="/public/invoice/*" element={<PublicInvoicePage />} />
+        <Route path="/public/warranty/*" element={<PublicWarrantyPage />} />
         
         {/* Dedicated Print Route (No Layout/Sidebar) */}
         <Route element={<ProtectedRoute allowedRoles={['sales', 'admin', 'superadmin', 'finance']} />}>

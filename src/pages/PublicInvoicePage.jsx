@@ -5,7 +5,8 @@ import { Printer } from 'lucide-react';
 import { formatCurrency } from '../data/mockData';
 
 const PublicInvoicePage = () => {
-  const { transactionId } = useParams();
+  const params = useParams();
+  const transactionId = params['*'];
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
