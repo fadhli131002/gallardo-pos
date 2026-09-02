@@ -31,7 +31,7 @@ const getTransactionById = async (req, res, next) => {
 
 const getPublicTransactionById = async (req, res, next) => {
   try {
-    const id = req.params.id || req.params[0] || req.params['*'];
+    const { id } = req.params;
     let dbId = parseInt(id);
     if (isNaN(dbId)) {
       if (typeof id === 'string' && id.includes('-')) {

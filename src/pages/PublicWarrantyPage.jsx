@@ -34,8 +34,7 @@ const getWarrantyDetails = (itemName, installDate) => {
 };
 
 const PublicWarrantyPage = () => {
-  const params = useParams();
-  const transactionId = params['*'];
+  const { transactionId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

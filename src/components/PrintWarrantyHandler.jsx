@@ -232,7 +232,8 @@ const PrintWarrantyHandler = ({ isOpen, onClose, transaction }) => {
     const { expiryDate } = getWarrantyDetails(productName, installationDate);
     const validUntil = format(expiryDate, 'dd MMM yyyy', { locale: localeId });
 
-    const warrantyLink = `${window.location.origin}/public/warranty/${order.id || order.transactionId || order.transaction_id || ''}`;
+    const cleanId = String(order.id || order.transactionId || order.transaction_id || '').replace(/\//g, '-');
+    const warrantyLink = `${window.location.origin}/public/warranty/${cleanId}`;
     const msg = `Halo Bapak/Ibu ${customerName}, berikut adalah informasi Garansi Digital dari Gallardo Autosport untuk kendaraan ${brandModel.trim()} (${plate}). Garansi ini berlaku hingga ${validUntil} untuk layanan/produk ${productName}.
 
 Akses Garansi Digital Anda melalui link berikut:
