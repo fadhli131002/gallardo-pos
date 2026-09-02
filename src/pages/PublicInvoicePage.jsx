@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import SharedInvoice from '../components/SharedInvoice';
-import { Printer } from 'lucide-react';
+import { Printer, X } from 'lucide-react';
 import { formatCurrency } from '../data/mockData';
 
 const PublicInvoicePage = () => {
