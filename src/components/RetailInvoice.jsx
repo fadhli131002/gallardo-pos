@@ -36,9 +36,15 @@ export default function RetailInvoice({ order }) {
     return acc + (price * item.qty);
   }, 0);
 
-  const calculatedDiscount = (order.items || []).reduce((acc, item) => {
+  const itemDiscount = (order.items || []).reduce((acc, item) => {
     return acc + (item.discount || 0);
   }, 0);
+
+  let calculatedDiscount = order.discountAmount !== undefined ? order.discountAmount : (order.discount !== undefined ? order.discount : itemDiscount);
+  
+  if (calculatedDiscount === 0 && order.totalPrice !== undefined && calculatedSubTotal > order.totalPrice) {
+    calculatedDiscount = calculatedSubTotal - order.totalPrice;
+  }
 
   const grandTotal = order.totalPrice !== undefined ? order.totalPrice : (calculatedSubTotal - calculatedDiscount);
 
