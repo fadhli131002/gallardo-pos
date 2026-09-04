@@ -30,6 +30,7 @@ import FinanceCommissions from './pages/Finance/FinanceCommissions';
 import FinanceHpp from './pages/Finance/FinanceHpp';
 
 import { Toaster } from 'sonner';
+import MaintenanceBanner from './components/MaintenanceBanner';
 
 import { useAuth } from './context/AuthContext';
 
@@ -63,6 +64,7 @@ function App() {
   return (
     <Router>
       <Toaster position="top-right" richColors />
+      <MaintenanceBanner />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<DashboardEntry />} />

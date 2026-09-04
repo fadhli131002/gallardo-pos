@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Wrench, X, AlertTriangle, Check, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import { useOrders } from '../../context/OrderContext';
 import { useInventory } from '../../context/InventoryContext';
 import './Dashboard.css';
@@ -58,6 +59,59 @@ const AdminDashboard = () => {
 
     fetchDashboardStats();
   }, []);
+
+  const [maintenanceConfig, setMaintenanceConfig] = useState({
+    isActive: false,
+    message: '',
+    estimatedEnd: ''
+  });
+  const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
+  const [isSavingMaintenance, setIsSavingMaintenance] = useState(false);
+
+  const fetchMaintenance = async () => {
+    try {
+      const res = await fetch((window.API_URL || '') + '/api/system/maintenance', { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setMaintenanceConfig(json.data);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchMaintenance();
+  }, []);
+
+  const handleSaveMaintenance = async (e) => {
+    e.preventDefault();
+    setIsSavingMaintenance(true);
+    try {
+      const res = await fetch((window.API_URL || '') + '/api/system/maintenance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(maintenanceConfig)
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(json.message || 'Status maintenance berhasil diperbarui');
+        setMaintenanceConfig(json.data);
+        setIsMaintenanceModalOpen(false);
+      } else {
+        toast.error(json.message || 'Gagal menyimpan status maintenance');
+      }
+    } catch (err) {
+      toast.error('Gagal menghubungi server: ' + err.message);
+    } finally {
+      setIsSavingMaintenance(false);
+    }
+  };
 
   // Use API stats if available, fallback to context orders
   const uniqueCustomers = stats.totalCustomers || new Set(orders.map(o => o.customerHp)).size;
@@ -127,10 +181,41 @@ const AdminDashboard = () => {
 
   return (
     <div className="dashboard-container animate-fade-in">
-      <div className="page-header">
+      <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 className="page-title">Halo, {displayName} 👋</h1>
           <p className="page-subtitle">Admin Workspace - Pusat kendali operasional, order masuk, dan penugasan</p>
+        </div>
+        <div>
+          <button
+            type="button"
+            onClick={() => setIsMaintenanceModalOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              border: maintenanceConfig.isActive ? '1.5px solid #ef4444' : '1px solid #d1d5db',
+              backgroundColor: maintenanceConfig.isActive ? '#fef2f2' : '#ffffff',
+              color: maintenanceConfig.isActive ? '#dc2626' : '#374151',
+              boxShadow: maintenanceConfig.isActive ? '0 0 10px rgba(239, 68, 68, 0.25)' : '0 1px 2px rgba(0,0,0,0.05)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <span style={{
+              width: '9px',
+              height: '9px',
+              borderRadius: '50%',
+              backgroundColor: maintenanceConfig.isActive ? '#ef4444' : '#10b981',
+              boxShadow: maintenanceConfig.isActive ? '0 0 8px #ef4444' : 'none'
+            }} />
+            <Wrench size={15} />
+            <span>{maintenanceConfig.isActive ? 'Mode Maintenance: ON' : 'Mode Maintenance: OFF'}</span>
+          </button>
         </div>
       </div>
 
@@ -264,6 +349,211 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Pengaturan Maintenance */}
+      {isMaintenanceModalOpen && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '14px',
+            width: '100%',
+            maxWidth: '520px',
+            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '18px 24px',
+              borderBottom: '1px solid #f3f4f6',
+              backgroundColor: maintenanceConfig.isActive ? '#fef2f2' : '#f9fafb'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  backgroundColor: maintenanceConfig.isActive ? '#fee2e2' : '#e0e7ff',
+                  color: maintenanceConfig.isActive ? '#dc2626' : '#4f46e5',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Wrench size={18} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '700', color: '#111827' }}>
+                    Kontrol Mode Maintenance
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#6b7280' }}>
+                    Atur status banner peringatan sistem secara global
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMaintenanceModalOpen(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveMaintenance} style={{ padding: '24px' }}>
+              {/* Toggle Switch */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px',
+                backgroundColor: maintenanceConfig.isActive ? '#fef2f2' : '#f8fafc',
+                border: maintenanceConfig.isActive ? '1.5px solid #fca5a5' : '1px solid #e2e8f0',
+                borderRadius: '10px',
+                marginBottom: '20px'
+              }}>
+                <div>
+                  <div style={{ fontWeight: '700', fontSize: '0.95rem', color: maintenanceConfig.isActive ? '#b91c1c' : '#1e293b' }}>
+                    Status Banner: {maintenanceConfig.isActive ? 'AKTIF (ON)' : 'NONAKTIF (OFF)'}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
+                    {maintenanceConfig.isActive 
+                      ? 'Banner merah akan tampil di bagian atas layar semua user'
+                      : 'Sistem beroperasi normal tanpa banner peringatan'}
+                  </div>
+                </div>
+
+                <label style={{ position: 'relative', display: 'inline-block', width: '48px', height: '26px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={maintenanceConfig.isActive}
+                    onChange={(e) => setMaintenanceConfig(prev => ({ ...prev, isActive: e.target.checked }))}
+                    style={{ opacity: 0, width: 0, height: 0 }}
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    cursor: 'pointer',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: maintenanceConfig.isActive ? '#dc2626' : '#cbd5e1',
+                    borderRadius: '26px',
+                    transition: '0.3s'
+                  }}>
+                    <span style={{
+                      position: 'absolute',
+                      height: '20px',
+                      width: '20px',
+                      left: maintenanceConfig.isActive ? '25px' : '3px',
+                      bottom: '3px',
+                      backgroundColor: 'white',
+                      borderRadius: '50%',
+                      transition: '0.3s',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                    }} />
+                  </span>
+                </label>
+              </div>
+
+              {/* Input Pesan */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                  Pesan Peringatan untuk User:
+                </label>
+                <textarea
+                  rows={3}
+                  value={maintenanceConfig.message || ''}
+                  onChange={(e) => setMaintenanceConfig(prev => ({ ...prev, message: e.target.value }))}
+                  placeholder="Contoh: Sistem POS sedang dalam pemeliharaan database. Mohon simpan transaksi Anda."
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #d1d5db',
+                    fontSize: '0.875rem',
+                    boxSizing: 'border-box',
+                    outline: 'none',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              {/* Input Estimasi Waktu */}
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                  Estimasi Selesai (Opsional):
+                </label>
+                <input
+                  type="text"
+                  value={maintenanceConfig.estimatedEnd || ''}
+                  onChange={(e) => setMaintenanceConfig(prev => ({ ...prev, estimatedEnd: e.target.value }))}
+                  placeholder="Contoh: Hari ini pukul 18:00 WIB"
+                  style={{
+                    width: '100%',
+                    padding: '9px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #d1d5db',
+                    fontSize: '0.875rem',
+                    boxSizing: 'border-box',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsMaintenanceModalOpen(false)}
+                  style={{
+                    padding: '9px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid #d1d5db',
+                    backgroundColor: '#ffffff',
+                    color: '#374151',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingMaintenance}
+                  style={{
+                    padding: '9px 20px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    backgroundColor: maintenanceConfig.isActive ? '#dc2626' : '#111827',
+                    color: '#ffffff',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  {isSavingMaintenance ? 'Menyimpan...' : (
+                    <>
+                      <Check size={16} />
+                      <span>Simpan & Terapkan</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
