@@ -96,7 +96,7 @@ export const OrderProvider = ({ children }) => {
             type: isRetail ? 'RETAIL' : 'WORKSHOP',
             // Default new maintenance transactions to 'OPEN' unless it's explicitly completed
             status: (isLunas && !serviceName.toLowerCase().includes('maintenance')) ? 'Selesai' : 'OPEN',
-            location: 'Gallardo',
+            location: trx.branch || 'Gallardo',
             notes: trx.notes || '',
             items: (trx.items || []).map(item => ({
               name: item.product_name,
@@ -667,7 +667,10 @@ export const OrderProvider = ({ children }) => {
     if (order.customEndDate) {
       return new Date(order.customEndDate);
     }
-    return getEndDate(order.date, order.serviceType);
+    // Gunakan installationDate (jadwal yang dipilih sales) sebagai base,
+    // bukan created_at, agar sinkron dengan kalender sales
+    const baseDate = order.installationDate || order.date;
+    return getEndDate(baseDate, order.serviceType);
   };
 
   // Check if a date is blocked by active orders (Quota = 3 cars per day)

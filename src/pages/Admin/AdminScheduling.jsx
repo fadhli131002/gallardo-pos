@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { CalendarClock, CalendarRange, Download, ChevronLeft, ChevronRight, Search, Loader2, MoreVertical, Edit2, CheckCircle, Clock, FileText, X } from 'lucide-react';
+import { CalendarClock, CalendarRange, Download, ChevronLeft, ChevronRight, Search, Loader2, MoreVertical, Edit2, CheckCircle, Clock, FileText, X, LogIn, LogOut, ArrowRight, Hash } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { 
   format, 
@@ -101,7 +101,7 @@ const AdminScheduling = () => {
       filterEnd = new Date(Number(y), Number(m) - 1, Number(d), 23, 59, 59, 999);
     }
 
-    const orderStart = new Date(order.date);
+    const orderStart = new Date(order.installationDate || order.date);
     orderStart.setHours(0, 0, 0, 0);
     
     const orderEnd = getOrderEndDate(order);
@@ -225,7 +225,8 @@ const AdminScheduling = () => {
                 if (o.type === 'RETAIL') return false;
                 if (o.location !== bookingSlotBranch) return false;
                 // Tampilkan SEMUA status (Aktif maupun Selesai) agar sinkron dengan tabel log operasional
-                const start = new Date(o.date);
+                // Gunakan installationDate (tanggal jadwal) bukan created_at
+                const start = new Date(o.installationDate || o.date);
                 start.setHours(0, 0, 0, 0);
                 const end = getOrderEndDate(o);
                 end.setHours(0, 0, 0, 0);
@@ -397,7 +398,7 @@ const AdminScheduling = () => {
             </thead>
             <tbody>
               {filteredOrdersTable.map(order => {
-                const startDate = new Date(order.date);
+                const startDate = new Date(order.installationDate || order.date);
                 const endDate = getOrderEndDate(order);
                 
                 return (
@@ -526,7 +527,7 @@ const AdminScheduling = () => {
           </thead>
           <tbody>
             {filteredOrdersTable.map(order => {
-              const start = new Date(order.date);
+              const start = new Date(order.installationDate || order.date);
               const end = getOrderEndDate(order);
               return (
                 <tr key={order.id} style={{ borderBottom: '1px solid #ccc' }}>
@@ -648,7 +649,8 @@ const AdminScheduling = () => {
                 const dayOrders = orders.filter(o => {
                   if (o.type === 'RETAIL') return false;
                   if (o.location !== bookingSlotBranch) return false;
-                  const start = new Date(o.date);
+                  // Gunakan installationDate (tanggal jadwal) bukan created_at
+                  const start = new Date(o.installationDate || o.date);
                   start.setHours(0, 0, 0, 0);
                   const end = getOrderEndDate(o);
                   end.setHours(0, 0, 0, 0);
@@ -661,24 +663,56 @@ const AdminScheduling = () => {
                    return <p style={{ color: '#6b7280', fontSize: '14px', fontStyle: 'italic', backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px', textAlign: 'center', border: '1px dashed #d1d5db', margin: 0 }}>Tidak ada kendaraan pada tanggal ini.</p>;
                 }
 
-                return dayOrders.map((order, idx) => (
-                  <div key={idx} style={{ padding: '16px', backgroundColor: '#f9fafb', borderRadius: '12px', border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <p style={{ fontWeight: 'bold', fontSize: '16px', color: '#111827', margin: 0 }}>{order.carBrand} {order.carModel}</p>
-                      {getStatusBadge(order.status)}
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                      <div>
-                        <p style={{ fontSize: '14px', color: '#4b5563', margin: 0 }}>Customer: <span style={{ fontWeight: '600', color: '#1f2937' }}>{order.customerName}</span></p>
-                        <p style={{ fontSize: '14px', color: '#4b5563', margin: 0 }}>Plat Nomor: <span style={{ fontWeight: '600', color: '#1f2937' }}>{order.plateNumber}</span></p>
+                return dayOrders.map((order, idx) => {
+                  const startDate = new Date(order.installationDate || order.date);
+                  const endDate = getOrderEndDate(order);
+                  const isLongJob = endDate > startDate;
+                  return (
+                    <div key={idx} style={{ padding: '16px', backgroundColor: '#f9fafb', borderRadius: '12px', border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {/* Header: Car + Status */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <p style={{ fontWeight: 'bold', fontSize: '16px', color: '#111827', margin: 0 }}>{order.carBrand} {order.carModel}</p>
+                          <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0 0', fontFamily: 'monospace' }}>{order.id}</p>
+                        </div>
+                        {getStatusBadge(order.status)}
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <p style={{ fontSize: '14px', color: '#4b5563', margin: 0 }}>Layanan: <span style={{ fontWeight: '600', color: '#1f2937' }}>{order.serviceType}</span></p>
-                        {order.product && <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>{order.product}</p>}
+
+                      {/* Masuk / Keluar Timeline */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '8px', alignItems: 'center', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '10px 12px' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
+                            <LogIn size={12} color="#16a34a" />
+                            <span style={{ fontSize: '10px', fontWeight: '700', color: '#16a34a', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Masuk</span>
+                          </div>
+                          <p style={{ fontSize: '13px', fontWeight: '700', color: '#111827', margin: 0 }}>{format(startDate, 'dd MMM yyyy', { locale: id })}</p>
+                          <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>{format(startDate, "HH:mm 'WIB'")}</p>
+                        </div>
+                        <ArrowRight size={16} color="#9ca3af" />
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', marginBottom: '2px' }}>
+                            <LogOut size={12} color={order.status === 'Selesai' ? '#111827' : '#f59e0b'} />
+                            <span style={{ fontSize: '10px', fontWeight: '700', color: order.status === 'Selesai' ? '#111827' : '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{order.status === 'Selesai' ? 'Keluar' : 'Est. Selesai'}</span>
+                          </div>
+                          <p style={{ fontSize: '13px', fontWeight: '700', color: '#111827', margin: 0 }}>{format(endDate, 'dd MMM yyyy', { locale: id })}</p>
+                          <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>{format(endDate, "HH:mm 'WIB'")}</p>
+                        </div>
+                      </div>
+
+                      {/* Customer + Layanan */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+                        <div>
+                          <p style={{ fontSize: '13px', color: '#4b5563', margin: 0 }}>Customer: <span style={{ fontWeight: '600', color: '#1f2937' }}>{order.customerName}</span></p>
+                          <p style={{ fontSize: '13px', color: '#4b5563', margin: '2px 0 0 0' }}>Plat: <span style={{ fontWeight: '600', color: '#1f2937', fontFamily: 'monospace' }}>{order.plateNumber || '-'}</span></p>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <p style={{ fontSize: '13px', color: '#4b5563', margin: 0 }}>Layanan: <span style={{ fontWeight: '600', color: '#1f2937' }}>{order.serviceType}</span></p>
+                          {order.spgName && <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0 0' }}>PIC: {order.spgName}</p>}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ));
+                  );
+                });
               })()}
             </div>
             

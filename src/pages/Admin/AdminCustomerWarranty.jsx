@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useOrders } from '../../context/OrderContext';
 import { format, addYears } from 'date-fns';
-import { Shield, ShieldAlert, X, Search, Printer, MessageCircle, Loader2, MoreVertical, FileText, Wrench, Download, CreditCard, Upload, CheckCircle, UserPen, FileCheck, Trash2, Save, Calendar, MapPin, User, Phone } from 'lucide-react';
+import { Shield, ShieldAlert, ShieldCheck, X, Search, Printer, MessageCircle, Loader2, MoreVertical, FileText, Wrench, Download, CreditCard, Upload, CheckCircle, UserPen, FileCheck, Trash2, Save, Calendar, MapPin, User, Phone, Bell, AlertTriangle, Clock } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import * as XLSX from 'xlsx';
 import { toast } from 'sonner';
@@ -12,6 +12,9 @@ import { formatCurrency } from '../../data/mockData';
 import SharedInvoice from '../../components/SharedInvoice';
 import PrintWarrantyHandler, { hasWarranty } from '../../components/PrintWarrantyHandler';
 import ComplaintModal from '../../components/ComplaintModal';
+import DuplicateAlertBanner from '../../components/DuplicateAlertBanner';
+import DeletionRequestModal from '../../components/DeletionRequestModal';
+import DeletionApprovalModal from '../../components/DeletionApprovalModal';
 import { useInventory } from '../../context/InventoryContext';
 import '../Customers/Customers.css';
 
@@ -63,6 +66,94 @@ const AdminCustomerWarranty = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showEditHistoryPaymentModal, setShowEditHistoryPaymentModal] = useState(false);
   const [editHistoryPaymentData, setEditHistoryPaymentData] = useState(null);
+
+  const [duplicatesData, setDuplicatesData] = useState(null);
+  const [warningLoading, setWarningLoading] = useState({});
+
+  // States untuk Fitur Approval Hapus Data Customer
+  const [showDeletionRequestModal, setShowDeletionRequestModal] = useState(false);
+  const [deletionRequestOrder, setDeletionRequestOrder] = useState(null);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [deletionRequests, setDeletionRequests] = useState([]);
+  const [pendingDeletionCounts, setPendingDeletionCounts] = useState(0);
+
+  const fetchDeletionRequests = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${window.API_URL || ''}/api/deletion-requests?status=PENDING`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setDeletionRequests(json.data);
+          setPendingDeletionCounts(json.counts?.pending || json.data.length || 0);
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching deletion requests:', e);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchDeletionRequests();
+  }, [fetchDeletionRequests]);
+
+  const fetchDuplicates = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${window.API_URL || ''}/api/transactions/duplicates`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) setDuplicatesData(json);
+      }
+    } catch (e) {
+      console.error('Error fetching duplicates in customer warranty:', e);
+    }
+  };
+
+  useEffect(() => {
+    fetchDuplicates();
+  }, [token]);
+
+  const handleWarnSales = async (orderId, salesId, salesName, customerName, plateNumber, reason) => {
+    if (!isSuperOrOwner && userRole !== 'admin') {
+      toast.error('Hanya Admin dan Superadmin yang memiliki wewenang untuk menegur sales.');
+      return;
+    }
+    try {
+      setWarningLoading(prev => ({ ...prev, [orderId]: true }));
+      const res = await fetch(`${window.API_URL || ''}/api/notifications/warn-sales`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          transactionId: orderId,
+          salesId: salesId,
+          salesName: salesName,
+          customerName: customerName,
+          plateNumber: plateNumber,
+          reason: reason || 'Terindikasi data ganda'
+        })
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        toast.success(json.message || `Peringatan berhasil dikirim ke Sales ${salesName}`);
+        fetchDuplicates();
+      } else {
+        toast.error(json.message || 'Gagal mengirim peringatan');
+      }
+    } catch (err) {
+      toast.error('Gagal menghubungi server: ' + err.message);
+    } finally {
+      setWarningLoading(prev => ({ ...prev, [orderId]: false }));
+    }
+  };
 
   const [filterStatus, setFilterStatus] = useState('Semua Status');
   const [filterTransactionType, setFilterTransactionType] = useState('Semua Transaksi');
@@ -296,8 +387,47 @@ const AdminCustomerWarranty = () => {
           <p className="page-subtitle">Kelola data pelanggan dan riwayat klaim garansi produk/layanan</p>
         </div>
 
-        <div className="print:hidden" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div className="print:hidden" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <span className="font-sans text-sm font-medium text-gray-600">Total: <strong className="text-black font-bold">{filteredOrders.length}</strong> Kendaraan</span>
+          
+          {(isSuperOrOwner || userRole === 'admin') && (
+            <button
+              type="button"
+              onClick={() => setShowApprovalModal(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 14px',
+                borderRadius: '6px',
+                border: pendingDeletionCounts > 0 ? '1.5px solid #ef4444' : '1px solid #d1d5db',
+                backgroundColor: pendingDeletionCounts > 0 ? '#fff1f2' : '#ffffff',
+                color: pendingDeletionCounts > 0 ? '#b91c1c' : '#374151',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                boxShadow: pendingDeletionCounts > 0 ? '0 1px 3px rgba(239, 68, 68, 0.2)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+              title="Buka panel persetujuan hapus data customer"
+            >
+              <ShieldCheck size={16} color={pendingDeletionCounts > 0 ? '#dc2626' : '#6b7280'} />
+              <span>Approval Hapus Data</span>
+              {pendingDeletionCounts > 0 && (
+                <span style={{
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff',
+                  fontSize: '0.72rem',
+                  fontWeight: '700',
+                  padding: '1px 6px',
+                  borderRadius: '9999px'
+                }}>
+                  {pendingDeletionCounts}
+                </span>
+              )}
+            </button>
+          )}
+
           {filterTransactionType === 'Retail (Grosir)' && (
             <button
               onClick={handleExportBulkExcel}
@@ -321,7 +451,10 @@ const AdminCustomerWarranty = () => {
         </div>
       </div>
 
-        <div className="customers-list premium-card" style={{ overflow: 'visible' }}>
+      {/* Duplicate Alert Banner */}
+      <DuplicateAlertBanner onRefreshData={fetchDuplicates} />
+
+      <div className="customers-list premium-card" style={{ overflow: 'visible' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px', padding: '1.5rem 1.5rem 0 1.5rem', flexWrap: 'nowrap' }} className="print:hidden">
             {/* Sisi Kiri: Search Input */}
             <div style={{ position: 'relative', flex: 1, minWidth: '0' }}>
@@ -439,10 +572,16 @@ const AdminCustomerWarranty = () => {
                 }
                 if (isLunas) remaining = 0;
 
+                const rawId = order.dbId || parseInt(String(order.id).replace(/[^0-9]/g, ''), 10);
+                const isDuplicate = duplicatesData?.duplicateTransactionIds?.includes(rawId);
+                const duplicateGroup = duplicatesData?.duplicateGroups?.find(g => g.transactions.some(t => t.id === rawId));
+                const duplicateTrxInfo = duplicateGroup?.transactions?.find(t => t.id === rawId);
+                const warningSent = duplicateTrxInfo?.warningSent;
+
                 return (
                   <div key={order.id} className="premium-card" style={{ 
-                    backgroundColor: selectedRows.includes(order.id) ? '#f0fdf4' : '#ffffff', 
-                    border: selectedRows.includes(order.id) ? '1px solid #86efac' : '1px solid #e5e7eb', 
+                    backgroundColor: selectedRows.includes(order.id) ? '#f0fdf4' : (isDuplicate ? '#fff1f2' : '#ffffff'), 
+                    border: selectedRows.includes(order.id) ? '1px solid #86efac' : (isDuplicate ? '1.5px solid #fecdd3' : '1px solid #e5e7eb'), 
                     borderRadius: '12px', 
                     padding: '32px', 
                     display: 'grid', 
@@ -450,7 +589,7 @@ const AdminCustomerWarranty = () => {
                     gap: '24px', 
                     alignItems: 'start', 
                     position: 'relative', 
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
+                    boxShadow: isDuplicate ? '0 4px 12px rgba(225, 29, 72, 0.08)' : '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
                     transition: 'all 0.2s',
                     overflow: 'visible'
                   }}>
@@ -478,8 +617,102 @@ const AdminCustomerWarranty = () => {
                         <span className="badge" style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', backgroundColor: statusBg, color: statusColor, border: `1px solid ${statusBorder}`, fontWeight: 'bold' }}>
                           {displayStatus}
                         </span>
+
+                        {isDuplicate && (
+                          <span className="badge" style={{
+                            fontSize: '10px',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            backgroundColor: '#ffe4e6',
+                            color: '#e11d48',
+                            border: '1px solid #fecdd3',
+                            fontWeight: 'bold',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            <AlertTriangle size={11} />
+                            <span>Indikasi Ganda</span>
+                          </span>
+                        )}
                       </div>
                       
+                      {isDuplicate && (
+                        <div style={{
+                          marginTop: '6px',
+                          padding: '8px 10px',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #fecdd3',
+                          borderRadius: '8px',
+                          fontSize: '0.74rem',
+                          color: '#9f1239',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '6px'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '700' }}>
+                            <AlertTriangle size={12} color="#e11d48" />
+                            <span>{duplicateGroup?.reason || 'Terdeteksi input ganda pada hari yang sama'}</span>
+                          </div>
+
+                          {/* RBAC Action Button: Only Admin & Superadmin */}
+                          {(isSuperOrOwner || userRole === 'admin') ? (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px', paddingTop: '4px', borderTop: '1px dashed #fecdd3' }}>
+                              <span style={{ fontSize: '0.7rem', color: '#be123c' }}>
+                                PIC: <strong>{order.spgName || 'Sales Team'}</strong>
+                              </span>
+                              {warningSent ? (
+                                <span style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px',
+                                  color: '#15803d',
+                                  backgroundColor: '#dcfce7',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  fontWeight: '700',
+                                  fontSize: '0.7rem'
+                                }}>
+                                  <CheckCircle size={10} />
+                                  <span>Telah Ditegur</span>
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled={warningLoading[rawId]}
+                                  onClick={() => handleWarnSales(
+                                    rawId, 
+                                    order.salesId || order.sales_id, 
+                                    order.spgName || order.event || 'Sales Team', 
+                                    order.customerName, 
+                                    order.plateNumber,
+                                    duplicateGroup?.reason
+                                  )}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    backgroundColor: '#f59e0b',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '3px 8px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: '700',
+                                    cursor: warningLoading[rawId] ? 'not-allowed' : 'pointer',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                                  }}
+                                  title="Kirim notifikasi peringatan in-app ke PIC Sales"
+                                >
+                                  <Bell size={11} />
+                                  <span>{warningLoading[rawId] ? 'Mengirim...' : 'Tegur Sales'}</span>
+                                </button>
+                              )}
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
+
                       <div style={{ marginTop: '12px' }}>
                         <div className="text-sm font-bold text-primary" style={{ letterSpacing: '0.025em', lineHeight: '1.6' }}>{order.id.replace('ORD-', 'WRK/300260700')}</div>
                         <div className="text-xs text-secondary font-mono-ui mt-1" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -837,9 +1070,7 @@ const AdminCustomerWarranty = () => {
                           )}
 
                           {/* Destructive Actions Separator */}
-                          {((!isPenawaran && isSuperOrOwner) || (isPenawaran && isSuperOrOwner)) && (
-                            <div style={{ height: '1px', backgroundColor: '#f3f4f6', margin: '4px 0' }}></div>
-                          )}
+                          <div style={{ height: '1px', backgroundColor: '#f3f4f6', margin: '4px 0' }}></div>
 
                           {/* Destructive Actions */}
                           {(!isPenawaran) && isSuperOrOwner && (
@@ -862,6 +1093,18 @@ const AdminCustomerWarranty = () => {
                                 <Trash2 size={16} color="#ef4444" /> Hapus Data Transaksi
                               </button>
                             </>
+                          )}
+
+                          {/* Kasir / Sales: Request Delete Customer */}
+                          {(!isPenawaran) && !isSuperOrOwner && (
+                            <button onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveDropdown(null);
+                              setDeletionRequestOrder(order);
+                              setShowDeletionRequestModal(true);
+                            }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#dc2626', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef2f2'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                              <ShieldAlert size={16} color="#dc2626" /> Request Delete Customer
+                            </button>
                           )}
 
                           {isPenawaran && isSuperOrOwner && (
@@ -1821,6 +2064,25 @@ const AdminCustomerWarranty = () => {
         transactionData={complaintOrderData}
         onSuccess={() => {
           // Additional logic if needed after saving complaint
+        }}
+      />
+
+      {/* Modal Pengajuan Hapus Customer oleh Kasir */}
+      <DeletionRequestModal
+        isOpen={showDeletionRequestModal}
+        onClose={() => setShowDeletionRequestModal(false)}
+        order={deletionRequestOrder}
+        onSuccess={fetchDeletionRequests}
+      />
+
+      {/* Modal Persetujuan Hapus Data oleh Superadmin */}
+      <DeletionApprovalModal
+        isOpen={showApprovalModal}
+        onClose={() => setShowApprovalModal(false)}
+        onRefreshData={() => {
+          fetchDeletionRequests();
+          if (refreshOrdersFromApi) refreshOrdersFromApi();
+          if (fetchDuplicates) fetchDuplicates();
         }}
       />
     </>

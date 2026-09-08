@@ -599,6 +599,7 @@ const POSRetail = () => {
           payment_method: newOrder.paymentMethod,
           termin_schedule: newOrder.terminSchedule,
           notes: newOrder.notes,
+          branch: formData.location || userBranch || 'Gallardo',
           // items — untuk log nama produk di TransactionItem
           items: finalizedCartItems.map(item => ({
             product_name: item.name,

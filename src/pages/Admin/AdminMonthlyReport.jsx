@@ -1,10 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, DollarSign, Package, ShoppingBag, FileText, Printer, Search, Download, Loader2, CreditCard, TrendingUp, TrendingDown, PieChart } from 'lucide-react';
+import { Calendar, DollarSign, Package, ShoppingBag, FileText, Printer, Search, Download, Loader2, CreditCard, TrendingUp, TrendingDown, PieChart, ArrowUpRight, ArrowDownRight, Minus, CheckCircle2 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { toast } from 'sonner';
 import { formatTransactionId } from '../../utils/formatId';
 import DashboardDetailsModal from '../../components/DashboardDetailsModal';
+
+/**
+ * MoMBadge — Badge persentase Month-over-Month
+ * pct = null  → Badge abu-abu "Data Awal" (bulan lalu belum ada data)
+ * pct > 0     → Badge hijau "+XX%"
+ * pct < 0     → Badge merah "-XX%"
+ * pct = 0     → Badge abu-abu "0%"
+ */
+const MoMBadge = ({ pct }) => {
+  if (pct === null || pct === undefined) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/70 shrink-0 whitespace-nowrap">
+        <Minus className="w-3 h-3" />
+        Data Awal
+      </span>
+    );
+  }
+  if (pct > 0) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/80 shrink-0 whitespace-nowrap">
+        <ArrowUpRight className="w-3 h-3" />
+        +{pct}% MoM
+      </span>
+    );
+  }
+  if (pct < 0) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200/80 shrink-0 whitespace-nowrap">
+        <ArrowDownRight className="w-3 h-3" />
+        {pct}% MoM
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/70 shrink-0 whitespace-nowrap">
+      <Minus className="w-3 h-3" />
+      0% MoM
+    </span>
+  );
+};
 
 const AdminMonthlyReport = () => {
   const [activeTab, setActiveTab] = useState('omset');
@@ -127,6 +167,23 @@ const AdminMonthlyReport = () => {
     try {
       const headers = { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` };
       const API_URL = window.API_URL || '';
+
+      // ── Validasi Mandatory Beban Operasional ─────────────────────────
+      if (exportAll || activeTab === 'omset') {
+        try {
+          const chk = await fetch(`${API_URL}/api/reports/validate-beban?month=${monthFilter}`, { headers });
+          if (chk.ok) {
+            const chkData = await chk.json();
+            if (chkData.isValid === false) {
+              toast.dismiss(toastId);
+              setIsExporting(false);
+              toast.error(`Beban Operasional bulan ${monthFilter} belum diisi (Rp 0). Laporan tidak dapat digenerate karena akan menghasilkan Laba Bersih yang tidak akurat. Isi beban di menu Keuangan → Beban Operasional.`);
+              return;
+            }
+          }
+        } catch (_) {}
+      }
+      // ─────────────────────────────────────────────────────────────────
 
       const [year, month] = monthFilter.split('-');
       const startDate = new Date(year, parseInt(month) - 1, 1).toISOString();
@@ -255,225 +312,508 @@ const AdminMonthlyReport = () => {
   };
 
   return (
-    <div className="h-full flex flex-col p-6 space-y-6 bg-gray-50/50">
-      <div className="flex flex-col gap-5 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+    <div className="min-h-full flex flex-col space-y-6 bg-slate-50 text-slate-900">
+      {/* Header & Top Controls */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-[20px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Laporan Bulanan</h1>
-          <p className="text-sm font-medium text-gray-500 mt-1">Pantau performa penjualan, omset, dan mutasi stok.</p>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Laporan Bulanan</h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">Pantau performa penjualan, omset, dan mutasi stok.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Calendar className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
             <input 
               type="month"
               value={monthFilter}
               onChange={(e) => setMonthFilter(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              className="pl-10 pr-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-semibold text-slate-700 hover:bg-slate-100/60 transition-colors"
             />
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => handlePrintPDF(false)}
-              disabled={isExporting}
-              className={`flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-300 shadow-sm transition-all text-sm ${isExporting ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <FileText className="w-4 h-4 text-blue-600" />
-              {isExporting ? 'Memproses...' : `Export ${activeTab === 'omset' ? 'Omset' : activeTab === 'produk' ? 'Produk' : activeTab === 'stok' ? 'Stok' : activeTab === 'invoice' ? 'Transaksi' : 'Komplain'}`}
-            </button>
-            <button
-              onClick={() => handlePrintPDF(true)}
-              disabled={isExporting}
-              className={`flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 shadow-sm hover:shadow transition-all text-sm ${isExporting ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
-              {isExporting ? 'Memproses...' : 'Export Lengkap'}
-            </button>
-          </div>
+          <button
+            onClick={() => handlePrintPDF(false)}
+            disabled={isExporting}
+            className={`flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all text-sm ${isExporting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <FileText className="w-4 h-4 text-blue-600" />
+            {isExporting ? 'Memproses...' : `Export ${activeTab === 'omset' ? 'Omset' : activeTab === 'produk' ? 'Produk' : activeTab === 'stok' ? 'Stok' : activeTab === 'invoice' ? 'Transaksi' : 'Komplain'}`}
+          </button>
+          <button
+            onClick={() => handlePrintPDF(true)}
+            disabled={isExporting}
+            className={`flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 shadow-sm hover:shadow transition-all text-sm ${isExporting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+            {isExporting ? 'Memproses...' : 'Export Lengkap'}
+          </button>
         </div>
       </div>
 
-      <div className="flex space-x-1 p-1 bg-gray-100/80 rounded-xl max-w-fit">
+      {/* Floating Pill Tabs */}
+      <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-200/60 backdrop-blur-sm rounded-2xl max-w-fit border border-slate-200/50">
         {[
           { id: 'omset', label: 'Omset Bersih', icon: DollarSign },
           { id: 'produk', label: 'Penjualan Produk', icon: ShoppingBag },
           { id: 'stok', label: 'Mutasi Stok', icon: Package },
           { id: 'invoice', label: 'Daftar Transaksi', icon: FileText },
           { id: 'komplain', label: 'Data Komplain', icon: FileText }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-              activeTab === tab.id 
-                ? 'bg-white text-gray-900 shadow-sm' 
-                : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
-            }`}
-          >
-            <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600' : ''}`} />
-            {tab.label}
-          </button>
-        ))}
+        ].map(tab => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                isActive 
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-100' 
+                  : 'text-slate-500 hover:text-slate-800 hover:bg-white/40'
+              }`}
+            >
+              <tab.icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
+      {/* Main Content Area */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
-        className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+        className="flex-1"
       >
         {isLoading ? (
-          <div className="h-full flex flex-col items-center justify-center">
+          <div className="bg-white rounded-[20px] border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] p-12 flex flex-col items-center justify-center min-h-[320px]">
             <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-4" />
-            <p className="text-gray-500 font-medium">Memuat data laporan...</p>
+            <p className="text-slate-500 font-medium">Memuat data laporan...</p>
           </div>
         ) : error ? (
-          <div className="h-full flex flex-col items-center justify-center p-6 text-center">
+          <div className="bg-white rounded-[20px] border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] p-8 text-center min-h-[320px] flex flex-col items-center justify-center">
             <div className="text-red-500 text-5xl mb-3">⚠️</div>
-            <p className="text-xl font-bold text-gray-900 mb-1">Gagal Memuat Data</p>
-            <p className="text-gray-500 text-sm max-w-md">{error}</p>
+            <p className="text-xl font-bold text-slate-900 mb-1">Gagal Memuat Data</p>
+            <p className="text-slate-500 text-sm max-w-md">{error}</p>
             <button 
               onClick={fetchData}
-              className="mt-6 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors"
+              className="mt-6 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-semibold hover:bg-blue-100 transition-colors"
             >
               Coba Lagi
             </button>
           </div>
         ) : (
-          <div className="p-6 h-full overflow-y-auto">
-            
+          <div>
             {/* TAB OMSET */}
             {activeTab === 'omset' && (
-              netRevenue ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Kas Masuk Card */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    onClick={() => handleCardClick('kas-masuk')}
-                    className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden cursor-pointer"
-                  >
-                    <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <DollarSign className="w-20 h-20 text-green-600" />
-                    </div>
-                    <div className="relative z-10">
-                      <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-1">Kas Masuk</h3>
-                      <div className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">
-                        {formatCurrency(netRevenue.totalKasMasuk)}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center border border-green-100">
-                          <DollarSign className="w-4 h-4 text-green-600" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-semibold text-green-700 flex items-center">
-                            <TrendingUp size={12} className="mr-1" /> Stabil
-                          </span>
-                          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Bulan Terpilih</span>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
+              netRevenue ? (() => {
+                const plData = netRevenue.pl || {};
+                const cashflowData = netRevenue.cashflow || {};
+                const momData = netRevenue.momComparison || {};
+                const receivablesData = netRevenue.receivables || {};
 
-                  {/* Piutang Card */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    onClick={() => handleCardClick('piutang')}
-                    className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden cursor-pointer"
-                  >
-                    <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <CreditCard className="w-20 h-20 text-orange-600" />
-                    </div>
-                    <div className="relative z-10">
-                      <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-1">Piutang</h3>
-                      <div className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">
-                        {formatCurrency(netRevenue.totalPiutang)}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center border border-orange-100">
-                          <CreditCard className="w-4 h-4 text-orange-600" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-semibold text-orange-700 flex items-center">
-                            Belum Lunas
-                          </span>
-                          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Total Akumulasi</span>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
+                const totalOmset = plData.totalOmset ?? netRevenue.totalOmset ?? 0;
+                const totalHpp = plData.totalHpp ?? netRevenue.totalHpp ?? 0;
+                const totalBeban = plData.totalBeban ?? netRevenue.totalExpense ?? 0;
+                const totalKomisi = plData.totalKomisi ?? netRevenue.totalKomisi ?? 0;
+                const labaKotor = plData.labaKotor ?? (totalOmset - totalHpp);
 
-                  {/* Omset Card */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    onClick={() => handleCardClick('omset')}
-                    className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden cursor-pointer"
-                  >
-                    <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <FileText className="w-20 h-20 text-blue-600" />
-                    </div>
-                    <div className="relative z-10">
-                      <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-1">Total Omset</h3>
-                      <div className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">
-                        {formatCurrency(netRevenue.totalOmset)}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100">
-                          <FileText className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-semibold text-blue-700 flex items-center">
-                            Sales Gross
-                          </span>
-                          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Bulan Terpilih</span>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
+                // Laba Bersih WAJIB basis akrual: Total Omset - Total HPP - Total Beban - Total Komisi
+                const labaBersih = plData.labaBersih ?? (totalOmset - totalHpp - totalBeban - totalKomisi);
 
-                  {/* Omset Bersih Card */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    onClick={() => handleCardClick('kas-masuk')}
-                    className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] hover:shadow-md border border-gray-100 p-5 flex flex-col transition-all group relative overflow-hidden cursor-pointer"
-                  >
-                    <div className="absolute top-4 right-4 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <DollarSign className="w-20 h-20 text-emerald-600" />
-                    </div>
-                    <div className="relative z-10">
-                      <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-1">Omset Bersih</h3>
-                      <div className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">
-                        {formatCurrency((netRevenue.totalKasMasuk || 0) - (netRevenue.totalKomisi || 0))}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100">
-                          <DollarSign className="w-4 h-4 text-emerald-600" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-semibold text-emerald-700 flex items-center">
-                            Net Revenue
+                // Cashflow murni uang fisik/transfer riil
+                const kasMasuk = cashflowData.kasMasuk ?? netRevenue.totalKasMasuk ?? 0;
+                const kasKeluar = cashflowData.kasKeluar ?? (totalBeban + (netRevenue.totalPembelian || cashflowData.totalPembelian || 0));
+                const netCashflow = cashflowData.netCashflow ?? (kasMasuk - kasKeluar);
+                const totalTerkumpul = cashflowData.totalTerkumpul ?? netRevenue.totalTerkumpul ?? 0;
+                const pelunasanPiutangLama = cashflowData.pelunasanPiutangLama ?? netRevenue.pelunasanPiutangLama ?? 0;
+                const kasBulanIni = cashflowData.kasBulanIni ?? netRevenue.kasBulanIni ?? 0;
+                const totalPiutang = receivablesData.totalPiutang ?? netRevenue.totalPiutang ?? 0;
+                const totalPiutangPeriode = receivablesData.totalPiutangPeriode ?? netRevenue.totalPiutangPeriode ?? 0;
+
+                return (
+                  <div className="space-y-6">
+                    {/* Section 1: Arus Kas Riil (Cashflow) */}
+                    <div className="w-full text-left">
+                      <div className="w-full mb-4 mt-4 text-left">
+                        <div className="flex items-center justify-between gap-3 w-full">
+                          <div className="flex items-center gap-2.5 text-left">
+                            <span className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/70 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
+                              1
+                            </span>
+                            <h3 className="text-lg font-extrabold text-slate-900 tracking-tight text-left">ARUS KAS RIIL (CASHFLOW)</h3>
+                          </div>
+                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-200/80 shadow-2xs shrink-0">
+                            <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                            Periode: {monthFilter}
                           </span>
-                          <span className="text-[10px] text-gray-400 uppercase tracking-wide">Kas Masuk - Komisi</span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-slate-500 mt-1.5 font-medium text-left">
+                          Penerimaan & pengeluaran uang fisik / transfer yang benar-benar terjadi pada periode {monthFilter}
+                        </p>
+                      </div>
+
+                      {/* Bento 4-Column Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-5">
+                        {/* Kartu 1: Kas Masuk Riil */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          onClick={() => handleCardClick('kas-masuk')}
+                          className="bg-white rounded-[22px] p-5 xl:p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:border-emerald-200 min-w-0 overflow-hidden"
+                        >
+                          <div>
+                            {/* Top Row: Label & Icon Container */}
+                            <div className="h-8 flex items-center justify-between gap-2 mb-3">
+                              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">KAS MASUK RIIL</span>
+                              <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-105 transition-transform shrink-0">
+                                <DollarSign className="w-4 h-4" />
+                              </div>
+                            </div>
+                            
+                            {/* Middle Row: Value */}
+                            <div className="text-2xl xl:text-[28px] font-black text-slate-900 tracking-tight leading-none mb-2 truncate">
+                              {formatCurrency(kasMasuk)}
+                            </div>
+                            {/* Badge Slot: Fixed height for alignment */}
+                            <div className="h-6 flex items-center">
+                              <MoMBadge pct={momData?.kas?.pct} />
+                            </div>
+                          </div>
+
+                          {/* Bottom Row: Context Subtext */}
+                          <div className="flex items-center gap-2 pt-3 mt-4 border-t border-slate-100 text-xs font-medium text-slate-500">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                            <span className="truncate">Uang Masuk Tunai & Transfer</span>
+                          </div>
+                        </motion.div>
+
+                        {/* Kartu 2: Pelunasan Piutang Lama */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.05 }}
+                          onClick={() => handleCardClick('piutang-lama')}
+                          className="bg-white rounded-[22px] p-5 xl:p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:border-teal-200 min-w-0 overflow-hidden"
+                        >
+                          <div>
+                            {/* Top Row: Label & Status Badge */}
+                            <div className="h-8 flex items-center justify-between gap-2 mb-3">
+                              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate" title="Pelunasan Piutang Lama">PELUNASAN PIUTANG LAMA</span>
+                              <span className="px-2.5 py-1 bg-teal-50 text-teal-700 border border-teal-200/80 rounded-full text-[10px] font-bold shrink-0 whitespace-nowrap">
+                                Bagian Kas Masuk
+                              </span>
+                            </div>
+                            
+                            {/* Middle Row: Value */}
+                            <div className="text-2xl xl:text-[28px] font-black text-slate-900 tracking-tight leading-none mb-2 truncate">
+                              {formatCurrency(pelunasanPiutangLama)}
+                            </div>
+                            {/* Badge Slot: Fixed height for alignment */}
+                            <div className="h-6 flex items-center" />
+                          </div>
+
+                          {/* Bottom Row: Context Subtext */}
+                          <div className="flex items-center gap-2 pt-3 mt-4 border-t border-slate-100 text-xs font-medium text-slate-500">
+                            <CreditCard className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                            <span className="truncate">Cicilan / Termin Invoice Lalu</span>
+                          </div>
+                        </motion.div>
+
+                        {/* Kartu 3: Net Cashflow */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                          onClick={() => handleCardClick('net-cashflow')}
+                          className="bg-white rounded-[22px] p-5 xl:p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:border-cyan-200 min-w-0 overflow-hidden"
+                        >
+                          <div>
+                            {/* Top Row: Label & Icon Container */}
+                            <div className="h-8 flex items-center justify-between gap-2 mb-3">
+                              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">NET CASHFLOW</span>
+                              <div className="w-8 h-8 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-600 group-hover:scale-105 transition-transform shrink-0">
+                                <TrendingUp className="w-4 h-4" />
+                              </div>
+                            </div>
+                            
+                            {/* Middle Row: Value */}
+                            <div className={`text-2xl xl:text-[28px] font-black tracking-tight leading-none mb-2 truncate ${netCashflow >= 0 ? 'text-slate-900' : 'text-rose-600'}`}>
+                              {netCashflow < 0 ? '-' : ''}{formatCurrency(Math.abs(netCashflow))}
+                            </div>
+                            {/* Badge Slot: Fixed height for alignment */}
+                            <div className="h-6 flex items-center">
+                              <MoMBadge pct={momData?.cashflow?.pct} />
+                            </div>
+                          </div>
+
+                          {/* Bottom Row: Context Subtext */}
+                          <div className="flex items-center gap-2 pt-3 mt-4 border-t border-slate-100 text-xs font-medium text-slate-500">
+                            <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${netCashflow >= 0 ? 'bg-cyan-500' : 'bg-rose-500'}`} />
+                            <span className="truncate">Kas Masuk - Kas Keluar</span>
+                          </div>
+                        </motion.div>
+
+                        {/* Kartu 4: Sisa Piutang Berjalan */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.15 }}
+                          onClick={() => handleCardClick('piutang')}
+                          className="bg-white rounded-[22px] p-5 xl:p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:border-amber-200 min-w-0 overflow-hidden"
+                        >
+                          <div>
+                            {/* Top Row: Label & Status Badge */}
+                            <div className="h-8 flex items-center justify-between gap-2 mb-3">
+                              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate" title="Sisa Piutang Berjalan">SISA PIUTANG BERJALAN</span>
+                              <span className="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200/80 rounded-full text-[10px] font-bold shrink-0 whitespace-nowrap">
+                                Belum Lunas
+                              </span>
+                            </div>
+                            
+                            {/* Middle Row: Value */}
+                            <div className="text-2xl xl:text-[28px] font-black text-slate-900 tracking-tight leading-none mb-2 truncate">
+                              {formatCurrency(totalPiutang)}
+                            </div>
+                            {/* Badge Slot: Fixed height for alignment */}
+                            <div className="h-6 flex items-center" />
+                          </div>
+
+                          {/* Bottom Row: Context Subtext */}
+                          <div className="flex items-center gap-2 pt-3 mt-4 border-t border-slate-100 text-xs font-medium text-slate-500">
+                            <CreditCard className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                            <span className="truncate">{totalPiutangPeriode > 0 ? `Bulan ini: ${formatCurrency(totalPiutangPeriode)}` : 'Total Akumulasi'}</span>
+                          </div>
+                        </motion.div>
+                      </div>
+
+                      {/* Verification Banner */}
+                      <div className="w-full bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-emerald-50/90 border border-emerald-200/90 rounded-[20px] p-4 flex flex-col lg:flex-row items-center justify-between gap-3 shadow-2xs mt-4 mb-2 min-w-0">
+                        <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 text-xs sm:text-sm text-slate-700">
+                          <span className="inline-flex items-center gap-1.5 font-bold text-slate-900 shrink-0">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            Pemetaan Kas Masuk Riil:
+                          </span>
+                          <span className="bg-white/90 border border-emerald-200/80 px-2.5 py-1 rounded-lg font-semibold text-slate-700 text-xs shadow-2xs">
+                            Kas Invoice Berjalan: <strong className="text-slate-900">{formatCurrency(kasBulanIni)}</strong>
+                          </span>
+                          <span className="text-emerald-700 font-bold">+</span>
+                          <span className="bg-white/90 border border-emerald-200/80 px-2.5 py-1 rounded-lg font-semibold text-slate-700 text-xs shadow-2xs">
+                            Pelunasan Piutang Lalu: <strong className="text-slate-900">{formatCurrency(pelunasanPiutangLama)}</strong>
+                          </span>
+                          <span className="text-emerald-700 font-bold">=</span>
+                          <span className="bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold text-xs shadow-2xs">
+                            {formatCurrency(kasMasuk)}
+                          </span>
+                        </div>
+                        <div className="shrink-0">
+                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold border border-emerald-300/80 shadow-2xs">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            Terverifikasi Sinkron (Selisih Rp 0)
+                          </span>
                         </div>
                       </div>
                     </div>
-                  </motion.div>
-                </div>
-              ) : (
-                <div className="py-10 text-center text-gray-500">
+
+                    {/* Section 2: Standar Laporan Keuangan SOP (Laba Rugi Akrual) */}
+                    <div className="w-full text-left">
+                      <div className="w-full mb-4 mt-8 text-left">
+                        <div className="flex items-center justify-between gap-3 w-full">
+                          <div className="flex items-center gap-2.5 text-left">
+                            <span className="w-7 h-7 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200/70 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
+                              2
+                            </span>
+                            <h3 className="text-lg font-extrabold text-slate-900 tracking-tight text-left">STANDAR LAPORAN KEUANGAN SOP (LABA RUGI AKRUAL)</h3>
+                          </div>
+                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold border border-indigo-200/80 shadow-2xs shrink-0">
+                            <PieChart className="w-3.5 h-3.5 text-indigo-500" />
+                            Profit & Loss Analysis
+                          </span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-slate-500 mt-1.5 font-medium text-left">
+                          Dihitung murni berdasarkan basis akrual: Total Omset Penjualan dikurangi HPP, Beban Operasional, dan Komisi Sales
+                        </p>
+                      </div>
+
+                      {/* Bento Responsive Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 xl:gap-5">
+                        {/* Kartu 1: Total Omset (Akrual) */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          onClick={() => handleCardClick('omset')}
+                          className="bg-white rounded-[22px] p-5 xl:p-5.5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:border-blue-200 min-w-0 overflow-hidden"
+                        >
+                          <div>
+                            {/* Top Row */}
+                            <div className="h-8 flex items-center justify-between gap-2 mb-3">
+                              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">TOTAL OMSET</span>
+                              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-105 transition-transform shrink-0">
+                                <TrendingUp className="w-4 h-4" />
+                              </div>
+                            </div>
+                            
+                            {/* Middle Row */}
+                            <div className="text-xl sm:text-2xl xl:text-[26px] font-black text-slate-900 tracking-tight leading-none mb-2 truncate">
+                              {formatCurrency(totalOmset)}
+                            </div>
+                            <div className="h-6 flex items-center">
+                              <MoMBadge pct={momData?.omset?.pct} />
+                            </div>
+                          </div>
+
+                          {/* Bottom Row */}
+                          <div className="flex items-center gap-2 pt-3 mt-4 border-t border-slate-100 text-xs font-medium text-slate-500">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                            <span className="truncate">Semua Transaksi SOP</span>
+                          </div>
+                        </motion.div>
+
+                        {/* Kartu 2: HPP (Modal Bahan) */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.05 }}
+                          onClick={() => handleCardClick('hpp')}
+                          className="bg-white rounded-[22px] p-5 xl:p-5.5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:border-amber-200 min-w-0 overflow-hidden"
+                        >
+                          <div>
+                            {/* Top Row */}
+                            <div className="h-8 flex items-center justify-between gap-2 mb-3">
+                              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">HPP (MODAL BAHAN)</span>
+                              <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 group-hover:scale-105 transition-transform shrink-0">
+                                <Package className="w-4 h-4" />
+                              </div>
+                            </div>
+                            
+                            {/* Middle Row */}
+                            <div className="text-xl sm:text-2xl xl:text-[26px] font-black text-slate-900 tracking-tight leading-none mb-2 truncate">
+                              {formatCurrency(totalHpp)}
+                            </div>
+                            <div className="h-6 flex items-center" />
+                          </div>
+
+                          {/* Bottom Row */}
+                          <div className="flex items-center gap-2 pt-3 mt-4 border-t border-slate-100 text-xs font-medium text-slate-500">
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                            <span className="truncate">Stok Terpasang</span>
+                          </div>
+                        </motion.div>
+
+                        {/* Kartu 3: Beban Operasional */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                          onClick={() => handleCardClick('beban')}
+                          className="bg-white rounded-[22px] p-5 xl:p-5.5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:border-rose-200 min-w-0 overflow-hidden"
+                        >
+                          <div>
+                            {/* Top Row */}
+                            <div className="h-8 flex items-center justify-between gap-2 mb-3">
+                              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">BEBAN OPERASIONAL</span>
+                              <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 group-hover:scale-105 transition-transform shrink-0">
+                                <TrendingDown className="w-4 h-4" />
+                              </div>
+                            </div>
+                            
+                            {/* Middle Row */}
+                            <div className="text-xl sm:text-2xl xl:text-[26px] font-black text-slate-900 tracking-tight leading-none mb-2 truncate">
+                              {formatCurrency(totalBeban)}
+                            </div>
+                            <div className="h-6 flex items-center" />
+                          </div>
+
+                          {/* Bottom Row */}
+                          <div className="flex items-center gap-2 pt-3 mt-4 border-t border-slate-100 text-xs font-medium text-slate-500">
+                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                            <span className="truncate">Biaya Rutin Ops</span>
+                          </div>
+                        </motion.div>
+
+                        {/* Kartu 4: Komisi Sales */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.15 }}
+                          onClick={() => handleCardClick('komisi')}
+                          className="bg-white rounded-[22px] p-5 xl:p-5.5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:border-purple-200 min-w-0 overflow-hidden"
+                        >
+                          <div>
+                            {/* Top Row */}
+                            <div className="h-8 flex items-center justify-between gap-2 mb-3">
+                              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">KOMISI SALES</span>
+                              <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-105 transition-transform shrink-0">
+                                <PieChart className="w-4 h-4" />
+                              </div>
+                            </div>
+                            
+                            {/* Middle Row */}
+                            <div className="text-xl sm:text-2xl xl:text-[26px] font-black text-slate-900 tracking-tight leading-none mb-2 truncate">
+                              {formatCurrency(totalKomisi)}
+                            </div>
+                            <div className="h-6 flex items-center" />
+                          </div>
+
+                          {/* Bottom Row */}
+                          <div className="flex items-center gap-2 pt-3 mt-4 border-t border-slate-100 text-xs font-medium text-slate-500">
+                            <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />
+                            <span className="truncate">Insentif Transaksi Lunas</span>
+                          </div>
+                        </motion.div>
+
+                        {/* Kartu 5: Laba Bersih (Hero Metric Bento Card) */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          onClick={() => handleCardClick('laba-rugi')}
+                          className={`rounded-[22px] p-5 xl:p-5.5 border shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group min-w-0 overflow-hidden lg:col-span-2 xl:col-span-1 ${
+                            labaBersih >= 0 
+                              ? 'bg-gradient-to-br from-white via-emerald-50/25 to-emerald-50/40 border-emerald-200/90 hover:border-emerald-300' 
+                              : 'bg-gradient-to-br from-white via-rose-50/25 to-rose-50/40 border-rose-200/90 hover:border-rose-300'
+                          }`}
+                        >
+                          <div>
+                            {/* Top Row: Label & Status Badge */}
+                            <div className="h-8 flex items-center justify-between gap-2 mb-3">
+                              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">LABA BERSIH</span>
+                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 whitespace-nowrap ${
+                                labaBersih >= 0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300/80' : 'bg-rose-100 text-rose-800 border border-rose-300/80'
+                              }`}>
+                                {labaBersih >= 0 ? 'Surplus Laba' : 'Defisit Rugi'}
+                              </span>
+                            </div>
+                            
+                            {/* Middle Row */}
+                            <div className={`text-xl sm:text-2xl xl:text-[26px] font-black tracking-tight leading-none mb-2 truncate ${labaBersih >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                              {labaBersih < 0 ? '-' : ''}{formatCurrency(Math.abs(labaBersih))}
+                            </div>
+                            <div className="h-6 flex items-center">
+                              <MoMBadge pct={momData?.laba?.pct} />
+                            </div>
+                          </div>
+
+                          {/* Bottom Row */}
+                          <div className="flex items-center gap-2 pt-3 mt-4 border-t border-slate-100/80 text-[11px] font-semibold text-slate-400">
+                            <div className={`w-2 h-2 rounded-full ${labaBersih >= 0 ? 'bg-emerald-500 ring-2 ring-emerald-100' : 'bg-rose-500 ring-2 ring-rose-100'} shrink-0`} />
+                            <span className="uppercase tracking-wider truncate">Omset - HPP - Beban - Komisi</span>
+                          </div>
+                        </motion.div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })() : (
+                <div className="bg-white rounded-[20px] border border-slate-100 p-12 text-center text-slate-500 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
                   Data omset tidak tersedia.
                 </div>
               )
             )}
 
-            {/* TAB PRODUK */}
-            {activeTab === 'produk' && (
-              <div className="flex flex-col gap-4">
+            {/* OTHER TABS (PRODUK, STOK, INVOICE, KOMPLAIN) IN BENTO CARD */}
+            {activeTab !== 'omset' && (
+              <div className="bg-white border border-slate-100 rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+                {/* TAB PRODUK */}
+                {activeTab === 'produk' && (
+                  <div className="flex flex-col gap-4">
                 <div className="flex flex-row flex-wrap justify-end items-center gap-3">
                   <select
                     value={revenueTypeFilter}
@@ -603,6 +943,9 @@ const AdminMonthlyReport = () => {
                       <option value="Batal">Batal</option>
                     </select>
                   </div>
+                  <div className="text-xs text-gray-500 font-medium">
+                    Total: <strong className="text-gray-900">{invoices.length}</strong> transaksi ditemukan
+                  </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-sm">
@@ -611,57 +954,94 @@ const AdminMonthlyReport = () => {
                         <th className="py-3 px-4 font-semibold text-gray-600">Order ID & Tgl</th>
                         <th className="py-3 px-4 font-semibold text-gray-600">Pelanggan</th>
                         <th className="py-3 px-4 font-semibold text-gray-600">Kendaraan</th>
-                        <th className="py-3 px-4 font-semibold text-gray-600 text-right">Total Belanja</th>
+                        <th className="py-3 px-4 font-semibold text-gray-600">Sales / PIC</th>
+                        <th className="py-3 px-4 font-semibold text-gray-600 text-right">Total Tagihan</th>
+                        <th className="py-3 px-4 font-semibold text-gray-600 text-right">Sudah Dibayar</th>
+                        <th className="py-3 px-4 font-semibold text-gray-600 text-right">Sisa Tagihan</th>
                         <th className="py-3 px-4 font-semibold text-gray-600 text-center">Status</th>
                         <th className="py-3 px-4 font-semibold text-gray-600 text-center">Aksi</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {invoices.length === 0 ? (
-                        <tr><td colSpan="6" className="py-8 text-center text-gray-500">Tidak ada transaksi ditemukan.</td></tr>
+                        <tr><td colSpan="9" className="py-8 text-center text-gray-500">Tidak ada transaksi ditemukan.</td></tr>
                       ) : (
-                        invoices.map((inv) => (
-                          <tr key={inv.id} className="hover:bg-gray-50/50">
-                            <td className="py-3 px-4">
-                              <div className="font-bold text-gray-900">{formatTransactionId(inv)}</div>
-                              <div className="text-gray-500 text-xs">{new Date(inv.created_at).toLocaleDateString('id-ID')}</div>
-                            </td>
-                            <td className="py-3 px-4">
-                              <div className="font-semibold text-gray-900">{inv.customer_name || '-'}</div>
-                              <div className="text-gray-500 text-xs">{inv.customer_phone || '-'}</div>
-                            </td>
-                            <td className="py-3 px-4">
-                              <div className="font-medium text-gray-900">{inv.car_brand} {inv.car_model}</div>
-                              <div className="text-gray-500 text-xs">{inv.plate_number}</div>
-                            </td>
-                            <td className="py-3 px-4 text-right font-bold text-gray-900">
-                              {formatCurrency(inv.total_amount)}
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                inv.status_pembayaran === 'Lunas' ? 'bg-green-100 text-green-700' :
-                                inv.status_pembayaran === 'Batal' ? 'bg-red-100 text-red-700' :
-                                'bg-orange-100 text-orange-700'
-                              }`}>
-                                {inv.status_pembayaran}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              <button 
-                                onClick={() => {
-                                  const cleanId = String(inv.id).replace(/\//g, '-'); 
-                                  window.open(`/sales/invoices/print/${cleanId}`, '_blank');
-                                }}
-                                className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors inline-flex"
-                                title="Cetak Ulang Invoice"
-                              >
-                                <Printer size={16} />
-                              </button>
-                            </td>
-                          </tr>
-                        ))
+                        invoices.map((inv) => {
+                          const paidAmount = Math.max(0, (inv.total_amount || 0) - (inv.sisa_tagihan || 0));
+                          const remainingAmount = inv.sisa_tagihan || 0;
+                          return (
+                            <tr key={inv.id} className="hover:bg-gray-50/50">
+                              <td className="py-3 px-4">
+                                <div className="font-bold text-gray-900">{formatTransactionId(inv)}</div>
+                                <div className="text-gray-500 text-xs">{new Date(inv.created_at).toLocaleDateString('id-ID')}</div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="font-semibold text-gray-900">{inv.customer_name || '-'}</div>
+                                <div className="text-gray-500 text-xs">{inv.customer_phone || '-'}</div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="font-medium text-gray-900">{inv.car_brand} {inv.car_model}</div>
+                                <div className="text-gray-500 text-xs">{inv.plate_number}</div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-md font-medium">
+                                  {inv.event || '-'}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-right font-bold text-gray-900">
+                                {formatCurrency(inv.total_amount)}
+                              </td>
+                              <td className="py-3 px-4 text-right font-semibold text-green-700">
+                                {formatCurrency(paidAmount)}
+                              </td>
+                              <td className="py-3 px-4 text-right font-semibold">
+                                <span className={remainingAmount > 0 ? 'text-orange-600' : 'text-gray-400'}>
+                                  {formatCurrency(remainingAmount)}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                  inv.status_pembayaran === 'Lunas' ? 'bg-green-100 text-green-700' :
+                                  inv.status_pembayaran === 'Batal' ? 'bg-red-100 text-red-700' :
+                                  'bg-orange-100 text-orange-700'
+                                }`}>
+                                  {inv.status_pembayaran}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                <button 
+                                  onClick={() => {
+                                    const cleanId = String(inv.id).replace(/\//g, '-'); 
+                                    window.open(`/sales/invoices/print/${cleanId}`, '_blank');
+                                  }}
+                                  className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors inline-flex"
+                                  title="Cetak Ulang Invoice"
+                                >
+                                  <Printer size={16} />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
+                    {invoices.length > 0 && (
+                      <tfoot>
+                        <tr className="bg-gray-50 border-t-2 border-gray-200 font-bold text-gray-900">
+                          <td colSpan="4" className="py-3 px-4 uppercase text-xs">Total ({invoices.length} Transaksi)</td>
+                          <td className="py-3 px-4 text-right text-sm font-bold text-gray-900">
+                            {formatCurrency(invoices.reduce((sum, i) => sum + (i.total_amount || 0), 0))}
+                          </td>
+                          <td className="py-3 px-4 text-right text-sm font-bold text-green-700">
+                            {formatCurrency(invoices.reduce((sum, i) => sum + Math.max(0, (i.total_amount || 0) - (i.sisa_tagihan || 0)), 0))}
+                          </td>
+                          <td className="py-3 px-4 text-right text-sm font-bold text-orange-700">
+                            {formatCurrency(invoices.reduce((sum, i) => sum + (i.sisa_tagihan || 0), 0))}
+                          </td>
+                          <td colSpan="2"></td>
+                        </tr>
+                      </tfoot>
+                    )}
                   </table>
                 </div>
               </div>
@@ -716,40 +1096,86 @@ const AdminMonthlyReport = () => {
                 </table>
               </div>
             )}
-
+              </div>
+            )}
+            
             {/* HIDDEN PRINT LAYOUTS FOR ALL TABS */}
             
             <div id="laporan-omset-pdf" className="hidden pdf-table-container">
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', textTransform: 'uppercase' }}>LAPORAN KEUANGAN</h1>
-                <h2 style={{ fontSize: '14px', margin: '4px 0 0 0', fontWeight: 'bold' }}>Bulan: {monthFilter}</h2>
+                <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', textTransform: 'uppercase' }}>GALLARDO AUTO SPORT</h1>
+                <h2 style={{ fontSize: '15px', fontWeight: 'bold', margin: '4px 0 0 0', color: '#1e40af', textTransform: 'uppercase' }}>LAPORAN KEUANGAN & LABA RUGI BULANAN (STANDAR SOP)</h2>
+                <p style={{ fontSize: '12px', margin: '4px 0 0 0', color: '#475569' }}>Periode: <strong>{monthFilter}</strong> | Tanggal Cetak: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
               </div>
-              {netRevenue && (
-                <table>
-                  <thead>
-                    <tr>
-                      <th style={{ textAlign: 'center' }}>Kas Masuk</th>
-                      <th style={{ textAlign: 'center' }}>Piutang</th>
-                      <th style={{ textAlign: 'center' }}>Total Omset</th>
-                      <th style={{ textAlign: 'center' }}>Omset Bersih</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td style={{ textAlign: 'center', fontSize: '16px', fontWeight: 'bold', color: '#166534' }}>{formatCurrency(netRevenue.totalKasMasuk)}</td>
-                      <td style={{ textAlign: 'center', fontSize: '16px', fontWeight: 'bold', color: '#9a3412' }}>{formatCurrency(netRevenue.totalPiutang)}</td>
-                      <td style={{ textAlign: 'center', fontSize: '16px', fontWeight: 'bold', color: '#1e40af' }}>{formatCurrency(netRevenue.totalOmset)}</td>
-                      <td style={{ textAlign: 'center', fontSize: '16px', fontWeight: 'bold', color: '#059669' }}>{formatCurrency((netRevenue.totalKasMasuk || 0) - (netRevenue.totalKomisi || 0))}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              )}
+              {netRevenue && (() => {
+                const pl = netRevenue.pl || {};
+                const cf = netRevenue.cashflow || {};
+                const rc = netRevenue.receivables || {};
+                const tOmset = pl.totalOmset ?? netRevenue.totalOmset ?? 0;
+                const tHpp = pl.totalHpp ?? netRevenue.totalHpp ?? 0;
+                const tBeban = pl.totalBeban ?? netRevenue.totalExpense ?? 0;
+                const tKomisi = pl.totalKomisi ?? netRevenue.totalKomisi ?? 0;
+                const tLaba = pl.labaBersih ?? (tOmset - tHpp - tBeban - tKomisi);
+                const tKasMasuk = cf.kasMasuk ?? netRevenue.totalKasMasuk ?? 0;
+                const tTerkumpul = cf.totalTerkumpul ?? netRevenue.totalTerkumpul ?? 0;
+                const tNetCash = cf.netCashflow ?? (tKasMasuk - (tBeban + (netRevenue.totalPembelian || 0)));
+                const tPiutang = rc.totalPiutang ?? netRevenue.totalPiutang ?? 0;
+
+                return (
+                  <>
+                    <h3 style={{ fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', color: '#334155', marginTop: '16px', marginBottom: '8px' }}>1. Ringkasan Arus Kas Riil (Cashflow)</h3>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th style={{ textAlign: 'center' }}>Kas Masuk Riil</th>
+                          <th style={{ textAlign: 'center' }}>Pelunasan Piutang Lama</th>
+                          <th style={{ textAlign: 'center' }}>Net Cashflow</th>
+                          <th style={{ textAlign: 'center' }}>Total Piutang</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style={{ textAlign: 'center', fontSize: '15px', fontWeight: 'bold', color: '#166534' }}>{formatCurrency(tKasMasuk)}</td>
+                          <td style={{ textAlign: 'center', fontSize: '15px', fontWeight: 'bold', color: '#0f766e' }}>{formatCurrency(tTerkumpul)}</td>
+                          <td style={{ textAlign: 'center', fontSize: '15px', fontWeight: 'bold', color: '#1e40af' }}>{formatCurrency(tNetCash)}</td>
+                          <td style={{ textAlign: 'center', fontSize: '15px', fontWeight: 'bold', color: '#c2410c' }}>{formatCurrency(tPiutang)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <h3 style={{ fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', color: '#334155', marginTop: '24px', marginBottom: '8px' }}>2. Laba Rugi Akrual (SOP: Omset - HPP - Beban - Komisi)</h3>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th style={{ textAlign: 'center' }}>Total Omset</th>
+                          <th style={{ textAlign: 'center' }}>HPP Modal Bahan</th>
+                          <th style={{ textAlign: 'center' }}>Beban Operasional</th>
+                          <th style={{ textAlign: 'center' }}>Komisi Sales</th>
+                          <th style={{ textAlign: 'center' }}>Laba Bersih Akrual</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style={{ textAlign: 'center', fontSize: '15px', fontWeight: 'bold', color: '#1e40af' }}>{formatCurrency(tOmset)}</td>
+                          <td style={{ textAlign: 'center', fontSize: '15px', fontWeight: 'bold', color: '#b45309' }}>{formatCurrency(tHpp)}</td>
+                          <td style={{ textAlign: 'center', fontSize: '15px', fontWeight: 'bold', color: '#b91c1c' }}>{formatCurrency(tBeban)}</td>
+                          <td style={{ textAlign: 'center', fontSize: '15px', fontWeight: 'bold', color: '#6d28d9' }}>{formatCurrency(tKomisi)}</td>
+                          <td style={{ textAlign: 'center', fontSize: '15px', fontWeight: 'bold', color: tLaba >= 0 ? '#15803d' : '#b91c1c' }}>
+                            {formatCurrency(tLaba)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </>
+                );
+              })()}
             </div>
 
             <div id="laporan-produk-pdf" className="hidden pdf-table-container">
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', textTransform: 'uppercase' }}>LAPORAN PENJUALAN PRODUK {productBrandFilter !== 'Semua' ? `- ${productBrandFilter}` : ''}</h1>
-                <h2 style={{ fontSize: '14px', margin: '4px 0 0 0', fontWeight: 'bold' }}>Bulan: {monthFilter}</h2>
+                <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', textTransform: 'uppercase' }}>GALLARDO AUTO SPORT</h1>
+                <h2 style={{ fontSize: '15px', fontWeight: 'bold', margin: '4px 0 0 0', color: '#1e40af', textTransform: 'uppercase' }}>LAPORAN PENJUALAN PRODUK {productBrandFilter !== 'Semua' ? `- ${productBrandFilter}` : ''}</h2>
+                <p style={{ fontSize: '12px', margin: '4px 0 0 0', color: '#475569' }}>Bulan: <strong>{monthFilter}</strong> | Tanggal Cetak: {new Date().toLocaleDateString('id-ID')}</p>
               </div>
               <table>
                 <thead>
@@ -792,8 +1218,9 @@ const AdminMonthlyReport = () => {
 
             <div id="laporan-stok-pdf" className="hidden pdf-table-container">
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', textTransform: 'uppercase' }}>LAPORAN MUTASI STOK</h1>
-                <h2 style={{ fontSize: '14px', margin: '4px 0 0 0', fontWeight: 'bold' }}>Bulan: {monthFilter}</h2>
+                <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', textTransform: 'uppercase' }}>GALLARDO AUTO SPORT</h1>
+                <h2 style={{ fontSize: '15px', fontWeight: 'bold', margin: '4px 0 0 0', color: '#1e40af', textTransform: 'uppercase' }}>LAPORAN MUTASI STOK INVENTORY</h2>
+                <p style={{ fontSize: '12px', margin: '4px 0 0 0', color: '#475569' }}>Bulan: <strong>{monthFilter}</strong> | Tanggal Cetak: {new Date().toLocaleDateString('id-ID')}</p>
               </div>
               <table>
                 <thead>
@@ -835,48 +1262,71 @@ const AdminMonthlyReport = () => {
 
             <div id="laporan-invoice-pdf" className="hidden pdf-table-container">
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', textTransform: 'uppercase' }}>DAFTAR INVOICE & TRANSAKSI</h1>
-                <h2 style={{ fontSize: '14px', margin: '4px 0 0 0', fontWeight: 'bold' }}>Bulan: {monthFilter} | Status: {statusFilter}</h2>
+                <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', textTransform: 'uppercase' }}>GALLARDO AUTO SPORT</h1>
+                <h2 style={{ fontSize: '15px', fontWeight: 'bold', margin: '4px 0 0 0', color: '#1e40af', textTransform: 'uppercase' }}>DAFTAR INVOICE & TRANSAKSI (SOP)</h2>
+                <p style={{ fontSize: '12px', margin: '4px 0 0 0', color: '#475569' }}>Bulan: <strong>{monthFilter}</strong> | Status: <strong>{statusFilter}</strong> | Tanggal Cetak: {new Date().toLocaleDateString('id-ID')}</p>
               </div>
               <table>
                 <thead>
                   <tr>
-                    <th>No</th>
+                    <th style={{ textAlign: 'center', width: '35px' }}>No</th>
                     <th>Order ID & Tgl</th>
                     <th>Pelanggan</th>
                     <th>Kendaraan</th>
-                    <th>Total Belanja</th>
-                    <th>Status</th>
+                    <th>Sales / PIC</th>
+                    <th style={{ textAlign: 'right' }}>Total Tagihan</th>
+                    <th style={{ textAlign: 'right' }}>Sudah Dibayar</th>
+                    <th style={{ textAlign: 'right' }}>Sisa Piutang</th>
+                    <th style={{ textAlign: 'center' }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {invoices.map((inv, idx) => (
-                    <tr key={inv.id}>
-                      <td style={{ textAlign: 'center' }}>{idx + 1}</td>
-                      <td>
-                        <strong>{formatTransactionId(inv)}</strong><br/>
-                        {new Date(inv.created_at).toLocaleDateString('id-ID')}
-                      </td>
-                      <td>
-                        <strong>{inv.customer_name || '-'}</strong><br/>
-                        {inv.customer_phone || '-'}
-                      </td>
-                      <td>
-                        <strong>{inv.car_brand} {inv.car_model}</strong><br/>
-                        {inv.plate_number}
-                      </td>
-                      <td style={{ textAlign: 'right' }}>{formatCurrency(inv.total_amount)}</td>
-                      <td style={{ textAlign: 'center' }}>{inv.status_pembayaran}</td>
-                    </tr>
-                  ))}
+                  {invoices.map((inv, idx) => {
+                    const paid = Math.max(0, (inv.total_amount || 0) - (inv.sisa_tagihan || 0));
+                    const sisa = inv.sisa_tagihan || 0;
+                    return (
+                      <tr key={inv.id}>
+                        <td style={{ textAlign: 'center' }}>{idx + 1}</td>
+                        <td>
+                          <strong>{formatTransactionId(inv)}</strong><br/>
+                          {new Date(inv.created_at).toLocaleDateString('id-ID')}
+                        </td>
+                        <td>
+                          <strong>{inv.customer_name || '-'}</strong><br/>
+                          {inv.customer_phone || '-'}
+                        </td>
+                        <td>
+                          <strong>{inv.car_brand} {inv.car_model}</strong><br/>
+                          {inv.plate_number}
+                        </td>
+                        <td>{inv.event || '-'}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(inv.total_amount)}</td>
+                        <td style={{ textAlign: 'right', color: '#166534', fontWeight: 'semibold' }}>{formatCurrency(paid)}</td>
+                        <td style={{ textAlign: 'right', color: sisa > 0 ? '#c2410c' : '#64748b', fontWeight: 'semibold' }}>{formatCurrency(sisa)}</td>
+                        <td style={{ textAlign: 'center' }}>{inv.status_pembayaran}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
+                {invoices.length > 0 && (
+                  <tfoot>
+                    <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold', borderTop: '2px solid #cbd5e1' }}>
+                      <td colSpan="5" style={{ textAlign: 'right', textTransform: 'uppercase' }}>Total ({invoices.length} Transaksi):</td>
+                      <td style={{ textAlign: 'right' }}>{formatCurrency(invoices.reduce((sum, i) => sum + (i.total_amount || 0), 0))}</td>
+                      <td style={{ textAlign: 'right', color: '#166534' }}>{formatCurrency(invoices.reduce((sum, i) => sum + Math.max(0, (i.total_amount || 0) - (i.sisa_tagihan || 0)), 0))}</td>
+                      <td style={{ textAlign: 'right', color: '#c2410c' }}>{formatCurrency(invoices.reduce((sum, i) => sum + (i.sisa_tagihan || 0), 0))}</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                )}
               </table>
             </div>
 
             <div id="laporan-komplain-pdf" className="hidden pdf-table-container">
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', textTransform: 'uppercase' }}>LAPORAN DATA KOMPLAIN</h1>
-                <h2 style={{ fontSize: '14px', margin: '4px 0 0 0', fontWeight: 'bold' }}>Bulan: {monthFilter}</h2>
+                <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', textTransform: 'uppercase' }}>GALLARDO AUTO SPORT</h1>
+                <h2 style={{ fontSize: '15px', fontWeight: 'bold', margin: '4px 0 0 0', color: '#1e40af', textTransform: 'uppercase' }}>LAPORAN DATA KOMPLAIN PELANGGAN</h2>
+                <p style={{ fontSize: '12px', margin: '4px 0 0 0', color: '#475569' }}>Bulan: <strong>{monthFilter}</strong> | Tanggal Cetak: {new Date().toLocaleDateString('id-ID')}</p>
               </div>
               <table>
                 <thead>

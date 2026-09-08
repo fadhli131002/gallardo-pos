@@ -12,5 +12,6 @@ router.get('/monthly/sales-by-product', reportsController.getSalesByProduct);
 router.get('/monthly/stock-mutation', reportsController.getStockMutation);
 router.get('/monthly/invoices', reportsController.getInvoiceList);
 router.get('/monthly/complaints', reportsController.getComplaints);
+router.get('/validate-beban', reportsController.validateBeban);
 
 module.exports = router;

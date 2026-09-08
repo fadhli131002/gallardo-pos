@@ -10,6 +10,8 @@ const financeController = require('./finance.controller');
 router.get('/dashboard', financeController.getDashboardSummary);
 router.get('/dashboard/details', financeController.getDashboardDetails);
 router.get('/receivables', financeController.getReceivables);
+router.get('/receivables-aging', financeController.getReceivablesWithAging);
+router.get('/receivable-alerts', financeController.getReceivableAlerts);
 router.post('/refund', financeController.processRefund);
 router.get('/refunds', financeController.getRefundHistory);
 router.get('/commissions', financeController.getSalesCommissions);

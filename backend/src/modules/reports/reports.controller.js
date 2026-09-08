@@ -1,16 +1,48 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+function getMonthDateRange(month) {
+  if (!month) return null;
+  const [yearStr, monthStr] = month.split('-');
+  const year = parseInt(yearStr);
+  const m = parseInt(monthStr);
+  const startDate = new Date(year, m - 1, 1, 0, 0, 0, 0);
+  const endDate = new Date(year, m, 0, 23, 59, 59, 999);
+  return { startDate, endDate };
+}
+
 // 1. Laporan Omset Bersih (Net Revenue)
 exports.getNetRevenue = async (req, res, next) => {
   try {
-    const { month } = req.query; // format YYYY-MM
+    const { month, force } = req.query; // format YYYY-MM
     let dateFilter = {};
+    let expenseDateFilter = {};
     if (month) {
-      const startDate = new Date(`${month}-01T00:00:00.000Z`);
-      const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0, 23, 59, 59, 999);
-      dateFilter = { created_at: { gte: startDate, lte: endDate } };
+      const range = getMonthDateRange(month);
+      if (range) {
+        dateFilter = { created_at: { gte: range.startDate, lte: range.endDate } };
+        expenseDateFilter = { date: { gte: range.startDate, lte: range.endDate } };
+      }
     }
+
+    // ── Mandatory Beban Validation ────────────────────────────────────────
+    // Tolak request jika total beban bulan ini = 0 (kecuali force=true dikirim)
+    if (force !== 'true') {
+      const expenseCheck = await prisma.expense.aggregate({
+        _sum: { amount: true },
+        where: Object.keys(expenseDateFilter).length > 0 ? expenseDateFilter : undefined
+      });
+      const totalExpenseCheck = expenseCheck._sum.amount || 0;
+
+      if (totalExpenseCheck === 0) {
+        return res.status(422).json({
+          success: false,
+          errorCode: 'BEBAN_KOSONG',
+          message: `Beban Operasional bulan ${month || 'ini'} belum diisi (Rp 0). Laporan tidak dapat digenerate karena akan menghasilkan Laba Bersih yang tidak akurat. Isi data Beban terlebih dahulu di menu Keuangan → Beban Operasional.`,
+        });
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────────
 
     const transactions = await prisma.transaction.findMany({
       where: {
@@ -56,9 +88,8 @@ exports.getSalesByProduct = async (req, res, next) => {
     const { month, status } = req.query;
     let dateFilter = {};
     if (month) {
-      const startDate = new Date(`${month}-01T00:00:00.000Z`);
-      const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0, 23, 59, 59, 999);
-      dateFilter = { created_at: { gte: startDate, lte: endDate } };
+      const range = getMonthDateRange(month);
+      if (range) dateFilter = { created_at: { gte: range.startDate, lte: range.endDate } };
     }
 
     const whereClause = {
@@ -121,12 +152,13 @@ exports.getStockMutation = async (req, res, next) => {
     let startDate, endDate;
     
     if (month) {
-      startDate = new Date(`${month}-01T00:00:00.000Z`);
-      endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0, 23, 59, 59, 999);
+      const range = getMonthDateRange(month);
+      startDate = range.startDate;
+      endDate = range.endDate;
     } else {
       // Default to current month
       const now = new Date();
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
       endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
     }
 
@@ -221,9 +253,8 @@ exports.getInvoiceList = async (req, res, next) => {
     const { month, status } = req.query;
     let dateFilter = {};
     if (month) {
-      const startDate = new Date(`${month}-01T00:00:00.000Z`);
-      const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0, 23, 59, 59, 999);
-      dateFilter = { created_at: { gte: startDate, lte: endDate } };
+      const range = getMonthDateRange(month);
+      if (range) dateFilter = { created_at: { gte: range.startDate, lte: range.endDate } };
     }
 
     const whereClause = { ...dateFilter };
@@ -252,9 +283,8 @@ exports.getComplaints = async (req, res, next) => {
     const { month } = req.query;
     let dateFilter = {};
     if (month) {
-      const startDate = new Date(`${month}-01T00:00:00.000Z`);
-      const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0, 23, 59, 59, 999);
-      dateFilter = { created_at: { gte: startDate, lte: endDate } };
+      const range = getMonthDateRange(month);
+      if (range) dateFilter = { created_at: { gte: range.startDate, lte: range.endDate } };
     }
 
     const complaints = await prisma.complaint.findMany({
@@ -273,6 +303,36 @@ exports.getComplaints = async (req, res, next) => {
     });
 
     res.json(complaints);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 6. Cek status beban operasional (untuk validasi frontend sebelum generate laporan)
+exports.validateBeban = async (req, res, next) => {
+  try {
+    const { month } = req.query; // format YYYY-MM
+    let expenseDateFilter = {};
+    if (month) {
+      const range = getMonthDateRange(month);
+      if (range) expenseDateFilter = { date: { gte: range.startDate, lte: range.endDate } };
+    }
+
+    const expenseAgg = await prisma.expense.aggregate({
+      _sum: { amount: true },
+      where: Object.keys(expenseDateFilter).length > 0 ? expenseDateFilter : undefined
+    });
+    const totalBeban = expenseAgg._sum.amount || 0;
+
+    res.json({
+      success: true,
+      month: month || 'All Time',
+      totalBeban,
+      isValid: totalBeban > 0,
+      message: totalBeban > 0
+        ? `Beban operasional bulan ${month} sudah diisi (Rp ${totalBeban.toLocaleString('id-ID')})`
+        : `Beban Operasional bulan ${month || 'ini'} belum diisi. Isi dulu sebelum generate laporan.`,
+    });
   } catch (error) {
     next(error);
   }

@@ -3,6 +3,7 @@
  * Mengelola data inventaris dan log stok untuk dashboard admin.
  */
 const prisma = require('../../config/db');
+const { createAuditLog } = require('../audit/audit.controller');
 
 // GET /api/inventory — semua data inventaris (admin)
 const getInventory = async (req, res, next) => {
@@ -142,6 +143,19 @@ const updateInventoryStock = async (req, res, next) => {
           stok_sesudah: newBase,
           keterangan:   keterangan || `Manual ${delta > 0 ? 'restock' : 'adjustment'} oleh ${adminName || 'Admin'}`
         }
+      });
+
+      // ── Audit Trail: catat penyesuaian stok manual ─────────────────────
+      const actor = req.user || {};
+      await createAuditLog({
+        userId: parseInt(actor.user_id || actor.id || 0),
+        userName: actor.name || adminName || 'Admin',
+        action: 'STOCK_ADJUST',
+        targetType: 'InventoryLog',
+        targetId: parseInt(existing.id) || 0,
+        reason: keterangan || 'Penyesuaian stok manual',
+        oldValue: { stok_utama: existing.stok_utama, stok_pecahan: existing.stok_pecahan, base_unit: oldBase },
+        newValue: { stok_utama: newUtama, stok_pecahan: newPecahan, base_unit: newBase, delta },
       });
     }
 

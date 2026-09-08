@@ -42,6 +42,7 @@ model Transaction {
   payment_method    String?
   termin_schedule   String?
   notes             String?
+  branch            String            @default("Gallardo") // Cabang tempat order dibuat
   additional_discount Float?          @default(0)
   refund_amount       Float?          @default(0)
   refund_reason       String?
@@ -51,6 +52,7 @@ model Transaction {
   items             TransactionItem[]
   inventory_logs    InventoryLog[]
   complaints        Complaint[]
+  cash_flow_logs    CashFlowLog[]
 }
 
 model TransactionItem {
@@ -60,7 +62,7 @@ model TransactionItem {
   product_note   String?
   price          Float       @default(0)
   quantity       Float       @default(1)
-  transaction    Transaction @relation(fields: [transaction_id], references: [id])
+  transaction    Transaction @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
 }
 
 model Payment {
@@ -71,7 +73,7 @@ model Payment {
   notes          String?
   payment_proof  String?
   payment_date   DateTime    @default(now())
-  transaction    Transaction @relation(fields: [transaction_id], references: [id])
+  transaction    Transaction @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
 }
 
 model Inventory {
@@ -104,7 +106,7 @@ model InventoryLog {
   keterangan     String?
   created_at     DateTime     @default(now())
   inventory      Inventory?   @relation(fields: [inventory_id], references: [id])
-  transaction    Transaction? @relation(fields: [transaction_id], references: [id])
+  transaction    Transaction? @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
 }
 
 model Complaint {
@@ -116,7 +118,7 @@ model Complaint {
   status         String      @default("Pending")
   created_at     DateTime    @default(now())
   updated_at     DateTime    @updatedAt
-  transaction    Transaction @relation(fields: [transaction_id], references: [id])
+  transaction    Transaction @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
 }
 
 model Vehicle {
@@ -172,8 +174,10 @@ model CashFlowLog {
   type        String   // "IN" (Masuk) atau "OUT" (Keluar)
   amount      Float
   description String
-  referenceId String?  // ID Transaksi atau ID Expense
-  date        DateTime @default(now())
+  referenceId    String?      // ID Transaksi atau ID Expense
+  transaction_id Int?
+  transaction    Transaction? @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
+  date           DateTime     @default(now())
 }
 
 model PurchaseOrder {
@@ -203,4 +207,56 @@ model MasterPotonganPPF {
   updated_at      DateTime @updatedAt
 
   @@unique([ukuranKendaraan, peruntukan])
+}
+
+// Audit Trail — mencatat setiap perubahan sensitif pada transaksi & stok
+// old_value & new_value hanya menyimpan atribut yang berubah (bukan full object)
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  user_name   String
+  action      String   // "CANCEL_INVOICE" | "MARK_PAID" | "EDIT_PRICE" | "STOCK_ADJUST" | "EDIT_DISCOUNT"
+  target_type String   // "Transaction" | "InventoryLog"
+  target_id   Int
+  reason      String?
+  old_value   String?  // JSON: hanya field yang berubah, contoh: {"sisa_tagihan": 500000, "status": "Proses"}
+  new_value   String?  // JSON: nilai baru setelah perubahan
+  created_at  DateTime @default(now())
+}
+
+model Notification {
+  id             Int       @id @default(autoincrement())
+  user_id        Int?      // Target user ID (PIC Sales)
+  target_sales   String?   // Nama Sales / PIC (misal: "Rosyid")
+  sender_id      Int?      // ID Admin/Superadmin yang menegur
+  sender_name    String?   // Nama Admin
+  transaction_id Int?      // ID transaksi terkait
+  type           String    @default("DUPLICATE_WARNING")
+  title          String
+  message        String
+  is_read        Boolean   @default(false)
+  created_at     DateTime  @default(now())
+}
+
+model DeletionRequest {
+  id             Int       @id @default(autoincrement())
+  transaction_id Int?      // ID transaksi terkait di database
+  customer_id    String?   // Formatted ID / Order ID (misal "#0024" atau "RTL-DB-12")
+  customer_name  String    // Nama pelanggan
+  customer_phone String?   // Kontak HP pelanggan
+  plate_number   String?   // Plat nomor kendaraan
+  car_brand      String?   // Merk / tipe kendaraan
+  total_amount   Float?    // Total nominal transaksi
+  cashier_id     Int?      // User ID kasir/sales yang meminta hapus
+  cashier_name   String    // Nama kasir/sales
+  reason         String    // Alasan pengajuan hapus
+  status         String    @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  action_by_id   Int?      // User ID Superadmin yang memproses
+  action_by_name String?   // Nama Superadmin
+  action_reason  String?   // Alasan/catatan jika ditolak/disetujui
+  action_at      DateTime?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+
+  @@map("deletion_requests")
 }

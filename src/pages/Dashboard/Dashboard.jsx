@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
-import { Users, ShoppingBag, CheckCircle, Clock } from 'lucide-react';
+import { Users, ShoppingBag, CheckCircle, Clock, Bell, AlertTriangle } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useOrders } from '../../context/OrderContext';
 import { toast } from 'sonner';
 import { formatTransactionId } from '../../utils/formatId';
 import { format } from 'date-fns';
+import DuplicateAlertBanner from '../../components/DuplicateAlertBanner';
 import './Dashboard.css';
 
 import { useAuth } from '../../context/AuthContext';
@@ -69,6 +70,44 @@ const Dashboard = () => {
     };
     fetchAdminStats();
   }, [token, isSales]);
+
+  const [myWarnings, setMyWarnings] = useState([]);
+
+  const fetchMyWarnings = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${window.API_URL || ''}/api/notifications/my-warnings`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setMyWarnings(json.data);
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching warnings:', e);
+    }
+  };
+
+  useEffect(() => {
+    fetchMyWarnings();
+  }, [token]);
+
+  const handleMarkWarningRead = async (notifId) => {
+    try {
+      const res = await fetch(`${window.API_URL || ''}/api/notifications/${notifId}/read`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        toast.success('Peringatan ditandai selesai diperiksa');
+        fetchMyWarnings();
+      }
+    } catch (e) {
+      toast.error('Gagal memperbarui status peringatan');
+    }
+  };
 
   // Normalise name: "Femy Sales" → "femy", "Femmy" → "femy"
   const normName = (str) =>
@@ -137,6 +176,92 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* In-App Sales Warnings from Admin */}
+      {myWarnings && myWarnings.filter(w => !w.is_read).length > 0 && (
+        <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {myWarnings.filter(w => !w.is_read).map(w => (
+            <div 
+              key={w.id}
+              style={{
+                backgroundColor: '#fffbeb',
+                border: '1.5px solid #fcd34d',
+                borderRadius: '12px',
+                padding: '14px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+                boxShadow: '0 2px 8px rgba(245, 158, 11, 0.1)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  backgroundColor: '#fef3c7',
+                  color: '#d97706',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Bell size={18} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: '700', fontSize: '0.9rem', color: '#92400e' }}>
+                    Peringatan Input Ganda dari {w.sender_name || 'Admin'}
+                  </div>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: '#b45309', lineHeight: 1.4 }}>
+                    {w.message}
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <a
+                  href="/sales/customers"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: '#d97706',
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    padding: '6px 14px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  Periksa Transaksi
+                </a>
+                <button
+                  type="button"
+                  onClick={() => handleMarkWarningRead(w.id)}
+                  style={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #d1d5db',
+                    color: '#374151',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Selesai Diperiksa ✓
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Duplicate Alert Banner */}
+      <DuplicateAlertBanner />
 
       <div className="kreosis-grid">
         {/* KOLOM KIRI (70%) */}

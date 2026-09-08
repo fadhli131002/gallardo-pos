@@ -85,10 +85,35 @@ const getDashboardStats = async (req, res, next) => {
   try {
     const { role, user_id, id } = req.user || {};
     const userId = user_id || id;
+    const { month, year } = req.query;
 
     let whereClause = {};
     if (role === 'sales' || role === 'sales_team') {
       whereClause.sales_id = parseInt(userId);
+    }
+
+    // Filter Periode Bulan (Default ke bulan berjalan jika tidak ada query atau jika month diberikan)
+    let filterMonth = month;
+    if (!filterMonth && filterMonth !== 'all' && !year) {
+      const now = new Date();
+      filterMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+    }
+
+    if (filterMonth && filterMonth !== 'all') {
+      const [y, m] = filterMonth.split('-');
+      const startOfMonth = new Date(parseInt(y), parseInt(m) - 1, 1, 0, 0, 0, 0);
+      const endOfMonth = new Date(parseInt(y), parseInt(m), 0, 23, 59, 59, 999);
+      whereClause.created_at = {
+        gte: startOfMonth,
+        lte: endOfMonth
+      };
+    } else if (year && year !== 'all') {
+      const startOfYear = new Date(parseInt(year), 0, 1, 0, 0, 0, 0);
+      const endOfYear = new Date(parseInt(year), 11, 31, 23, 59, 59, 999);
+      whereClause.created_at = {
+        gte: startOfYear,
+        lte: endOfYear
+      };
     }
 
     const transactions = await prisma.transaction.findMany({
@@ -97,7 +122,7 @@ const getDashboardStats = async (req, res, next) => {
       orderBy: { created_at: 'desc' }
     });
 
-    // 1. Total Customers (Unique non-empty names)
+    // 1. Total Customers (Unique non-empty names in this period)
     const customerSet = new Set();
     transactions.forEach(t => {
       const name = (t.customer_name || '').trim();
@@ -123,8 +148,12 @@ const getDashboardStats = async (req, res, next) => {
     // 4. Weekly Sales Dynamics (Minggu 1 - 4)
     const weeklyData = [1, 2, 3, 4].map(w => ({
       week: `Minggu ${w}`,
-      revenue: 0
+      revenue: 0,
+      orders: 0,
+      newCustomers: 0
     }));
+
+    const weekCustomerSets = [new Set(), new Set(), new Set(), new Set()];
 
     transactions.forEach(t => {
       const d = new Date(t.created_at);
@@ -132,6 +161,13 @@ const getDashboardStats = async (req, res, next) => {
       let weekIndex = Math.floor((dateNum - 1) / 7);
       if (weekIndex > 3) weekIndex = 3;
       weeklyData[weekIndex].revenue += (t.total_amount || 0);
+      weeklyData[weekIndex].orders += 1;
+      const cust = (t.customer_phone || t.customer_name || '').trim();
+      if (cust) weekCustomerSets[weekIndex].add(cust);
+    });
+
+    weeklyData.forEach((w, idx) => {
+      w.newCustomers = weekCustomerSets[idx].size;
     });
 
     // 5. Top Products (Produk Terlaris)
@@ -139,20 +175,24 @@ const getDashboardStats = async (req, res, next) => {
     transactions.forEach(t => {
       t.items.forEach(item => {
         const name = item.product_name || 'Lainnya';
-        productSalesMap[name] = (productSalesMap[name] || 0) + item.quantity;
+        const revenue = (item.total_price || (item.price * item.quantity) || 0);
+        if (!productSalesMap[name]) {
+          productSalesMap[name] = { name, sales: revenue, qty: 0 };
+        }
+        productSalesMap[name].sales += revenue;
+        productSalesMap[name].qty += (item.quantity || 1);
       });
     });
 
-    let topProducts = Object.entries(productSalesMap)
-      .map(([name, sales]) => ({ name, sales }))
+    let topProducts = Object.values(productSalesMap)
       .sort((a, b) => b.sales - a.sales)
       .slice(0, 5);
 
     if (topProducts.length === 0) {
       topProducts = [
-        { name: 'Kaca Film', sales: 0 },
-        { name: 'Coating', sales: 0 },
-        { name: 'PPF', sales: 0 }
+        { name: 'Kaca Film', sales: 0, qty: 0 },
+        { name: 'Coating', sales: 0, qty: 0 },
+        { name: 'PPF', sales: 0, qty: 0 }
       ];
     }
 
@@ -169,6 +209,76 @@ const getDashboardStats = async (req, res, next) => {
     // 7. Total Omzet
     const totalOmzet = transactions.reduce((sum, t) => sum + (t.total_amount || 0), 0);
 
+    // 8. Drill-down: Customers List (Sorted by Top Spender / Total Belanja Terbesar ke Terkecil)
+    const customerGroupMap = {};
+    transactions.forEach(t => {
+      const name = (t.customer_name || '').trim();
+      const phone = (t.customer_phone || '').trim();
+      const key = (phone && phone !== '-') ? `phone_${phone}` : `name_${name.toLowerCase()}`;
+      
+      if (!customerGroupMap[key]) {
+        customerGroupMap[key] = {
+          name: name || 'Pelanggan Umum',
+          phone: phone || '-',
+          plates: new Set(),
+          vehicles: new Set(),
+          totalSpent: 0,
+          orderCount: 0,
+          lastOrderDate: t.created_at,
+          orders: []
+        };
+      }
+
+      if (t.plate_number && t.plate_number !== '-') customerGroupMap[key].plates.add(t.plate_number);
+      if (t.car_brand || t.car_model) {
+        const v = `${t.car_brand || ''} ${t.car_model || ''}`.trim();
+        if (v) customerGroupMap[key].vehicles.add(v);
+      }
+      customerGroupMap[key].totalSpent += (t.total_amount || 0);
+      customerGroupMap[key].orderCount += 1;
+      customerGroupMap[key].orders.push({
+        id: t.id,
+        formattedId: `TRX-DB-${t.id}`,
+        amount: t.total_amount,
+        date: t.created_at
+      });
+    });
+
+    const customersList = Object.values(customerGroupMap)
+      .map(c => ({
+        name: c.name,
+        phone: c.phone,
+        plates: Array.from(c.plates).join(', ') || '-',
+        vehicles: Array.from(c.vehicles).join(', ') || '-',
+        totalSpent: c.totalSpent,
+        orderCount: c.orderCount,
+        lastOrderDate: c.lastOrderDate,
+        orders: c.orders
+      }))
+      .sort((a, b) => b.totalSpent - a.totalSpent); // Sort Top Spender first!
+
+    // 9. Drill-down: Full Orders List for the selected month
+    const ordersList = transactions.map(t => {
+      const isLunas = t.status_pembayaran?.toUpperCase() === 'LUNAS' || t.sisa_tagihan <= 0;
+      return {
+        id: t.id,
+        formattedId: `TRX-DB-${t.id}`,
+        date: t.created_at,
+        customerName: t.customer_name || 'Pelanggan Umum',
+        customerPhone: t.customer_phone || '-',
+        carBrand: t.car_brand || '-',
+        carModel: t.car_model || '-',
+        plateNumber: t.plate_number || '-',
+        serviceType: t.type || 'WORKSHOP',
+        services: t.items?.map(i => i.product_name).join(', ') || 'Layanan POS',
+        totalAmount: t.total_amount || 0,
+        sisaTagihan: t.sisa_tagihan || 0,
+        statusPembayaran: t.status_pembayaran || (isLunas ? 'LUNAS' : 'PROSES'),
+        statusPengerjaan: isLunas ? 'Selesai' : 'Proses',
+        salesName: t.event || 'Sales Team'
+      };
+    });
+
     res.json({
       success: true,
       data: {
@@ -179,7 +289,10 @@ const getDashboardStats = async (req, res, next) => {
         totalOmzet,
         weeklyData,
         topProducts,
-        recentOrders
+        recentOrders,
+        customersList,
+        ordersList,
+        period: filterMonth || 'all'
       }
     });
   } catch (error) {

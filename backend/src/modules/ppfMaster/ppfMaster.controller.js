@@ -28,11 +28,13 @@ const getById = async (req, res) => {
 const create = async (req, res) => {
   try {
     const { ukuranKendaraan, peruntukan, potonganCm } = req.body;
+    let cm = parseFloat(potonganCm);
+    if (cm <= 50) cm = cm * 100;
     const data = await prisma.masterPotonganPPF.create({
       data: {
         ukuranKendaraan,
         peruntukan,
-        potonganCm: parseFloat(potonganCm)
+        potonganCm: cm
       }
     });
     res.status(201).json(data);
@@ -45,12 +47,14 @@ const update = async (req, res) => {
   try {
     const { id } = req.params;
     const { ukuranKendaraan, peruntukan, potonganCm } = req.body;
+    let cm = parseFloat(potonganCm);
+    if (cm <= 50) cm = cm * 100;
     const data = await prisma.masterPotonganPPF.update({
       where: { id: parseInt(id) },
       data: {
         ukuranKendaraan,
         peruntukan,
-        potonganCm: parseFloat(potonganCm)
+        potonganCm: cm
       }
     });
     res.status(200).json(data);

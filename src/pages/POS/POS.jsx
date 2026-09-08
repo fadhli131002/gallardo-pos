@@ -635,6 +635,7 @@ const POS = () => {
         installation_date: formData.installationDate || null,
         installation_time: formData.installationTime || null,
         notes: formData.notes || null,
+        branch: formData.location || userBranch || 'Gallardo',
         total_amount: newOrder.totalPrice,
         discount: newOrder.discountAmount || 0,
         sisa_tagihan: newOrder.remainingAmount || 0,

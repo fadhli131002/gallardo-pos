@@ -1,16 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
-import { ChevronRight, Wrench, X, AlertTriangle, Check, RefreshCw } from 'lucide-react';
+import { ChevronRight, Wrench, X, AlertTriangle, Check, RefreshCw, Calendar, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useOrders } from '../../context/OrderContext';
 import { useInventory } from '../../context/InventoryContext';
+import DuplicateAlertBanner from '../../components/DuplicateAlertBanner';
+import DeletionApprovalModal from '../../components/DeletionApprovalModal';
+import { CustomerDetailModal, OrderDetailModal, WorkingBayDetailModal } from '../../components/DashboardDrilldownModals';
 import './Dashboard.css';
 
 import { useAuth } from '../../context/AuthContext';
 
 const AdminDashboard = () => {
-  const { flatOrders: orders, getEndDate } = useOrders();
-  const { inventory } = useInventory();
+  const { flatOrders: orders = [], getEndDate } = useOrders();
+  const { inventory = [] } = useInventory();
   const { user, token, loading: authLoading } = useAuth();
 
   // ── Loading gate: block rendering until auth verification is complete ──
@@ -27,38 +31,61 @@ const AdminDashboard = () => {
 
   const userName = user.name ?? null;
 
-  const [stats, setStats] = useState({
-    totalCustomers: 0,
-    totalOrders: 0,
-    lunasOrders: 0,
-    prosesOrders: 0,
-    totalOmzet: 0,
-    topProducts: [],
-    weeklyData: []
-  });
+  const todayDate = new Date();
+  const currentMonthStr = `${todayDate.getFullYear()}-${(todayDate.getMonth() + 1).toString().padStart(2, '0')}`;
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthStr);
+
+  const [stats, setStats] = useState(null);
+
+  const fetchDashboardStats = useCallback(async () => {
+    try {
+      if (!token) return;
+      const res = await fetch(`${window.API_URL || ''}/api/analytics/dashboard?month=${selectedMonth}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setStats(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching admin dashboard stats:', err);
+    }
+  }, [token, selectedMonth]);
 
   useEffect(() => {
-    const fetchDashboardStats = async () => {
-      try {
-        if (!token) return;
-        const res = await fetch(window.API_URL + '/api/analytics/dashboard', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (res.ok) {
-          const json = await res.json();
-          if (json.success && json.data) {
-            setStats(json.data);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching admin dashboard stats:', err);
-      }
-    };
-
     fetchDashboardStats();
-  }, []);
+  }, [fetchDashboardStats]);
+
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [isWorkingBayModalOpen, setIsWorkingBayModalOpen] = useState(false);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [pendingDeletionCount, setPendingDeletionCount] = useState(0);
+
+  const fetchPendingDeletions = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${window.API_URL || ''}/api/deletion-requests?status=PENDING`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) {
+          setPendingDeletionCount(json.counts?.pending || json.data?.length || 0);
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching pending deletions count in AdminDashboard:', e);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchPendingDeletions();
+  }, [fetchPendingDeletions]);
 
   const [maintenanceConfig, setMaintenanceConfig] = useState({
     isActive: false,
@@ -113,11 +140,18 @@ const AdminDashboard = () => {
     }
   };
 
-  // Use API stats if available, fallback to context orders
-  const uniqueCustomers = stats.totalCustomers || new Set(orders.map(o => o.customerHp)).size;
-  const totalOrders = stats.totalOrders || orders.length;
-  const pendingOrders = stats.prosesOrders || orders.filter(o => o.status === 'Aktif').length;
-  const selesaiOrders = stats.lunasOrders || orders.filter(o => o.status === 'Selesai').length;
+  // Filter context orders for this month as fallback
+  const filteredOrders = orders.filter(o => {
+    if (!o.date) return false;
+    const d = new Date(o.date);
+    const mStr = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+    return mStr === selectedMonth;
+  });
+
+  const uniqueCustomers = stats?.totalCustomers ?? new Set(filteredOrders.map(o => o.customerHp)).size;
+  const totalOrders = stats?.totalOrders ?? filteredOrders.length;
+  const pendingOrders = stats?.prosesOrders ?? filteredOrders.filter(o => o.status === 'Aktif').length;
+  const selesaiOrders = stats?.lunasOrders ?? filteredOrders.filter(o => o.status === 'Selesai').length;
 
   // 3. Kapasitas Working Bay
   let activeTodayCount = 0;
@@ -135,13 +169,13 @@ const AdminDashboard = () => {
   }
 
   // 4. Omzet Toko Bulan Ini
-  const totalOmzet = stats.totalOmzet || orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+  const totalOmzet = stats?.totalOmzet ?? filteredOrders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
   const targetOmzet = 150000000; // 150 Juta
   const percentage = Math.min(Math.round((totalOmzet / targetOmzet) * 100), 100);
 
   // 5. Grafik Omzet per Produk & Brand
   const brandSales = {};
-  orders.forEach(order => {
+  filteredOrders.forEach(order => {
     let brand = '-';
     if (order.serviceType === 'Kaca Film') brand = order.filmBrand;
     else if (order.serviceType === 'Coating') brand = order.coatingSeries;
@@ -151,7 +185,7 @@ const AdminDashboard = () => {
     brandSales[key] = (brandSales[key] || 0) + (order.totalPrice || 0);
   });
 
-  const omzetData = stats.topProducts && stats.topProducts.length > 0
+  const omzetData = stats?.topProducts && stats.topProducts.length > 0
     ? stats.topProducts.map(p => ({ name: p.name, revenue: p.sales }))
     : Object.entries(brandSales)
       .map(([name, revenue]) => ({ name, revenue }))
@@ -159,15 +193,16 @@ const AdminDashboard = () => {
       .slice(0, 4);
 
   // 6. Grafik Order Mingguan
-  // Distribute dynamically across 4 weeks for realistic visualization based on order array index
-  const weeklyData = [1, 2, 3, 4].map(w => {
-    const wOrders = orders.filter((o, idx) => (idx % 4) + 1 === w);
-    return {
-      week: `Minggu ${w}`,
-      orders: wOrders.length,
-      newCustomers: new Set(wOrders.map(o => o.customerHp)).size
-    };
-  });
+  const weeklyData = stats?.weeklyData && stats.weeklyData.length > 0
+    ? stats.weeklyData
+    : [1, 2, 3, 4].map(w => {
+        const wOrders = filteredOrders.filter((o, idx) => (idx % 4) + 1 === w);
+        return {
+          week: `Minggu ${w}`,
+          orders: wOrders.length,
+          newCustomers: new Set(wOrders.map(o => o.customerHp)).size
+        };
+      });
 
   const lowStockCount = inventory.filter(item => {
     if (!item) return false;
@@ -186,7 +221,31 @@ const AdminDashboard = () => {
           <h1 className="page-title">Halo, {displayName} 👋</h1>
           <p className="page-subtitle">Admin Workspace - Pusat kendali operasional, order masuk, dan penugasan</p>
         </div>
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Calendar size={15} style={{ position: 'absolute', left: '12px', color: '#6b7280', pointerEvents: 'none' }} />
+            <input 
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              style={{
+                paddingLeft: '34px',
+                paddingRight: '12px',
+                paddingTop: '8px',
+                paddingBottom: '8px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                color: '#374151',
+                outline: 'none',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                cursor: 'pointer'
+              }}
+              title="Pilih Periode Bulan"
+            />
+          </div>
           <button
             type="button"
             onClick={() => setIsMaintenanceModalOpen(true)}
@@ -219,13 +278,87 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* Alert Banner: Pengajuan Hapus Data Customer Menunggu Approval */}
+      {pendingDeletionCount > 0 && (
+        <div style={{
+          backgroundColor: '#fef2f2',
+          border: '1.5px solid #fecdd3',
+          borderRadius: '12px',
+          padding: '12px 20px',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px',
+          boxShadow: '0 2px 6px rgba(220, 38, 38, 0.08)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              backgroundColor: '#fee2e2',
+              color: '#dc2626',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <ShieldCheck size={20} />
+            </div>
+            <div>
+              <div style={{ fontWeight: '700', fontSize: '0.9rem', color: '#991b1b' }}>
+                Terdapat {pendingDeletionCount} Pengajuan Hapus Data Customer Menunggu Persetujuan
+              </div>
+              <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#b91c1c' }}>
+                Kasir/Sales telah mengajukan permohonan hapus data pelanggan. Klik tombol di kanan untuk meninjau dan mengeksekusi (Approve/Reject).
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsApprovalModalOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#dc2626',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '8px 16px',
+              fontSize: '0.82rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 2px 4px rgba(220, 38, 38, 0.25)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <span>Tinjau & Setujui</span>
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Duplicate Alert Banner */}
+      <DuplicateAlertBanner onRefreshData={fetchDashboardStats} />
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mt-6">
 
-        <div className="metric-card lg:col-span-2">
+        {/* 1. Card Total Customer (Clickable -> CustomerDetailModal) */}
+        <div 
+          className="metric-card lg:col-span-2 group hover:shadow-lg hover:border-indigo-400 transition-all cursor-pointer"
+          onClick={() => setIsCustomerModalOpen(true)}
+          style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+          title="Klik untuk melihat rincian pelanggan (Top Spender)"
+        >
           <div className="metric-card-left">
-            <h3 className="metric-card-title">Total Customer <ChevronRight size={14} /></h3>
+            <h3 className="metric-card-title flex items-center gap-1 group-hover:text-indigo-600 transition-colors">
+              Total Customer <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </h3>
             <span className="metric-card-value">{uniqueCustomers.toLocaleString('id-ID')}</span>
-            <span className="metric-card-sub">Berdasarkan data unik HP</span>
+            <span className="metric-card-sub">Berdasarkan data unik HP ({selectedMonth})</span>
           </div>
           <div className="metric-card-right">
             <ResponsiveContainer width="100%" height="100%">
@@ -236,11 +369,19 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="metric-card lg:col-span-2">
+        {/* 2. Card Total Order (Clickable -> OrderDetailModal) */}
+        <div 
+          className="metric-card lg:col-span-2 group hover:shadow-lg hover:border-indigo-400 transition-all cursor-pointer"
+          onClick={() => setIsOrderModalOpen(true)}
+          style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+          title="Klik untuk melihat rincian order transaksi"
+        >
           <div className="metric-card-left">
-            <h3 className="metric-card-title">Total Order <ChevronRight size={14} /></h3>
+            <h3 className="metric-card-title flex items-center gap-1 group-hover:text-indigo-600 transition-colors">
+              Total Order <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </h3>
             <span className="metric-card-value">{totalOrders}</span>
-            <span className="metric-card-sub">{pendingOrders} Pending, {selesaiOrders} Selesai</span>
+            <span className="metric-card-sub">{pendingOrders} Pending, {selesaiOrders} Selesai ({selectedMonth})</span>
           </div>
           <div className="metric-card-right">
             <ResponsiveContainer width="100%" height="100%">
@@ -251,9 +392,17 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="metric-card lg:col-span-2">
+        {/* 3. Card Working Bay (Clickable -> WorkingBayDetailModal) */}
+        <div 
+          className="metric-card lg:col-span-2 group hover:shadow-lg hover:border-indigo-400 transition-all cursor-pointer"
+          onClick={() => setIsWorkingBayModalOpen(true)}
+          style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+          title="Klik untuk melihat status working bay & unit aktif"
+        >
           <div className="metric-card-left">
-            <h3 className="metric-card-title">Working Bay <ChevronRight size={14} /></h3>
+            <h3 className="metric-card-title flex items-center gap-1 group-hover:text-indigo-600 transition-colors">
+              Working Bay <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </h3>
             <span className="metric-card-value">{activeTodayCount}/5</span>
             <span className="metric-card-sub" style={{ color: activeTodayCount >= 4 ? '#ef4444' : '#6b7280' }}>
               {activeTodayCount >= 4 ? 'Kapasitas Penuh' : 'Tersedia'}
@@ -275,7 +424,7 @@ const AdminDashboard = () => {
           <div className="metric-card-left">
             <h3 className="metric-card-title">Omzet Toko <ChevronRight size={14} /></h3>
             <span className="metric-card-value" style={{ fontSize: '1.25rem' }}>Rp {totalOmzet.toLocaleString('id-ID')}</span>
-            <span className="metric-card-sub">{percentage}% dari Target</span>
+            <span className="metric-card-sub">{percentage}% dari Target ({selectedMonth})</span>
           </div>
           <div className="metric-card-right">
             <ResponsiveContainer width="100%" height="100%">
@@ -351,25 +500,33 @@ const AdminDashboard = () => {
       </div>
 
       {/* Modal Pengaturan Maintenance */}
-      {isMaintenanceModalOpen && (
+      {isMaintenanceModalOpen && createPortal(
         <div style={{
           position: 'fixed',
-          inset: 0,
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
           backdropFilter: 'blur(4px)',
           zIndex: 99999,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '16px'
+          padding: '24px',
+          boxSizing: 'border-box'
         }}>
           <div style={{
             backgroundColor: '#ffffff',
             borderRadius: '14px',
             width: '100%',
             maxWidth: '520px',
+            maxHeight: '88vh',
+            display: 'flex',
+            flexDirection: 'column',
             boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            position: 'relative'
           }}>
             <div style={{
               display: 'flex',
@@ -552,8 +709,39 @@ const AdminDashboard = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
+
+      {/* Drill-down Modals */}
+      <CustomerDetailModal
+        isOpen={isCustomerModalOpen}
+        onClose={() => setIsCustomerModalOpen(false)}
+        customers={stats?.customersList || []}
+        selectedMonth={selectedMonth}
+      />
+      <OrderDetailModal
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+        orders={stats?.ordersList || []}
+        selectedMonth={selectedMonth}
+      />
+      <WorkingBayDetailModal
+        isOpen={isWorkingBayModalOpen}
+        onClose={() => setIsWorkingBayModalOpen(false)}
+        orders={orders}
+        activeBayCount={activeTodayCount}
+      />
+
+      {/* Deletion Approval Modal */}
+      <DeletionApprovalModal
+        isOpen={isApprovalModalOpen}
+        onClose={() => setIsApprovalModalOpen(false)}
+        onRefreshData={() => {
+          fetchPendingDeletions();
+          fetchDashboardStats();
+        }}
+      />
     </div>
   );
 };

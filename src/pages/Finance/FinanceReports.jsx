@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Download, Filter, Share2, Activity } from 'lucide-react';
+import { Download, Filter, Share2, Activity, AlertTriangle } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area, LineChart, Line
@@ -44,6 +44,28 @@ const FinanceReports = () => {
   const [pieFilter, setPieFilter] = useState('Latest');
   const [aggregatedData, setAggregatedData] = useState([]);
   const [categoryBreakdown, setCategoryBreakdown] = useState([]);
+
+  // Validasi Mandatory Beban
+  const [bebanValid, setBebanValid] = useState(null); // null = loading, true = valid, false = kosong
+  const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+
+  useEffect(() => {
+    const checkBeban = async () => {
+      try {
+        const token = sessionStorage.getItem('token');
+        const base = window.API_URL || '';
+        const res = await fetch(`${base}/api/reports/validate-beban?month=${currentMonth}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) { setBebanValid(true); return; } // jika endpoint error, jangan block user
+        const data = await res.json();
+        setBebanValid(data.isValid);
+      } catch (_) {
+        setBebanValid(true); // jika fetch gagal, jangan block user
+      }
+    };
+    checkBeban();
+  }, [currentMonth]);
 
   useEffect(() => {
     // 1. Generate last 7 months skeleton
@@ -155,6 +177,12 @@ const FinanceReports = () => {
   }, [aggregatedData, barTimeframe]);
 
   const handleExportPDF = () => {
+    // ── Validasi Mandatory Beban ────────────────────────────────────
+    if (bebanValid === false) {
+      alert(`Beban Operasional bulan ${currentMonth} belum diisi (Rp 0).\n\nLaporan tidak dapat digenerate karena akan menghasilkan Laba Bersih yang tidak akurat.\n\nIsi data Beban terlebih dahulu di menu Keuangan → Beban Operasional.`);
+      return;
+    }
+    // ────────────────────────────────────────────────────────
     const element = reportRef.current;
     if (!element) return;
     
@@ -178,21 +206,39 @@ const FinanceReports = () => {
           <Activity size={16} />
           Ringkasan
         </div>
-        <div className="flex items-center gap-3">
-          <select 
-            className="filter-select"
-            value={pieFilter}
-            onChange={(e) => setPieFilter(e.target.value)}
-          >
-            <option value="Latest">Bulan Terakhir</option>
-            {aggregatedData.map((d, i) => (
-              <option key={i} value={d.fullMonthStr}>{d.fullMonthStr}</option>
-            ))}
-          </select>
-          <button className="btn-outline-action" onClick={handleExportPDF}>
-            <Download size={16} /> Ekspor PDF
-          </button>
-        </div>
+          <div className="flex items-center gap-3">
+            <select 
+              className="filter-select"
+              value={pieFilter}
+              onChange={(e) => setPieFilter(e.target.value)}
+            >
+              <option value="Latest">Bulan Terakhir</option>
+              {aggregatedData.map((d, i) => (
+                <option key={i} value={d.fullMonthStr}>{d.fullMonthStr}</option>
+              ))}
+            </select>
+            <div className="relative group">
+              <button
+                className={`btn-outline-action ${bebanValid === false ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={handleExportPDF}
+                disabled={bebanValid === false}
+                title={bebanValid === false ? `Isi Beban Operasional bulan ${currentMonth} dahulu` : 'Ekspor laporan ke PDF'}
+              >
+                {bebanValid === false ? (
+                  <AlertTriangle size={16} className="text-orange-500" />
+                ) : (
+                  <Download size={16} />
+                )}
+                {bebanValid === false ? 'Beban Belum Diisi' : 'Ekspor PDF'}
+              </button>
+              {bebanValid === false && (
+                <div className="absolute right-0 top-full mt-1 z-10 w-64 bg-orange-50 border border-orange-200 rounded-lg p-3 text-xs text-orange-800 shadow-lg hidden group-hover:block">
+                  <strong>⚠️ Beban Operasional Kosong</strong>
+                  <p className="mt-1">Laporan bulan {currentMonth} tidak dapat digenerate karena Beban Operasional = Rp 0. Isi beban di menu Beban Operasional terlebih dahulu.</p>
+                </div>
+              )}
+            </div>
+          </div>
       </div>
 
       <div className="quadrant-grid">

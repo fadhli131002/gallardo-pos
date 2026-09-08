@@ -4,6 +4,7 @@
  * createTransaction now uses prisma.$transaction for atomic stock deduction.
  */
 const prisma = require('../../config/db');
+const { createAuditLog } = require('../audit/audit.controller');
 
 // ──────────────────────────────────────────────
 // GET  /api/transactions
@@ -93,6 +94,114 @@ const getTransactions = async (req, res, next) => {
   }
 };
 
+const getDuplicateTransactions = async (req, res, next) => {
+  try {
+    const transactions = await prisma.transaction.findMany({
+      include: {
+        items: true
+      },
+      orderBy: { created_at: 'desc' }
+    });
+
+    const notifications = await prisma.notification.findMany({
+      where: { type: 'DUPLICATE_WARNING' }
+    });
+    const warnedTrxIds = new Set(notifications.map(n => n.transaction_id));
+
+    const users = await prisma.user.findMany({
+      select: { id: true, name: true, username: true }
+    });
+    const userMap = new Map(users.map(u => [u.id, u.name]));
+
+    const plateGroups = {};
+    const custGroups = {};
+
+    transactions.forEach(t => {
+      const d = new Date(t.created_at);
+      const dayStr = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+      
+      const rawPlate = (t.plate_number || '').trim().toUpperCase().replace(/\s+/g, '');
+      if (rawPlate && rawPlate !== '-' && rawPlate !== 'B1234XYZ') {
+        const key = `${dayStr}___PLATE___${rawPlate}`;
+        if (!plateGroups[key]) plateGroups[key] = [];
+        plateGroups[key].push(t);
+      }
+
+      const rawName = (t.customer_name || '').trim().toLowerCase();
+      const rawPhone = (t.customer_phone || '').trim().replace(/[^0-9]/g, '');
+      const isGenericName = !rawName || rawName === '-' || rawName.includes('pelanggan umum');
+      const isGenericPhone = !rawPhone || rawPhone === '-' || rawPhone.length < 5;
+
+      if (!isGenericName && !isGenericPhone) {
+        const key = `${dayStr}___CUST___${rawName}___${rawPhone}`;
+        if (!custGroups[key]) custGroups[key] = [];
+        custGroups[key].push(t);
+      }
+    });
+
+    const duplicateGroups = [];
+    const duplicateTrxIdSet = new Set();
+    const processedGroupTrxSets = [];
+
+    const addGroup = (key, list, reasonText) => {
+      if (list.length < 2) return;
+      
+      const ids = list.map(x => x.id).sort().join(',');
+      if (processedGroupTrxSets.includes(ids)) return;
+      processedGroupTrxSets.push(ids);
+
+      const enrichedTransactions = list.map(t => {
+        duplicateTrxIdSet.add(t.id);
+        const salesName = t.event || userMap.get(t.sales_id) || 'Sales Team';
+        return {
+          id: t.id,
+          formattedId: `TRX-DB-${t.id}`,
+          customerName: t.customer_name || 'Pelanggan Umum',
+          customerPhone: t.customer_phone || '-',
+          plateNumber: t.plate_number || '-',
+          carBrand: t.car_brand || '-',
+          carModel: t.car_model || '-',
+          serviceType: t.type || 'WORKSHOP',
+          items: t.items?.map(i => i.product_name).join(', ') || '-',
+          totalAmount: t.total_amount || 0,
+          statusPembayaran: t.status_pembayaran || 'Proses',
+          sisaTagihan: t.sisa_tagihan || 0,
+          date: t.created_at,
+          salesId: t.sales_id,
+          salesName: salesName,
+          warningSent: warnedTrxIds.has(t.id)
+        };
+      });
+
+      duplicateGroups.push({
+        groupKey: key,
+        reason: reasonText,
+        transactions: enrichedTransactions
+      });
+    };
+
+    for (const [key, list] of Object.entries(plateGroups)) {
+      const [day, , plate] = key.split('___');
+      addGroup(key, list, `Plat Nomor Sama (${plate}) pada tanggal ${day}`);
+    }
+
+    for (const [key, list] of Object.entries(custGroups)) {
+      const [day, , name, phone] = key.split('___');
+      addGroup(key, list, `Nama & No HP Sama (${name.toUpperCase()} - ${phone}) pada tanggal ${day}`);
+    }
+
+    res.json({
+      success: true,
+      hasDuplicates: duplicateGroups.length > 0,
+      totalDuplicates: duplicateTrxIdSet.size,
+      duplicateGroups,
+      duplicateTransactionIds: Array.from(duplicateTrxIdSet)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ──────────────────────────────────────────────
 // POST /api/transactions
 // Menggunakan prisma.$transaction agar pembuatan
@@ -129,7 +238,8 @@ const createTransaction = async (req, res, next) => {
       car_year,
       installation_date,
       installation_time,
-      payment_proof
+      payment_proof,
+      branch         // Cabang tempat order dibuat (Gallardo / New Ratu)
     } = req.body;
 
     const transactionType = type
@@ -174,8 +284,13 @@ const createTransaction = async (req, res, next) => {
               throw new Error(`Master data potongan untuk kombinasi '${ukuran_potongan_ppf}' dan '${peruntukan_potongan_ppf}' tidak ditemukan di database. Pastikan data tidak terhapus.`);
             }
             
-            // potonganCm dibagi 100 untuk menjadi satuan meter
-            quantity = (ppfMaster.potonganCm / 100) * quantity;
+            // potonganCm: jika terinput <= 50 (misal 15 atau 17), berarti dalam satuan meter -> ubah ke cm
+            let cmValue = ppfMaster.potonganCm;
+            if (cmValue <= 50) {
+              cmValue = cmValue * 100;
+            }
+            // potonganCm dibagi 100 untuk menjadi satuan meter dasar
+            quantity = (cmValue / 100) * quantity;
           }
 
           // Hitung total stok dalam satuan dasar (meter/ml/pcs)
@@ -256,6 +371,7 @@ const createTransaction = async (req, res, next) => {
           car_year:          car_year || null,
           installation_date: installation_date || null,
           installation_time: installation_time || null,
+          branch:            branch || 'Gallardo',
           items: {
             create: items.map(item => ({
               product_name: item.product_name,
@@ -296,7 +412,8 @@ const createTransaction = async (req, res, next) => {
             type: 'IN',
             amount: paidAmount,
             description: `Pembayaran Transaksi POS (${customer_name || 'Umum'})`,
-            referenceId: `TRX-${newTransaction.id}`
+            referenceId: `TRX-${newTransaction.id}`,
+            transaction_id: newTransaction.id
           }
         });
       }
@@ -335,6 +452,8 @@ const createTransaction = async (req, res, next) => {
 const deleteTransaction = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { reason } = req.body;
+    const actor = req.user || {};
 
     const transaction = await prisma.transaction.findUnique({
       where: { id: parseInt(id) }
@@ -344,9 +463,36 @@ const deleteTransaction = async (req, res, next) => {
       return res.status(404).json({ success: false, error: 'Transaksi tidak ditemukan' });
     }
 
+    // ── Audit Trail: catat pembatalan invoice ──────────────────────────
+    await createAuditLog({
+      userId: parseInt(actor.user_id || actor.id || 0),
+      userName: actor.name || 'Unknown',
+      action: 'CANCEL_INVOICE',
+      targetType: 'Transaction',
+      targetId: parseInt(id),
+      reason: reason || 'Tidak ada alasan diberikan',
+      oldValue: {
+        status_pembayaran: transaction.status_pembayaran,
+        total_amount: transaction.total_amount,
+        sisa_tagihan: transaction.sisa_tagihan,
+        customer_name: transaction.customer_name,
+      },
+      newValue: { status: 'DELETED' },
+    });
+
     // Hapus dependencies manual sebelum menghapus transaksi
     await prisma.transactionItem.deleteMany({ where: { transaction_id: parseInt(id) } });
     await prisma.payment.deleteMany({ where: { transaction_id: parseInt(id) } });
+    await prisma.cashFlowLog.deleteMany({ 
+      where: { 
+        OR: [
+          { referenceId: `TRX-${id}` },
+          { referenceId: String(id) },
+          { transaction_id: parseInt(id) }
+        ]
+      } 
+    });
+    await prisma.inventoryLog.deleteMany({ where: { transaction_id: parseInt(id) } });
     await prisma.transaction.delete({ where: { id: parseInt(id) } });
 
     res.json({ success: true, message: 'Transaksi berhasil dihapus' });
@@ -423,7 +569,8 @@ const updatePaymentStatus = async (req, res, next) => {
           type: 'IN',
           amount: cleanAmount,
           description: `Pembayaran/Cicilan Transaksi POS (${transaction.customer_name || 'Umum'})`,
-          referenceId: `TRX-${id}`
+          referenceId: `TRX-${id}`,
+          transaction_id: parseInt(id)
         }
       });
     }
@@ -508,6 +655,7 @@ const updateTransactionPrice = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { items, total_amount } = req.body;
+    const actor = req.user || {};
 
     const existingTx = await prisma.transaction.findUnique({
       where: { id: parseInt(id) },
@@ -518,9 +666,17 @@ const updateTransactionPrice = async (req, res, next) => {
       return res.status(404).json({ success: false, error: 'Transaksi tidak ditemukan' });
     }
 
-    if (existingTx.status_pembayaran !== 'Penawaran' && existingTx.type !== 'Penawaran' && existingTx.payment_type !== 'Penawaran') {
-       // Just to be safe, if we only allow Penawaran, but let's just allow it for now.
-    }
+    // ── Audit Trail: catat perubahan harga ────────────────────────────
+    await createAuditLog({
+      userId: parseInt(actor.user_id || actor.id || 0),
+      userName: actor.name || 'Unknown',
+      action: 'EDIT_PRICE',
+      targetType: 'Transaction',
+      targetId: parseInt(id),
+      reason: 'Edit harga via menu transaksi',
+      oldValue: { total_amount: existingTx.total_amount, sisa_tagihan: existingTx.sisa_tagihan },
+      newValue: { total_amount },
+    });
 
     // Update the items
     for (const item of items) {
@@ -555,7 +711,8 @@ const updateTransactionPrice = async (req, res, next) => {
 const updatePaymentStatusManual = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { payment_type, sisa_tagihan } = req.body;
+    const { payment_type, sisa_tagihan, reason } = req.body;
+    const actor = req.user || {};
 
     const transaction = await prisma.transaction.findUnique({
       where: { id: parseInt(id) }
@@ -566,6 +723,20 @@ const updatePaymentStatusManual = async (req, res, next) => {
     }
 
     const cleanSisaTagihan = Number(sisa_tagihan);
+
+    // ── Audit Trail: catat perubahan status pembayaran manual ─────────
+    if (payment_type === 'Lunas' || cleanSisaTagihan !== transaction.sisa_tagihan) {
+      await createAuditLog({
+        userId: parseInt(actor.user_id || actor.id || 0),
+        userName: actor.name || 'Unknown',
+        action: payment_type === 'Lunas' ? 'MARK_PAID' : 'EDIT_DISCOUNT',
+        targetType: 'Transaction',
+        targetId: parseInt(id),
+        reason: reason || 'Ubah status pembayaran manual',
+        oldValue: { payment_type: transaction.payment_type, sisa_tagihan: transaction.sisa_tagihan, status_pembayaran: transaction.status_pembayaran },
+        newValue: { payment_type, sisa_tagihan: cleanSisaTagihan },
+      });
+    }
 
     const updated = await prisma.transaction.update({
       where: { id: parseInt(id) },
@@ -626,6 +797,22 @@ const processPaymentBalance = async (req, res, next) => {
       });
     }
 
+    const actor = req.user || {};
+    const newSisaFinal = (currentSisa - discount) - actualPayment;
+    const isLunasFinal = newSisaFinal <= 0;
+
+    // ── Audit Trail: catat pelunasan atau cicilan ──────────────────────
+    await createAuditLog({
+      userId: parseInt(actor.user_id || actor.id || 0),
+      userName: actor.name || 'Unknown',
+      action: isLunasFinal ? 'MARK_PAID' : 'EDIT_DISCOUNT',
+      targetType: 'Transaction',
+      targetId: Number(id),
+      reason: discount > 0 ? `Pelunasan dengan diskon Rp${discount}` : 'Pelunasan/cicilan sisa tagihan',
+      oldValue: { sisa_tagihan: transaction.sisa_tagihan, status_pembayaran: transaction.status_pembayaran },
+      newValue: { sisa_tagihan: Math.max(0, newSisaFinal), status_pembayaran: isLunasFinal ? 'LUNAS' : 'DP' },
+    });
+
     await prisma.$transaction(async (tx) => {
       const currentAdditional = transaction.additional_discount || 0;
       const newSisa = maxPayable - actualPayment;
@@ -657,7 +844,8 @@ const processPaymentBalance = async (req, res, next) => {
             type: 'IN',
             amount: actualPayment,
             description: `Pelunasan piutang TRX-${id} (${transaction.customer_name})`,
-            referenceId: `TRX-${id}`
+            referenceId: `TRX-${id}`,
+            transaction_id: Number(id)
           }
         });
       }
@@ -671,6 +859,7 @@ const processPaymentBalance = async (req, res, next) => {
 
 module.exports = {
   getTransactions,
+  getDuplicateTransactions,
   getTransactionById,
   getPublicTransactionById,
   createTransaction,
