@@ -93,9 +93,9 @@ const DeletionApprovalModal = ({ isOpen, onClose, onRefreshData }) => {
         
         // Hapus juga dari local OrderContext jika transaksi terkait terdaftar
         if (approvingRequest.transaction_id && deleteOrder) {
-          deleteOrder(approvingRequest.transaction_id);
+          await deleteOrder(approvingRequest.transaction_id);
         }
-        if (refreshOrdersFromApi) refreshOrdersFromApi();
+        if (refreshOrdersFromApi) await refreshOrdersFromApi();
         if (onRefreshData) onRefreshData();
 
         fetchRequests();

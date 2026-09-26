@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, ShoppingCart, LogOut, Users, Shield, Car, FileCheck, CalendarClock, TrendingUp, Package, Wallet, Wrench, Store, Trophy, MessageSquareWarning, PieChart } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, ShoppingCart, LogOut, Users, Shield, Car, FileCheck, CalendarClock, TrendingUp, Package, Wallet, Wrench, Store, Trophy, MessageSquareWarning, PieChart, Megaphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import logoGallardo from '../../assets/logo-gallardo.png';
 import logoNewRatu from '../../assets/logo-new-ratu.png';
@@ -135,6 +135,24 @@ const Layout = () => {
                 <NavText>POS Cashier</NavText>
               </NavLink>
 
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent('open-release-notes'))}
+                className="nav-item"
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  width: '100%', 
+                  cursor: 'pointer',
+                  justifyContent: isExpanded ? 'flex-start' : 'center', 
+                  padding: isExpanded ? '1rem 1.25rem' : '1rem 0',
+                  color: '#6366f1'
+                }}
+              >
+                <Megaphone size={22} style={{ flexShrink: 0 }} />
+                <NavText className="font-sans font-bold text-indigo-600">What's New (Update)</NavText>
+              </button>
+
             </>
           )}
 
@@ -183,6 +201,15 @@ const Layout = () => {
               >
                 <PieChart size={22} style={{ flexShrink: 0 }} />
                 <NavText>Laporan Bulanan</NavText>
+              </NavLink>
+
+              <NavLink 
+                to="/admin/release-notes" 
+                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                style={{ justifyContent: isExpanded ? 'flex-start' : 'center', padding: isExpanded ? '1rem 1.25rem' : '1rem 0' }}
+              >
+                <Megaphone size={22} style={{ flexShrink: 0 }} />
+                <NavText>Release Notes (Updates)</NavText>
               </NavLink>
 
               <NavLink 

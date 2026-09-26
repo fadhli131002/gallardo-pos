@@ -7,6 +7,7 @@ import { useOrders } from '../../context/OrderContext';
 import { useInventory } from '../../context/InventoryContext';
 import DuplicateAlertBanner from '../../components/DuplicateAlertBanner';
 import DeletionApprovalModal from '../../components/DeletionApprovalModal';
+import MegaphoneButton from '../../components/MegaphoneButton';
 import { CustomerDetailModal, OrderDetailModal, WorkingBayDetailModal } from '../../components/DashboardDrilldownModals';
 import './Dashboard.css';
 
@@ -246,6 +247,7 @@ const AdminDashboard = () => {
               title="Pilih Periode Bulan"
             />
           </div>
+          <MegaphoneButton showLabel={true} />
           <button
             type="button"
             onClick={() => setIsMaintenanceModalOpen(true)}

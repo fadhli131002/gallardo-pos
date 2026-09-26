@@ -20,6 +20,7 @@ import InvoicePrintPage from './pages/InvoicePrintPage';
 import PublicInvoicePage from './pages/PublicInvoicePage';
 import PublicWarrantyPage from './pages/PublicWarrantyPage';
 import AdminMonthlyReport from './pages/Admin/AdminMonthlyReport';
+import AdminReleaseNotes from './pages/Admin/AdminReleaseNotes';
 
 import FinanceLayout from './components/Layout/FinanceLayout';
 import OwnerLayout from './components/Layout/OwnerLayout';
@@ -31,6 +32,7 @@ import FinanceHpp from './pages/Finance/FinanceHpp';
 
 import { Toaster } from 'sonner';
 import MaintenanceBanner from './components/MaintenanceBanner';
+import ReleaseNotesHandler from './components/ReleaseNotesHandler';
 
 import { useAuth } from './context/AuthContext';
 
@@ -65,6 +67,7 @@ function App() {
     <Router>
       <Toaster position="top-right" richColors />
       <MaintenanceBanner />
+      <ReleaseNotesHandler />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<DashboardEntry />} />
@@ -85,6 +88,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="calendar" element={<Calendar />} />
             <Route path="pos" element={<POS />} />
+            <Route path="edit-order/:id" element={<POS />} />
             <Route path="pos-retail" element={<POSRetail />} />
             <Route path="customers" element={<AdminCustomerWarranty />} />
             <Route path="complaints" element={<Complaints />} />
@@ -96,6 +100,8 @@ function App() {
           <Route path="/admin" element={<Layout />}>
             <Route index element={<Navigate to="/admin/workspace" replace />} />
             <Route path="workspace" element={<AdminDashboard />} />
+            <Route path="pos" element={<POS />} />
+            <Route path="edit-order/:id" element={<POS />} />
             <Route path="pos-retail" element={<POSRetail />} />
             <Route path="scheduling" element={<AdminScheduling />} />
             <Route path="calendar" element={<AdminScheduling />} />
@@ -106,6 +112,7 @@ function App() {
             <Route path="customer-ranking" element={<CustomerRanking />} />
             <Route path="complaints" element={<Complaints />} />
             <Route path="monthly-report" element={<AdminMonthlyReport />} />
+            <Route path="release-notes" element={<AdminReleaseNotes />} />
           </Route>
         </Route>
 

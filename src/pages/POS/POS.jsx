@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { PRICING_MATRIX, CAR_BRANDS, formatCurrency, PRODUCT_CATALOG } from '../../data/mockData';
 import { useOrders } from '../../context/OrderContext';
@@ -16,6 +16,12 @@ import './POS.css';
 
 const POS = () => {
   const navigate = useNavigate();
+  const { id: editTrxId } = useParams();
+  const isEditMode = Boolean(editTrxId);
+  const [isLoadingEditData, setIsLoadingEditData] = useState(false);
+  const [originalTransaction, setOriginalTransaction] = useState(null);
+  const [existingPaidAmount, setExistingPaidAmount] = useState(0);
+
   const { userBranch } = useOutletContext() || { userBranch: 'Gallardo' };
   const { user, token } = useAuth();
 
@@ -77,7 +83,7 @@ const POS = () => {
     paymentProofName: ''
   });
 
-  const { orders, addOrder, isDateBlocked, getEndDate, categories, peruntukanItems, posisiPemasangan, posisiPartial, salesItems, vehicles } = useOrders();
+  const { orders, addOrder, refreshOrdersFromApi, isDateBlocked, getEndDate, categories, peruntukanItems, posisiPemasangan, posisiPartial, salesItems, vehicles } = useOrders();
   const { inventory, consumeStock, deductStock, deductRetailStock } = useInventory();
 
   const [ppfMasters, setPpfMasters] = useState([]);
@@ -97,6 +103,126 @@ const POS = () => {
         setPpfMasters([]);
       });
   }, []);
+
+  // ── Ambil data transaksi lama jika dalam Edit Mode ──
+  useEffect(() => {
+    if (!isEditMode || !token || !editTrxId) return;
+
+    let isMounted = true;
+    const fetchTransactionToEdit = async () => {
+      setIsLoadingEditData(true);
+      try {
+        const response = await fetch(`${window.API_URL}/api/transactions/${editTrxId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Gagal mengambil data transaksi untuk diedit');
+        }
+        const data = await response.json();
+        const tx = data.data || data;
+
+        if (!isMounted) return;
+
+        // Validasi: Jika transaksi sudah LUNAS, tidak boleh full edit
+        const isFullyPaid = (tx.status_pembayaran || '').toUpperCase() === 'LUNAS' ||
+                            (tx.payment_type || '').toUpperCase() === 'LUNAS' ||
+                            ((tx.sisa_tagihan || 0) <= 0 && (tx.total_amount || 0) > 0);
+
+        if (isFullyPaid) {
+          toast.error('Transaksi ini SUDAH LUNAS. Untuk transaksi lunas, hanya profil customer yang dapat diedit melalui modal.');
+          const currentPath = window.location.pathname;
+          const returnPath = currentPath.startsWith('/admin') ? '/admin/customer-warranty' : '/sales/customers';
+          navigate(returnPath, { replace: true });
+          return;
+        }
+
+        setOriginalTransaction(tx);
+
+        // Hitung total pembayaran yang sudah masuk (DP / Termin)
+        const paidSoFar = (tx.payments || []).reduce((sum, p) => sum + (p.amount || 0), 0) ||
+                          Math.max(0, (tx.total_amount || 0) - (tx.sisa_tagihan || 0));
+        setExistingPaidAmount(paidSoFar);
+
+        // Cari ukuran kendaraan dari daftar master jika cocok
+        let matchedCarSize = '';
+        if (vehicles && vehicles.length > 0 && tx.car_brand && tx.car_model) {
+          const v = vehicles.find(item => item.brand === tx.car_brand && item.model === tx.car_model);
+          if (v) matchedCarSize = v.size;
+        }
+
+        // Isi form data kendaraan & customer
+        setFormData({
+          location: tx.branch || userBranch || 'Gallardo',
+          carBrand: tx.car_brand || '',
+          sunroofQty: 0,
+          sunroofPrice: 0,
+          carModel: tx.car_model || '',
+          carSize: matchedCarSize || '',
+          carColor: tx.car_color || '',
+          plateNumber: tx.plate_number || '',
+          engineNumber: tx.engine_number || '',
+          chassisNumber: tx.chassis_number || '',
+          carYear: tx.car_year || '',
+          installationDate: tx.installation_date || new Date().toISOString().split('T')[0],
+          installationTime: tx.installation_time || '09:00',
+          notes: tx.notes || '',
+          customerName: tx.customer_name || '',
+          customerHp: tx.customer_phone || '',
+          customerEmail: '',
+          customerAddress: tx.customer_address || '',
+          customerCity: '',
+          customerProvince: '',
+          customerZip: '',
+        });
+
+        // Isi keranjang pesanan dari items lama
+        if (Array.isArray(tx.items) && tx.items.length > 0) {
+          const loadedCart = tx.items.map((item, idx) => ({
+            id: item.id ? `trx-item-${item.id}` : `loaded-item-${idx}`,
+            dbId: item.id,
+            name: item.product_name,
+            product_name: item.product_name,
+            price: Number(item.price || 0),
+            priceOverride: Number(item.price || 0),
+            finalPrice: Number(item.price || 0),
+            qty: Number(item.quantity || 1),
+            notes: item.product_note || '',
+            catatan: item.product_note || '',
+            category: 'Lainnya',
+            type: 'Lainnya',
+            trackInventory: false
+          }));
+          setCartItems(loadedCart);
+        }
+
+        // Isi diskon
+        setDiscount(Number(tx.discount || 0));
+
+        // Isi state pembayaran
+        setPaymentState(prev => ({
+          ...prev,
+          method: tx.payment_method || 'QRIS',
+          type: tx.payment_type || 'DP Custom',
+          dpAmount: paidSoFar,
+          spgName: tx.event || '',
+          billType: tx.type === 'RETAIL' ? 'Retail (Grosir)' : 'Walk-In (Workshop)',
+          useTax: false,
+        }));
+
+      } catch (err) {
+        console.error('Error fetching transaction to edit:', err);
+        toast.error(err.message || 'Gagal memuat transaksi');
+      } finally {
+        if (isMounted) setIsLoadingEditData(false);
+      }
+    };
+
+    fetchTransactionToEdit();
+
+    return () => { isMounted = false; };
+  }, [editTrxId, isEditMode, token]);
 
   const getProductName = (inv) => {
     if (inv.kategori === 'Tools' || inv.kategori === 'Jasa' || inv.kategori === 'Chemical') return inv.varian;
@@ -419,12 +545,15 @@ const POS = () => {
 
   let modalPaidAmount = 0;
   if (isMaintenanceOrKomplain || paymentState.method === 'Penawaran') modalPaidAmount = 0;
+  else if (isEditMode) modalPaidAmount = existingPaidAmount;
   else if (paymentState.type === 'Lunas') modalPaidAmount = netTotal;
   else if (paymentState.type === 'Tanpa DP') modalPaidAmount = 0;
   else if (paymentState.type === 'DP Custom') modalPaidAmount = paymentState.dpAmount || 0;
   else modalPaidAmount = netTotal / 2;
 
-  let modalRemainingAmount = netTotal - modalPaidAmount;
+  let modalRemainingAmount = isEditMode
+    ? Math.max(0, netTotal - existingPaidAmount)
+    : Math.max(0, netTotal - modalPaidAmount);
 
   const nextStep = () => {
     if (currentStep === 1) {
@@ -504,7 +633,7 @@ const POS = () => {
       }, 100);
       return;
     }
-    if (isDateBlocked(formData.installationDate)) {
+    if (!isEditMode && isDateBlocked(formData.installationDate)) {
       alert('Maaf, tanggal yang dipilih sudah penuh. Silakan pilih tanggal lain.');
       return;
     }
@@ -580,6 +709,69 @@ const POS = () => {
         isCustomPrice: isCustomPrice
       };
     });
+
+    // ── SUBMISSION KHUSUS EDIT MODE (FULL EDIT) ──
+    if (isEditMode) {
+      try {
+        const updatePayload = {
+          customer_name: formData.customerName || 'Pelanggan Umum (Tanpa Nama)',
+          customer_phone: formData.customerHp || '-',
+          customer_address: formData.customerAddress || null,
+          car_brand: formData.carBrand || null,
+          car_model: formData.carModel || null,
+          car_color: formData.carColor || null,
+          plate_number: formData.plateNumber || null,
+          chassis_number: formData.chassisNumber || null,
+          engine_number: formData.engineNumber || null,
+          car_year: formData.carYear || null,
+          installation_date: formData.installationDate || null,
+          installation_time: formData.installationTime || null,
+          notes: formData.notes || null,
+          branch: formData.location || userBranch || 'Gallardo',
+          total_amount: netTotal,
+          discount: discountAmount,
+          event: paymentState.spgName || originalTransaction?.event || null,
+          payment_method: paymentState.method || null,
+          items: finalizedCartItems.map(item => ({
+            product_name: item.name,
+            product_note: item.catatan || item.notes || item.product_note || '',
+            price: item.finalPrice !== undefined && item.finalPrice !== '' ? Number(item.finalPrice) : (Number(item.price) || 0),
+            quantity: Number(item.qty) || 1
+          }))
+        };
+
+        const response = await fetch(`${window.API_URL}/api/transactions/${editTrxId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(updatePayload)
+        });
+
+        const resJson = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          toast.error(`❌ ${resJson.message || 'Gagal menyimpan perubahan transaksi.'}`);
+          return;
+        }
+
+        toast.success('✅ Transaksi berhasil diperbarui!');
+        if (refreshOrdersFromApi) {
+          await refreshOrdersFromApi();
+        }
+
+        setShowPaymentModal(false);
+        const currentPath = window.location.pathname;
+        const returnPath = currentPath.startsWith('/admin') ? '/admin/customer-warranty' : '/sales/customers';
+        navigate(returnPath);
+        return;
+      } catch (err) {
+        console.error('Error updating transaction in POS:', err);
+        toast.error(`❌ ${err.message || 'Gagal menyimpan perubahan transaksi.'}`);
+        return;
+      }
+    }
 
     const serviceName = finalizedCartItems.map(item => `${item.name} (x${item.qty})`).join(', ');
 
@@ -848,16 +1040,52 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [showVariantModal, showPaymentModal, showInvoiceModal]);
 
+  if (isLoadingEditData) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', gap: '16px' }}>
+        <Loader2 size={40} className="animate-spin text-emerald-500" />
+        <p style={{ color: '#4b5563', fontSize: '15px', fontWeight: '600' }}>Memuat data transaksi lama untuk diedit...</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="pos-page animate-fade-in">
         <div className="page-header no-print">
           <div>
-            <h1 className="page-title">Point of Sale (Service & Retail)</h1>
-            <p className="page-subtitle">Sistem kasir, pembuatan SPK, dan pembayaran</p>
+            {isEditMode ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span className="badge" style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold' }}>
+                    MODE EDIT TRANSAKSI #{editTrxId}
+                  </span>
+                  {existingPaidAmount > 0 && (
+                    <span className="badge" style={{ backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold' }}>
+                      DP Masuk: {formatCurrency(existingPaidAmount)}
+                    </span>
+                  )}
+                </div>
+                <h1 className="page-title">Edit Transaksi (Full Edit)</h1>
+                <p className="page-subtitle">Ubah produk/layanan, harga kustom, diskon, data kendaraan, dan pelanggan</p>
+              </>
+            ) : (
+              <>
+                <h1 className="page-title">Point of Sale (Service & Retail)</h1>
+                <p className="page-subtitle">Sistem kasir, pembuatan SPK, dan pembayaran</p>
+              </>
+            )}
           </div>
-          <button onClick={() => navigate('/')} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <X size={18} /> Tutup POS
+          <button onClick={() => {
+            if (isEditMode) {
+              const currentPath = window.location.pathname;
+              const returnPath = currentPath.startsWith('/admin') ? '/admin/customer-warranty' : '/sales/customers';
+              navigate(returnPath);
+            } else {
+              navigate('/');
+            }
+          }} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <X size={18} /> {isEditMode ? 'Batal & Kembali' : 'Tutup POS'}
           </button>
         </div>
 
@@ -871,6 +1099,63 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
           className="pos-layout"
         >
           <div className="pos-forms-container">
+            {/* Quick Step Switcher Tabs */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setCurrentStep(1)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  border: currentStep === 1 ? '2px solid #10b981' : '1px solid #d1d5db',
+                  backgroundColor: currentStep === 1 ? '#ecfdf5' : '#ffffff',
+                  color: currentStep === 1 ? '#065f46' : '#4b5563',
+                  transition: 'all 0.2s',
+                  boxShadow: currentStep === 1 ? '0 1px 2px rgba(16, 185, 129, 0.2)' : 'none'
+                }}
+              >
+                1. Brand & Layanan / Produk ({cartItems.length} item)
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentStep(2)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  border: currentStep === 2 ? '2px solid #10b981' : '1px solid #d1d5db',
+                  backgroundColor: currentStep === 2 ? '#ecfdf5' : '#ffffff',
+                  color: currentStep === 2 ? '#065f46' : '#4b5563',
+                  transition: 'all 0.2s',
+                  boxShadow: currentStep === 2 ? '0 1px 2px rgba(16, 185, 129, 0.2)' : 'none'
+                }}
+              >
+                2. Data Kendaraan {formData.carBrand ? `(${formData.carBrand} ${formData.carModel})` : ''}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentStep(3)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  border: currentStep === 3 ? '2px solid #10b981' : '1px solid #d1d5db',
+                  backgroundColor: currentStep === 3 ? '#ecfdf5' : '#ffffff',
+                  color: currentStep === 3 ? '#065f46' : '#4b5563',
+                  transition: 'all 0.2s',
+                  boxShadow: currentStep === 3 ? '0 1px 2px rgba(16, 185, 129, 0.2)' : 'none'
+                }}
+              >
+                3. Data Customer {formData.customerName ? `(${formData.customerName})` : ''}
+              </button>
+            </div>
 
             {/* Step 1: Layanan & Brand */}
             {currentStep === 1 && (
@@ -1114,7 +1399,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 <div className="form-grid mt-4">
                   <div className="form-group">
                     <label className="font-mono-ui text-sm text-secondary">Estimasi Tanggal</label>
-                    <input type="date" name="installationDate" value={formData.installationDate} onChange={handleInputChange} className={`input-field ${formErrors.includes('Estimasi Tanggal') ? 'input-error' : ''}`} min={new Date().toISOString().split('T')[0]} />
+                    <input type="date" name="installationDate" value={formData.installationDate} onChange={handleInputChange} className={`input-field ${formErrors.includes('Estimasi Tanggal') ? 'input-error' : ''}`} min={isEditMode ? undefined : new Date().toISOString().split('T')[0]} />
                   </div>
                   <div className="form-group">
                     <label className="font-mono-ui text-sm text-secondary">Estimasi Waktu</label>
@@ -1278,10 +1563,10 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 <span className="font-sans text-secondary">Sub Total</span>
                 <span className="font-mono-num text-xl font-bold">{formatCurrency(totalPrice)}</span>
               </div>
-              <button type="submit" className="btn-primary w-full mt-6" disabled={!(searchStatus === 'Data Pelanggan Ditemukan & Berhasil Diisi Otomatis!' || currentStep === 3)} style={{ marginBottom: '0.5rem' }}>
-                Lanjut ke Pembayaran
+              <button type="submit" className="btn-primary w-full mt-6" disabled={!(searchStatus === 'Data Pelanggan Ditemukan & Berhasil Diisi Otomatis!' || currentStep === 3 || isEditMode)} style={{ marginBottom: '0.5rem' }}>
+                {isEditMode ? 'Review & Simpan Perubahan' : 'Lanjut ke Pembayaran'}
               </button>
-              {!(searchStatus === 'Data Pelanggan Ditemukan & Berhasil Diisi Otomatis!' || currentStep === 3) && (
+              {!(searchStatus === 'Data Pelanggan Ditemukan & Berhasil Diisi Otomatis!' || currentStep === 3 || isEditMode) && (
                 <p className="text-xs text-secondary text-center px-2 pt-2" style={{ lineHeight: '1.5' }}>Selesaikan semua langkah (Step 1-3) untuk mengaktifkan tombol ini.</p>
               )}
             </div>
@@ -1590,7 +1875,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 onMouseOver={e => e.currentTarget.style.backgroundColor = '#4338ca'}
                 onMouseOut={e => e.currentTarget.style.backgroundColor = '#4f46e5'}
               >
-                <CheckCircle size={18} /> Konfirmasi Pembayaran
+                <CheckCircle size={18} /> {isEditMode ? 'Simpan Perubahan Transaksi' : 'Konfirmasi Pembayaran'}
               </button>
             </div>
           </div>

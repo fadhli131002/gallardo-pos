@@ -519,18 +519,64 @@ export const OrderProvider = ({ children }) => {
   };
 
   const deleteOrder = async (orderId) => {
-    const order = orders.find(o => o.id === orderId);
-    setOrders(prev => prev.filter(o => o.id !== orderId));
-    if (order && order.dbId && token) {
-      try {
-        await fetch(`${window.API_URL}/api/transactions/${order.dbId}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-      } catch (err) {
-        console.error('Error deleting transaction from backend:', err);
+    if (!orderId) return;
+
+    // Cari order berdasarkan format ID string atau integer/string dbId
+    const order = orders.find(o => 
+      o.id === orderId || 
+      o.dbId === Number(orderId) || 
+      String(o.dbId) === String(orderId)
+    );
+
+    let targetDbId = order?.dbId;
+    if (!targetDbId) {
+      if (typeof orderId === 'number') {
+        targetDbId = orderId;
+      } else if (!isNaN(Number(orderId))) {
+        targetDbId = Number(orderId);
+      } else if (typeof orderId === 'string') {
+        if (orderId.startsWith('RTL-DB-')) {
+          targetDbId = parseInt(orderId.replace('RTL-DB-', ''), 10);
+        } else {
+          const parts = orderId.split(/[-/]/);
+          const lastPart = parts[parts.length - 1];
+          const match = lastPart?.match(/\d+/);
+          if (match) targetDbId = parseInt(match[0], 10);
+        }
       }
     }
+
+    const apiUrl = window.API_URL || '';
+
+    // Jika memiliki ID database dan auth token, eksekusi DELETE ke API backend
+    if (targetDbId && token) {
+      const response = await fetch(`${apiUrl}/api/transactions/${targetDbId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ reason: 'Dihapus dari antarmuka POS' })
+      });
+
+      if (!response.ok && response.status !== 404) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || errData.error || `Gagal menghapus transaksi (Status ${response.status})`);
+      }
+    }
+
+    // 1. Hapus dari state lokal
+    setOrders(prev => prev.filter(o => 
+      o.id !== orderId && 
+      (targetDbId ? o.dbId !== targetDbId && String(o.dbId) !== String(targetDbId) : true)
+    ));
+
+    // 2. Re-fetch dari database agar state selalu konsisten
+    if (token) {
+      await refreshOrdersFromApi();
+    }
+
+    return true;
   };
 
   const updatePaymentHistory = async (paymentId, updatedData) => {

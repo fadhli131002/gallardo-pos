@@ -260,3 +260,17 @@ model DeletionRequest {
 
   @@map("deletion_requests")
 }
+
+model ReleaseNote {
+  id           Int      @id @default(autoincrement())
+  version      String   // e.g. "v2.5.0"
+  title        String   // e.g. "Pembaruan Fitur Laporan Keuangan & Approval Hapus Data"
+  content      String   // Konten deskripsi rilis
+  is_published Boolean  @default(true)
+  author_id    Int?
+  author_name  String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@map("release_notes")
+}

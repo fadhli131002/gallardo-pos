@@ -75,7 +75,8 @@ const getTransactions = async (req, res, next) => {
 
       transactions = await prisma.transaction.findMany({
         where: {
-          sales_id: userId
+          sales_id: userId,
+          status_pembayaran: { not: 'DELETED' }
         },
         include: { payments: true, items: true, complaints: true },
         orderBy: { created_at: 'desc' }
@@ -83,6 +84,9 @@ const getTransactions = async (req, res, next) => {
     } else {
       // Admin / Finance sees all
       transactions = await prisma.transaction.findMany({
+        where: {
+          status_pembayaran: { not: 'DELETED' }
+        },
         include: { payments: true, items: true, complaints: true },
         orderBy: { created_at: 'desc' }
       });
@@ -97,6 +101,9 @@ const getTransactions = async (req, res, next) => {
 const getDuplicateTransactions = async (req, res, next) => {
   try {
     const transactions = await prisma.transaction.findMany({
+      where: {
+        status_pembayaran: { not: 'DELETED' }
+      },
       include: {
         items: true
       },
@@ -452,15 +459,20 @@ const createTransaction = async (req, res, next) => {
 const deleteTransaction = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { reason } = req.body;
+    const { reason } = req.body || {};
     const actor = req.user || {};
 
+    const trxId = parseInt(id, 10);
+    if (isNaN(trxId)) {
+      return res.status(400).json({ success: false, message: 'Format ID Transaksi tidak valid', error: 'Format ID Transaksi tidak valid' });
+    }
+
     const transaction = await prisma.transaction.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: trxId }
     });
 
     if (!transaction) {
-      return res.status(404).json({ success: false, error: 'Transaksi tidak ditemukan' });
+      return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan', error: 'Transaksi tidak ditemukan' });
     }
 
     // ── Audit Trail: catat pembatalan invoice ──────────────────────────
@@ -469,7 +481,7 @@ const deleteTransaction = async (req, res, next) => {
       userName: actor.name || 'Unknown',
       action: 'CANCEL_INVOICE',
       targetType: 'Transaction',
-      targetId: parseInt(id),
+      targetId: trxId,
       reason: reason || 'Tidak ada alasan diberikan',
       oldValue: {
         status_pembayaran: transaction.status_pembayaran,
@@ -480,24 +492,34 @@ const deleteTransaction = async (req, res, next) => {
       newValue: { status: 'DELETED' },
     });
 
-    // Hapus dependencies manual sebelum menghapus transaksi
-    await prisma.transactionItem.deleteMany({ where: { transaction_id: parseInt(id) } });
-    await prisma.payment.deleteMany({ where: { transaction_id: parseInt(id) } });
-    await prisma.cashFlowLog.deleteMany({ 
-      where: { 
-        OR: [
-          { referenceId: `TRX-${id}` },
-          { referenceId: String(id) },
-          { transaction_id: parseInt(id) }
-        ]
-      } 
-    });
-    await prisma.inventoryLog.deleteMany({ where: { transaction_id: parseInt(id) } });
-    await prisma.transaction.delete({ where: { id: parseInt(id) } });
+    // Hapus dependencies manual sebelum menghapus transaksi secara atomik
+    await prisma.$transaction([
+      prisma.transactionItem.deleteMany({ where: { transaction_id: trxId } }),
+      prisma.payment.deleteMany({ where: { transaction_id: trxId } }),
+      prisma.cashFlowLog.deleteMany({ 
+        where: { 
+          OR: [
+            { referenceId: `TRX-${trxId}` },
+            { referenceId: String(trxId) },
+            { transaction_id: trxId }
+          ]
+        } 
+      }),
+      prisma.inventoryLog.deleteMany({ where: { transaction_id: trxId } }),
+      prisma.complaint.deleteMany({ where: { transaction_id: trxId } }),
+      prisma.notification.deleteMany({ where: { transaction_id: trxId } }),
+      prisma.deletionRequest.deleteMany({ where: { transaction_id: trxId } }),
+      prisma.transaction.delete({ where: { id: trxId } })
+    ]);
 
-    res.json({ success: true, message: 'Transaksi berhasil dihapus' });
+    return res.json({ success: true, message: 'Transaksi berhasil dihapus' });
   } catch (error) {
-    next(error);
+    console.error('Error deleting transaction:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Gagal menghapus transaksi dari database: ' + (error.message || 'Terjadi kesalahan sistem'),
+      error: error.message
+    });
   }
 };
 
@@ -587,6 +609,11 @@ const updatePaymentStatus = async (req, res, next) => {
 const updateTransaction = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const trxId = parseInt(id, 10);
+    if (isNaN(trxId)) {
+      return res.status(400).json({ success: false, error: 'Format ID Transaksi tidak valid' });
+    }
+
     const {
       customer_name,
       customer_phone,
@@ -602,6 +629,10 @@ const updateTransaction = async (req, res, next) => {
       installation_time,
       notes,
       event,
+      branch,
+      items,
+      total_amount,
+      discount,
       status_pembayaran,
       payment_type,
       type,
@@ -610,37 +641,141 @@ const updateTransaction = async (req, res, next) => {
     } = req.body;
 
     const existingTx = await prisma.transaction.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: trxId },
+      include: { items: true, payments: true }
     });
 
     if (!existingTx) {
       return res.status(404).json({ success: false, error: 'Transaksi tidak ditemukan' });
     }
 
-    const updated = await prisma.transaction.update({
-      where: { id: parseInt(id) },
-      data: {
-        customer_name: customer_name !== undefined ? customer_name : existingTx.customer_name,
-        customer_phone: customer_phone !== undefined ? customer_phone : existingTx.customer_phone,
-        customer_address: customer_address !== undefined ? customer_address : existingTx.customer_address,
-        car_brand: car_brand !== undefined ? car_brand : existingTx.car_brand,
-        car_model: car_model !== undefined ? car_model : existingTx.car_model,
-        car_color: car_color !== undefined ? car_color : existingTx.car_color,
-        plate_number: plate_number !== undefined ? plate_number : existingTx.plate_number,
-        chassis_number: chassis_number !== undefined ? chassis_number : existingTx.chassis_number,
-        engine_number: engine_number !== undefined ? engine_number : existingTx.engine_number,
-        car_year: car_year !== undefined ? car_year : existingTx.car_year,
-        installation_date: installation_date !== undefined ? installation_date : existingTx.installation_date,
-        installation_time: installation_time !== undefined ? installation_time : existingTx.installation_time,
-        notes: notes !== undefined ? notes : existingTx.notes,
-        event: event !== undefined ? event : existingTx.event,
-        status_pembayaran: status_pembayaran !== undefined ? status_pembayaran : existingTx.status_pembayaran,
-        payment_type: payment_type !== undefined ? payment_type : existingTx.payment_type,
-        type: type !== undefined ? type : existingTx.type,
-        payment_method: payment_method !== undefined ? payment_method : existingTx.payment_method,
-        created_at: created_at ? new Date(created_at) : existingTx.created_at,
+    const isAlreadyLunas = (existingTx.status_pembayaran || '').toUpperCase() === 'LUNAS' ||
+                           (existingTx.payment_type || '').toUpperCase() === 'LUNAS' ||
+                           ((existingTx.sisa_tagihan || 0) <= 0 && (existingTx.total_amount || 0) > 0);
+
+    // Kebutuhan 1: Jika transaksi SUDAH LUNAS, HANYA BISA mengedit data profil customer/kendaraan
+    if (isAlreadyLunas && (items !== undefined || total_amount !== undefined)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Transaksi sudah LUNAS. Produk/Item dan Total Tagihan tidak dapat diubah lagi. Hanya profil customer/kendaraan yang dapat diedit.'
+      });
+    }
+
+    // Hitung total pembayaran yang sudah masuk (DP / Termin)
+    const totalPaid = (existingTx.payments || []).reduce((acc, p) => acc + (p.amount || 0), 0);
+    const effectivePaid = totalPaid > 0 ? totalPaid : Math.max(0, (existingTx.total_amount || 0) - (existingTx.sisa_tagihan || 0));
+
+    // Hitung grand total baru jika ada perubahan harga/items/diskon
+    let finalDiscount = existingTx.discount || 0;
+    if (discount !== undefined) {
+      finalDiscount = Number(discount) || 0;
+    }
+
+    let finalTotalAmount = existingTx.total_amount;
+    if (total_amount !== undefined) {
+      finalTotalAmount = Number(total_amount) || 0;
+    } else if (Array.isArray(items)) {
+      const itemsSum = items.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.quantity) || 1)), 0);
+      finalTotalAmount = Math.max(0, itemsSum - finalDiscount);
+    }
+
+    // Hitung sisa tagihan baru: Grand Total Baru - Pembayaran Sebelumnya (DP)
+    let newSisaTagihan = existingTx.sisa_tagihan;
+    let newStatusPembayaran = existingTx.status_pembayaran;
+    let newPaymentType = existingTx.payment_type;
+
+    if (total_amount !== undefined || Array.isArray(items) || discount !== undefined) {
+      newSisaTagihan = Math.max(0, finalTotalAmount - effectivePaid);
+
+      if (existingTx.payment_method === 'Penawaran' || payment_method === 'Penawaran') {
+        newStatusPembayaran = 'Penawaran';
+        newPaymentType = 'Penawaran';
+      } else if (newSisaTagihan <= 0 && finalTotalAmount > 0) {
+        newStatusPembayaran = 'Lunas';
+        newPaymentType = 'Lunas';
+      } else if (effectivePaid > 0) {
+        newStatusPembayaran = 'Proses';
+        newPaymentType = 'DP / Sebagian';
+      } else {
+        newStatusPembayaran = 'Belum Bayar';
+        newPaymentType = 'Belum Bayar';
       }
+    }
+
+    // Eksekusi pembaruan dalam database secara atomik
+    const updated = await prisma.$transaction(async (tx) => {
+      // Jika ada update items (Full Edit), perbarui TransactionItem
+      if (Array.isArray(items)) {
+        await tx.transactionItem.deleteMany({
+          where: { transaction_id: trxId }
+        });
+
+        if (items.length > 0) {
+          await tx.transactionItem.createMany({
+            data: items.map(item => ({
+              transaction_id: trxId,
+              product_name: item.product_name || item.name || 'Produk',
+              product_note: item.product_note || item.notes || item.catatan || null,
+              price: Number(item.price || item.finalPrice || 0),
+              quantity: Number(item.quantity || item.qty || 1)
+            }))
+          });
+        }
+      }
+
+      return await tx.transaction.update({
+        where: { id: trxId },
+        data: {
+          customer_name: customer_name !== undefined ? customer_name : existingTx.customer_name,
+          customer_phone: customer_phone !== undefined ? customer_phone : existingTx.customer_phone,
+          customer_address: customer_address !== undefined ? customer_address : existingTx.customer_address,
+          car_brand: car_brand !== undefined ? car_brand : existingTx.car_brand,
+          car_model: car_model !== undefined ? car_model : existingTx.car_model,
+          car_color: car_color !== undefined ? car_color : existingTx.car_color,
+          plate_number: plate_number !== undefined ? plate_number : existingTx.plate_number,
+          chassis_number: chassis_number !== undefined ? chassis_number : existingTx.chassis_number,
+          engine_number: engine_number !== undefined ? engine_number : existingTx.engine_number,
+          car_year: car_year !== undefined ? car_year : existingTx.car_year,
+          installation_date: installation_date !== undefined ? installation_date : existingTx.installation_date,
+          installation_time: installation_time !== undefined ? installation_time : existingTx.installation_time,
+          notes: notes !== undefined ? notes : existingTx.notes,
+          event: event !== undefined ? event : existingTx.event,
+          branch: branch !== undefined ? branch : existingTx.branch,
+          type: type !== undefined ? type : existingTx.type,
+          total_amount: finalTotalAmount,
+          discount: finalDiscount,
+          sisa_tagihan: newSisaTagihan,
+          status_pembayaran: status_pembayaran !== undefined ? status_pembayaran : newStatusPembayaran,
+          payment_type: payment_type !== undefined ? payment_type : newPaymentType,
+          payment_method: payment_method !== undefined ? payment_method : existingTx.payment_method,
+          created_at: created_at ? new Date(created_at) : existingTx.created_at,
+        },
+        include: { items: true, payments: true }
+      });
     });
+
+    // Catat ke Audit Log
+    const actor = req.user || {};
+    await createAuditLog({
+      userId: parseInt(actor.user_id || actor.id || 0),
+      userName: actor.name || 'Unknown',
+      action: Array.isArray(items) ? 'UPDATE_TRANSACTION_FULL' : 'UPDATE_CUSTOMER_PROFILE',
+      targetType: 'Transaction',
+      targetId: trxId,
+      reason: Array.isArray(items) ? 'Full edit transaksi (belum lunas)' : 'Edit profil customer/kendaraan',
+      oldValue: {
+        total_amount: existingTx.total_amount,
+        sisa_tagihan: existingTx.sisa_tagihan,
+        customer_name: existingTx.customer_name,
+        customer_phone: existingTx.customer_phone
+      },
+      newValue: {
+        total_amount: updated.total_amount,
+        sisa_tagihan: updated.sisa_tagihan,
+        customer_name: updated.customer_name,
+        customer_phone: updated.customer_phone
+      }
+    }).catch(err => console.error('Audit log error on updateTransaction:', err));
 
     res.json({ success: true, message: 'Transaksi berhasil diupdate', data: updated });
   } catch (error) {

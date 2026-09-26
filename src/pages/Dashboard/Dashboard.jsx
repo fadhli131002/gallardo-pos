@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { formatTransactionId } from '../../utils/formatId';
 import { format } from 'date-fns';
 import DuplicateAlertBanner from '../../components/DuplicateAlertBanner';
+import MegaphoneButton from '../../components/MegaphoneButton';
 import './Dashboard.css';
 
 import { useAuth } from '../../context/AuthContext';
@@ -167,6 +168,7 @@ const Dashboard = () => {
 
         {/* Right side actions - simulating Hostinger Top Nav */}
         <div className="flex items-center gap-4 hidden sm:flex">
+          <MegaphoneButton showLabel={true} />
           <button className="btn-secondary rounded-full flex items-center gap-2 px-4">
             <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">✨</span>
             Tanya AI

@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate, useLocation } from 'react-router-dom';
 import { useOrders } from '../../context/OrderContext';
 import { format, addYears } from 'date-fns';
-import { Shield, ShieldAlert, ShieldCheck, X, Search, Printer, MessageCircle, Loader2, MoreVertical, FileText, Wrench, Download, CreditCard, Upload, CheckCircle, UserPen, FileCheck, Trash2, Save, Calendar, MapPin, User, Phone, Bell, AlertTriangle, Clock } from 'lucide-react';
+import { Shield, ShieldAlert, ShieldCheck, X, Search, Printer, MessageCircle, Loader2, MoreVertical, FileText, Wrench, Download, CreditCard, Upload, CheckCircle, UserPen, Edit3, FileCheck, Trash2, Save, Calendar, MapPin, User, Phone, Bell, AlertTriangle, Clock } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import * as XLSX from 'xlsx';
 import { toast } from 'sonner';
@@ -21,6 +21,8 @@ import '../Customers/Customers.css';
 import { useAuth } from '../../context/AuthContext';
 
 const AdminCustomerWarranty = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user, token } = useAuth();
   const outletContext = useOutletContext() || {};
   const userRole = String(outletContext.userRole || user?.role || '').toLowerCase().trim();
@@ -571,6 +573,7 @@ const AdminCustomerWarranty = () => {
                     if (remaining <= 0) remaining = order.totalPrice;
                 }
                 if (isLunas) remaining = 0;
+                const isOrderFullyPaid = isLunas || (remaining <= 0 && (order.totalPrice || 0) > 0);
 
                 const rawId = order.dbId || parseInt(String(order.id).replace(/[^0-9]/g, ''), 10);
                 const isDuplicate = duplicatesData?.duplicateTransactionIds?.includes(rawId);
@@ -946,32 +949,45 @@ const AdminCustomerWarranty = () => {
                             </button>
                           )}
 
-                          <button onClick={(e) => {
-                            e.stopPropagation();
-                            setActiveDropdown(null);
-                            setEditCustomerData({
-                              id: order.id,
-                              customerName: order.customerName || '',
-                              customerHp: order.customerHp || '',
-                              customerEmail: order.customerEmail || '',
-                              customerAddress: order.customerAddress || '',
-                              customerCity: order.customerCity || '',
-                              customerProvince: order.customerProvince || '',
-                              customerZip: order.customerZip || '',
-                              carColor: order.carColor || '',
-                              carYear: order.carYear || '',
-                              plateNumber: order.plateNumber || '',
-                              chassisNumber: order.chassisNumber || '',
-                              engineNumber: order.engineNumber || '',
-                              installationDate: order.installationDate || '',
-                              installationTime: order.installationTime || '',
-                              notes: order.notes || '',
-                              created_at: order.date ? (new Date(new Date(order.date).getTime() - (new Date().getTimezoneOffset() * 60000))).toISOString().slice(0, 16) : ''
-                            });
-                            setShowEditCustomerModal(true);
-                          }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                            <UserPen size={16} color="#4b5563" /> Edit Data Customer
-                          </button>
+                          {/* Dynamic Edit: Modal profil jika LUNAS, Redirect Full Edit jika BELUM LUNAS */}
+                          {isOrderFullyPaid ? (
+                            <button onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveDropdown(null);
+                              setEditCustomerData({
+                                id: order.id,
+                                customerName: order.customerName || '',
+                                customerHp: order.customerHp || '',
+                                customerEmail: order.customerEmail || '',
+                                customerAddress: order.customerAddress || '',
+                                customerCity: order.customerCity || '',
+                                customerProvince: order.customerProvince || '',
+                                customerZip: order.customerZip || '',
+                                carColor: order.carColor || '',
+                                carYear: order.carYear || '',
+                                plateNumber: order.plateNumber || '',
+                                chassisNumber: order.chassisNumber || '',
+                                engineNumber: order.engineNumber || '',
+                                installationDate: order.installationDate || '',
+                                installationTime: order.installationTime || '',
+                                notes: order.notes || '',
+                                created_at: order.date ? (new Date(new Date(order.date).getTime() - (new Date().getTimezoneOffset() * 60000))).toISOString().slice(0, 16) : ''
+                              });
+                              setShowEditCustomerModal(true);
+                            }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#374151', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                              <UserPen size={16} color="#4b5563" /> Edit Data Customer
+                            </button>
+                          ) : (
+                            <button onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveDropdown(null);
+                              const targetId = order.dbId || rawId;
+                              const basePath = location.pathname.startsWith('/admin') ? '/admin' : '/sales';
+                              navigate(`${basePath}/edit-order/${targetId}`);
+                            }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#2563eb', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#eff6ff'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                              <Edit3 size={16} color="#2563eb" /> Edit Transaksi (Full Edit)
+                            </button>
+                          )}
 
                           <button onClick={(e) => {
                             e.stopPropagation();
@@ -1108,12 +1124,17 @@ const AdminCustomerWarranty = () => {
                           )}
 
                           {isPenawaran && isSuperOrOwner && (
-                            <button onClick={(e) => {
+                            <button onClick={async (e) => {
                               e.stopPropagation();
                               setActiveDropdown(null);
                               if (window.confirm("Apakah Anda yakin ingin membatalkan penawaran ini?")) {
-                                deleteOrder(order.id);
-                                toast.success('Penawaran berhasil ditandai sebagai Closed Lost.');
+                                try {
+                                  await deleteOrder(order.dbId || order.id);
+                                  toast.success('Penawaran berhasil ditandai sebagai Closed Lost.');
+                                  if (fetchDuplicates) fetchDuplicates();
+                                } catch (err) {
+                                  toast.error(err.message || 'Gagal membatalkan penawaran');
+                                }
                               }
                             }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#ef4444', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#fef2f2'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                               <Trash2 size={16} color="#ef4444" /> Tandai Closed Lost (Batal)
@@ -1136,7 +1157,7 @@ const AdminCustomerWarranty = () => {
         <PrintWarrantyHandler isOpen={!!selectedOrder} onClose={() => setSelectedOrder(null)} transaction={selectedOrder} />
       )}
 
-      {/* Delete Retail Confirmation Modal */}
+      {/* Delete Confirmation Modal */}
       {showDeleteRetailModal && deleteRetailOrder && (
         <div className="modal-overlay animate-fade-in" onClick={() => !isDeleting && setShowDeleteRetailModal(false)} style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)' }}>
           <div className="modal-content animate-fade-in" onClick={e => e.stopPropagation()} style={{ maxWidth: '450px', width: '95%', backgroundColor: '#ffffff', borderRadius: '16px', padding: '32px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', borderTop: '4px solid #ef4444' }}>
@@ -1179,27 +1200,16 @@ const AdminCustomerWarranty = () => {
                     }
                     setIsDeleting(true);
                     try {
-                      // Jika data berasal dari DB (RTL-DB-xx)
-                      if (String(deleteRetailOrder.id).startsWith('RTL-DB-')) {
-                        const dbId = deleteRetailOrder.id.replace('RTL-DB-', '');
-                        // token is already obtained from useAuth() at component level
-                        const response = await fetch(`${window.API_URL}/api/transactions/${dbId}`, {
-                          method: 'DELETE',
-                          headers: {
-                            'Authorization': `Bearer ${token}`
-                          }
-                        });
-                        if (!response.ok) {
-                          throw new Error('Gagal menghapus dari database');
-                        }
-                      }
-
-                      deleteOrder(deleteRetailOrder.id);
-                      toast.success('Data transaksi retail berhasil dihapus permanen.');
+                      const targetId = deleteRetailOrder.dbId || deleteRetailOrder.id;
+                      await deleteOrder(targetId);
+                      toast.success('Data transaksi berhasil dihapus permanen.');
                       setShowDeleteRetailModal(false);
+                      setDeleteRetailOrder(null);
+                      setDeleteConfirmText('');
+                      if (fetchDuplicates) fetchDuplicates();
                     } catch (error) {
                       console.error('Delete error:', error);
-                      toast.error('Terjadi kesalahan saat menghapus data.');
+                      toast.error(error.message || 'Terjadi kesalahan saat menghapus data.');
                     } finally {
                       setIsDeleting(false);
                     }

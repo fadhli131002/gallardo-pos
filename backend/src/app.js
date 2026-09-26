@@ -21,6 +21,7 @@ const systemRoutes = require('./modules/system/system.routes');
 const auditRoutes = require('./modules/audit/audit.routes');
 const notificationRoutes = require('./modules/notifications/notification.routes');
 const deletionRequestRoutes = require('./modules/deletionRequests/deletionRequest.routes');
+const releaseNoteRoutes = require('./modules/releaseNotes/releaseNote.routes');
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use('/api/system', systemRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/deletion-requests', deletionRequestRoutes);
+app.use('/api/release-notes', releaseNoteRoutes);
 
 // Error Handler
 app.use(errorHandler);
