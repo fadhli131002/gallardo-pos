@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ReleaseNoteModal from './ReleaseNoteModal';
+import { LATEST_SYSTEM_RELEASE, SYSTEM_RELEASE_NOTES } from '../config/systemReleaseNotes';
 
 const STORAGE_KEY = 'last_seen_release_version';
 
@@ -12,7 +13,7 @@ const ReleaseNotesHandler = () => {
   const { token, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [currentNote, setCurrentNote] = useState(null);
-  const [allNotes, setAllNotes] = useState([]);
+  const [allNotes, setAllNotes] = useState(SYSTEM_RELEASE_NOTES);
   const [isHistoryMode, setIsHistoryMode] = useState(false);
 
   // 1. Periksa rilis terbaru saat user terautentikasi
@@ -34,10 +35,20 @@ const ReleaseNotesHandler = () => {
             setIsHistoryMode(false);
             setIsOpen(true);
           }
+          return;
         }
       }
     } catch (err) {
-      console.error('Error checking latest release note:', err);
+      console.warn('API release-notes/latest unreachable, using local release notes fallback:', err);
+    }
+
+    // Fallback ke konfigurasi build jika database kosong atau belum di-seed
+    const lastSeenVersion = localStorage.getItem(STORAGE_KEY);
+    if (LATEST_SYSTEM_RELEASE && lastSeenVersion !== LATEST_SYSTEM_RELEASE.version) {
+      setCurrentNote(LATEST_SYSTEM_RELEASE);
+      setAllNotes(SYSTEM_RELEASE_NOTES);
+      setIsHistoryMode(false);
+      setIsOpen(true);
     }
   }, [token, user]);
 
@@ -50,15 +61,20 @@ const ReleaseNotesHandler = () => {
       });
       if (res.ok) {
         const json = await res.json();
-        if (json.success && json.data) {
+        if (json.success && json.data && json.data.length > 0) {
           setAllNotes(json.data);
-          if (json.data.length > 0 && !currentNote) {
+          if (!currentNote) {
             setCurrentNote(json.data[0]);
           }
+          return;
         }
       }
     } catch (err) {
-      console.error('Error fetching all release notes:', err);
+      console.warn('Error fetching all release notes, using fallback:', err);
+    }
+    setAllNotes(SYSTEM_RELEASE_NOTES);
+    if (!currentNote) {
+      setCurrentNote(LATEST_SYSTEM_RELEASE);
     }
   }, [token, currentNote]);
 
@@ -70,6 +86,7 @@ const ReleaseNotesHandler = () => {
   useEffect(() => {
     const handleOpenManual = async (e) => {
       setIsHistoryMode(true);
+      let foundNotes = SYSTEM_RELEASE_NOTES;
       if (token) {
         try {
           const res = await fetch(`${window.API_URL || ''}/api/release-notes?published=true`, {
@@ -78,18 +95,18 @@ const ReleaseNotesHandler = () => {
           if (res.ok) {
             const json = await res.json();
             if (json.success && json.data && json.data.length > 0) {
-              setAllNotes(json.data);
-              // Jika event membawa target note, gunakan target note
-              const target = e?.detail?.targetNote || json.data[0];
-              setCurrentNote(target);
-              setIsOpen(true);
-              return;
+              foundNotes = json.data;
             }
           }
         } catch (err) {
-          console.error('Error loading release notes for manual view:', err);
+          console.warn('Error loading release notes for manual view, using fallback:', err);
         }
       }
+
+      setAllNotes(foundNotes);
+      const target = e?.detail?.targetNote || foundNotes[0] || LATEST_SYSTEM_RELEASE;
+      setCurrentNote(target);
+      setIsOpen(true);
     };
 
     window.addEventListener('open-release-notes', handleOpenManual);

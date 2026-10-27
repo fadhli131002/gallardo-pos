@@ -30,6 +30,11 @@ import FinanceRefunds from './pages/Finance/FinanceRefunds';
 import FinanceCommissions from './pages/Finance/FinanceCommissions';
 import FinanceHpp from './pages/Finance/FinanceHpp';
 
+import InventoryLayout from './components/Layout/InventoryLayout';
+import InventoryPortalDashboard from './pages/InventoryPortal/InventoryPortalDashboard';
+import InventoryPortalCommsPage from './pages/InventoryPortal/InventoryPortalCommsPage';
+import InventoryPortalLogsPage from './pages/InventoryPortal/InventoryPortalLogsPage';
+
 import { Toaster } from 'sonner';
 import MaintenanceBanner from './components/MaintenanceBanner';
 import ReleaseNotesHandler from './components/ReleaseNotesHandler';
@@ -58,6 +63,8 @@ const DashboardEntry = () => {
     return <Navigate to="/owner-portal/dashboard" replace />;
   } else if (userRole === 'finance') {
     return <Navigate to="/finance/dashboard" replace />;
+  } else if (userRole === 'inventory') {
+    return <Navigate to="/inventory-portal/dashboard" replace />;
   }
   return <Navigate to="/sales/dashboard" replace />;
 };
@@ -136,6 +143,15 @@ function App() {
           </Route>
         </Route>
 
+        {/* Inventory Portal Routes (Exclusive for role inventory, accessible also by admin/superadmin) */}
+        <Route element={<ProtectedRoute allowedRoles={['inventory', 'admin', 'superadmin']} />}>
+          <Route path="/inventory-portal" element={<InventoryLayout />}>
+            <Route index element={<Navigate to="/inventory-portal/dashboard" replace />} />
+            <Route path="dashboard" element={<InventoryPortalDashboard />} />
+            <Route path="comms" element={<InventoryPortalCommsPage />} />
+            <Route path="logs" element={<InventoryPortalLogsPage />} />
+          </Route>
+        </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -1,9 +1,19 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { Sparkles, X, Check, Megaphone, Calendar, Tag, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Sparkles, X, Check, Megaphone, Calendar, Tag, ShieldCheck } from 'lucide-react';
+
+/**
+ * Utility untuk menghapus karakter emoji unicode dari teks (menjaga format newline tetap utuh)
+ */
+const stripEmojis = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1FA00}-\u{1FAFF}\u{200D}\u{FE0F}]/gu, '');
+};
 
 /**
  * Modal modern untuk menampilkan pengumuman What's New / Release Notes
+ * Didesain tanpa emoji dengan layout responsif anti-terpotong (flex-shrink protection)
  */
 const ReleaseNoteModal = ({
   isOpen,
@@ -26,20 +36,21 @@ const ReleaseNoteModal = ({
   // Helper untuk memformat teks markdown sederhana (bullet points, bold, headings)
   const renderFormattedContent = (rawText) => {
     if (!rawText) return null;
-    const lines = rawText.split('\n');
+    const lines = rawText.split(/\r?\n/);
 
     return lines.map((line, idx) => {
-      const trimmed = line.trim();
+      const cleanLine = stripEmojis(line);
+      const trimmed = cleanLine.trim();
 
       // Heading 3 atau 2 (### atau ##)
       if (trimmed.startsWith('### ') || trimmed.startsWith('## ')) {
-        const headingText = trimmed.replace(/^#{2,3}\s+/, '');
+        const headingText = trimmed.replace(/^#{2,3}\s+/, '').trim();
         return (
           <h4 key={idx} style={{
             fontSize: '0.98rem',
             fontWeight: '800',
             color: '#1e1b4b',
-            margin: '14px 0 6px 0',
+            margin: '20px 0 8px 0',
             display: 'flex',
             alignItems: 'center',
             gap: '6px'
@@ -51,29 +62,29 @@ const ReleaseNoteModal = ({
 
       // Bullet point (- atau *)
       if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-        const bulletText = trimmed.replace(/^[-*]\s+/, '');
+        const bulletText = stripEmojis(trimmed.replace(/^[-*]\s+/, ''));
         // Parse bold **text**
         const parts = bulletText.split(/(\*\*.*?\*\*)/g);
         return (
           <div key={idx} style={{
             display: 'flex',
             alignItems: 'flex-start',
-            gap: '8px',
-            fontSize: '0.84rem',
+            gap: '10px',
+            fontSize: '0.86rem',
             color: '#334155',
-            lineHeight: 1.55,
+            lineHeight: 1.6,
             marginBottom: '6px',
-            paddingLeft: '4px'
+            paddingLeft: '2px'
           }}>
             <span style={{
               width: '6px',
               height: '6px',
               borderRadius: '50%',
               backgroundColor: '#6366f1',
-              marginTop: '7px',
+              marginTop: '8px',
               flexShrink: 0
             }} />
-            <div>
+            <div style={{ flex: 1 }}>
               {parts.map((part, pIdx) => {
                 if (part.startsWith('**') && part.endsWith('**')) {
                   return <strong key={pIdx} style={{ color: '#0f172a', fontWeight: '700' }}>{part.slice(2, -2)}</strong>;
@@ -91,9 +102,9 @@ const ReleaseNoteModal = ({
       }
 
       // Paragraf biasa dengan parsing bold
-      const parts = line.split(/(\*\*.*?\*\*)/g);
+      const parts = stripEmojis(line).split(/(\*\*.*?\*\*)/g);
       return (
-        <p key={idx} style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.55, margin: '4px 0' }}>
+        <p key={idx} style={{ fontSize: '0.86rem', color: '#475569', lineHeight: 1.6, margin: '6px 0' }}>
           {parts.map((part, pIdx) => {
             if (part.startsWith('**') && part.endsWith('**')) {
               return <strong key={pIdx} style={{ color: '#0f172a', fontWeight: '700' }}>{part.slice(2, -2)}</strong>;
@@ -105,6 +116,8 @@ const ReleaseNoteModal = ({
     });
   };
 
+  const displayTitle = stripEmojis(releaseNote.title);
+
   return createPortal(
     <div style={{
       position: 'fixed',
@@ -112,80 +125,85 @@ const ReleaseNoteModal = ({
       left: 0,
       width: '100vw',
       height: '100vh',
-      backgroundColor: 'rgba(15, 23, 42, 0.7)',
-      backdropFilter: 'blur(6px)',
+      backgroundColor: 'rgba(15, 23, 42, 0.72)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
       zIndex: 99999,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '20px',
+      padding: '24px',
       boxSizing: 'border-box'
     }}>
       <div style={{
         backgroundColor: '#ffffff',
         borderRadius: '20px',
         width: '100%',
-        maxWidth: '560px',
+        maxWidth: '640px',
         maxHeight: '88vh',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
         overflow: 'hidden',
         position: 'relative',
         border: '1px solid #e0e7ff'
       }}>
-        {/* Banner Header dengan Gradien Modern */}
+        {/* Banner Header dengan Gradien Modern (flexShrink: 0 agar tidak terpotong flexbox) */}
         <div style={{
           background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%)',
-          padding: '24px 24px 20px',
+          padding: '24px 28px 20px',
           color: '#ffffff',
           position: 'relative',
-          overflow: 'hidden'
+          flexShrink: 0,
+          boxSizing: 'border-box'
         }}>
           {/* Decorative background glow */}
           <div style={{
             position: 'absolute',
-            top: '-20px',
-            right: '-20px',
-            width: '120px',
-            height: '120px',
+            top: '-25px',
+            right: '-25px',
+            width: '130px',
+            height: '130px',
             borderRadius: '50%',
             background: 'rgba(255, 255, 255, 0.15)',
-            filter: 'blur(10px)'
+            filter: 'blur(12px)',
+            pointerEvents: 'none'
           }} />
 
           {/* Close button */}
           <button
             type="button"
             onClick={handleGotIt}
+            aria-label="Tutup Pemberitahuan"
             style={{
               position: 'absolute',
-              top: '16px',
-              right: '16px',
-              background: 'rgba(255, 255, 255, 0.2)',
+              top: '18px',
+              right: '18px',
+              background: 'rgba(255, 255, 255, 0.22)',
               border: 'none',
               color: '#ffffff',
               cursor: 'pointer',
-              padding: '6px',
-              borderRadius: '8px',
+              padding: '7px',
+              borderRadius: '9px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              zIndex: 10
             }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.35)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.38)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.22)'}
           >
             <X size={18} />
           </button>
 
-          {/* Tag & Icon */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+          {/* Tag & Version */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
             <span style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '5px',
-              backgroundColor: 'rgba(255, 255, 255, 0.22)',
+              gap: '6px',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
               backdropFilter: 'blur(4px)',
               padding: '4px 10px',
               borderRadius: '9999px',
@@ -216,24 +234,33 @@ const ReleaseNoteModal = ({
 
           {/* Judul Rilis */}
           <h2 style={{
-            margin: '0 0 6px 0',
+            margin: '0 0 10px 0',
             fontSize: '1.25rem',
             fontWeight: '800',
-            lineHeight: 1.35,
+            lineHeight: 1.4,
             color: '#ffffff',
-            textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            textShadow: '0 1px 2px rgba(0,0,0,0.15)',
+            paddingRight: '36px'
           }}>
-            {releaseNote.title}
+            {displayTitle}
           </h2>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.76rem', color: 'rgba(255, 255, 255, 0.85)' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Calendar size={13} />
+          {/* Meta Info (Tanggal & Pembuat) */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            fontSize: '0.78rem',
+            color: 'rgba(255, 255, 255, 0.9)',
+            fontWeight: '500'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Calendar size={14} />
               {new Date(releaseNote.created_at || Date.now()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
             </span>
             {releaseNote.author_name && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <ShieldCheck size={13} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <ShieldCheck size={14} />
                 Oleh {releaseNote.author_name}
               </span>
             )}
@@ -243,13 +270,14 @@ const ReleaseNoteModal = ({
         {/* Jika dalam History Mode: Selector Versi Lain */}
         {allNotes && allNotes.length > 1 && (
           <div style={{
-            padding: '10px 20px',
+            padding: '10px 24px',
             backgroundColor: '#f8fafc',
             borderBottom: '1px solid #e2e8f0',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            overflowX: 'auto'
+            overflowX: 'auto',
+            flexShrink: 0
           }}>
             <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', whiteSpace: 'nowrap' }}>
               Riwayat Versi:
@@ -280,13 +308,15 @@ const ReleaseNoteModal = ({
           </div>
         )}
 
-        {/* Konten Rincian Update */}
+        {/* Konten Rincian Update (minHeight: 0 dan flex: 1 1 auto agar scroll bekerja sempurna) */}
         <div style={{
-          padding: '20px 24px',
+          padding: '22px 28px',
           overflowY: 'auto',
-          flex: 1,
+          flex: '1 1 auto',
+          minHeight: 0,
           backgroundColor: '#ffffff'
         }}>
+          {/* Info Banner tanpa emoji */}
           <div style={{
             backgroundColor: '#faf5ff',
             border: '1px solid #f3e8ff',
@@ -298,27 +328,28 @@ const ReleaseNoteModal = ({
             gap: '10px'
           }}>
             <Megaphone size={18} style={{ color: '#9333ea', marginTop: '2px', flexShrink: 0 }} />
-            <div style={{ fontSize: '0.78rem', color: '#6b21a8', lineHeight: 1.45 }}>
+            <div style={{ fontSize: '0.82rem', color: '#6b21a8', lineHeight: 1.5, fontWeight: '500' }}>
               Sistem telah diperbarui secara otomatis. Berikut adalah rincian fitur baru, perbaikan alur operasional, dan peningkatan performa sistem.
             </div>
           </div>
 
           {/* Formatted Content */}
-          <div style={{ padding: '0 4px' }}>
+          <div style={{ padding: '0 2px' }}>
             {renderFormattedContent(releaseNote.content)}
           </div>
         </div>
 
-        {/* Footer Aksi */}
+        {/* Footer Aksi (flexShrink: 0 agar tidak terkompresi) */}
         <div style={{
-          padding: '14px 24px',
+          padding: '16px 28px',
           borderTop: '1px solid #e2e8f0',
           backgroundColor: '#f8fafc',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          flexShrink: 0
         }}>
-          <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: '500' }}>
             POS Gallardo Enterprise System
           </span>
           <button
@@ -328,7 +359,7 @@ const ReleaseNoteModal = ({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '9px 20px',
+              padding: '9px 24px',
               borderRadius: '10px',
               border: 'none',
               background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',

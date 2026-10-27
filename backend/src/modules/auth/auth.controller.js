@@ -23,7 +23,10 @@ const login = async (req, res, next) => {
       const roleNames = {
         'sales': 'Sales Team',
         'finance': 'Finance / Accounting',
-        'admin': 'Administrator'
+        'admin': 'Administrator',
+        'superadmin': 'Super Administrator',
+        'owner': 'Business Owner',
+        'inventory': 'Inventory / Gudang'
       };
       return res.status(403).json({ success: false, error: `Akun ini tidak memiliki hak akses sebagai ${roleNames[role] || role}` });
     }

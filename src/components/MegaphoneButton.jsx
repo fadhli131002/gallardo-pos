@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Megaphone, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { LATEST_SYSTEM_RELEASE } from '../config/systemReleaseNotes';
 
 const STORAGE_KEY = 'last_seen_release_version';
 
@@ -11,7 +12,7 @@ const STORAGE_KEY = 'last_seen_release_version';
 const MegaphoneButton = ({ className = '', style = {}, showLabel = false }) => {
   const { token, user } = useAuth();
   const [hasUnread, setHasUnread] = useState(false);
-  const [latestVersion, setLatestVersion] = useState(null);
+  const [latestVersion, setLatestVersion] = useState(LATEST_SYSTEM_RELEASE?.version || 'v2.6.0');
 
   const checkUnread = useCallback(async () => {
     if (!token || !user) return;
@@ -25,10 +26,18 @@ const MegaphoneButton = ({ className = '', style = {}, showLabel = false }) => {
           setLatestVersion(json.data.version);
           const lastSeen = localStorage.getItem(STORAGE_KEY);
           setHasUnread(lastSeen !== json.data.version);
+          return;
         }
       }
     } catch (e) {
       // Graceful error
+    }
+
+    // Fallback ke local manifest
+    if (LATEST_SYSTEM_RELEASE) {
+      setLatestVersion(LATEST_SYSTEM_RELEASE.version);
+      const lastSeen = localStorage.getItem(STORAGE_KEY);
+      setHasUnread(lastSeen !== LATEST_SYSTEM_RELEASE.version);
     }
   }, [token, user]);
 

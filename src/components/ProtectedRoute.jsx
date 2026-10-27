@@ -25,6 +25,8 @@ const ProtectedRoute = ({ allowedRoles }) => {
       return <Navigate to="/owner-portal/dashboard" replace />;
     } else if (userRole === 'finance') {
       return <Navigate to="/finance/dashboard" replace />;
+    } else if (userRole === 'inventory') {
+      return <Navigate to="/inventory-portal/dashboard" replace />;
     } else {
       return <Navigate to="/sales/dashboard" replace />;
     }

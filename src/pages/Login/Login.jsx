@@ -61,7 +61,8 @@ const Login = () => {
           'finance': 'Finance / Accounting',
           'admin': 'Administrator',
           'superadmin': 'Super Administrator',
-          'owner': 'Business Owner'
+          'owner': 'Business Owner',
+          'inventory': 'Inventory / Gudang'
         };
         toast.error(`Akun ini tidak memiliki hak akses sebagai ${roleNames[role] || role}`);
         setIsAuthenticating(false);
@@ -86,6 +87,8 @@ const Login = () => {
               navigate('/finance/dashboard');
             } else if (loggedInRole === 'owner') {
               navigate('/owner-portal/dashboard');
+            } else if (loggedInRole === 'inventory') {
+              navigate('/inventory-portal/dashboard');
             } else {
               navigate('/sales/dashboard');
             }
@@ -185,6 +188,7 @@ const Login = () => {
                     <option value="admin">Administrator</option>
                     <option value="superadmin">Super Administrator</option>
                     <option value="owner">Business Owner</option>
+                    <option value="inventory">Inventory / Gudang</option>
                   </select>
                 </div>
               </div>

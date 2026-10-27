@@ -76,10 +76,20 @@ export const InventoryProvider = ({ children }) => {
         }
       }
 
-      // 2. Fetch inventory logs (Hanya untuk role yang diizinkan)
-      if (user && ['admin', 'superadmin', 'owner', 'finance'].includes(user.role)) {
+      // 2. Fetch inventory logs (Diizinkan untuk admin, superadmin, owner, finance, dan inventory)
+      let activeUser = user;
+      if (!activeUser) {
+        const stored = sessionStorage.getItem('user');
+        if (stored) {
+          try { activeUser = JSON.parse(stored); } catch (e) {}
+        }
+      }
+      const userRole = (activeUser?.role || sessionStorage.getItem('userRole') || '').toLowerCase().trim();
+      const allowedRoles = ['admin', 'superadmin', 'super_admin', 'super administrator', 'owner', 'finance', 'inventory'];
+
+      if (allowedRoles.includes(userRole)) {
         const resLogs = await fetch(window.API_URL + '/api/inventory/logs', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${activeToken}` }
         });
         if (resLogs.ok) {
           const jsonLogs = await resLogs.json();
@@ -228,7 +238,7 @@ export const InventoryProvider = ({ children }) => {
             kegelapan: updatedItem.kegelapan,
             satuan: updatedItem.satuan,
             konversi: updatedItem.konversi,
-            keterangan: 'Update stok oleh Admin'
+            keterangan: updatedItem.keterangan || 'Update stok oleh Admin'
           })
         });
         const json = await res.json();

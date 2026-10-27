@@ -7,11 +7,13 @@ import logoNewRatu from '../../assets/logo-new-ratu.png';
 import './Layout.css';
 
 import { useAuth } from '../../context/AuthContext';
+import { useInventoryComms } from '../../pages/InventoryPortal/context/InventoryCommsContext';
 
 const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout: authLogout } = useAuth();
+  const { openCount = 0, totalUnreadCount = 0 } = useInventoryComms() || {};
 
   const userRole = user?.role || 'sales';
   const userBranch = sessionStorage.getItem('userBranch') || 'Gallardo';
@@ -261,9 +263,63 @@ const Layout = () => {
                 to="/admin/inventory" 
                 className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                 style={{ justifyContent: isExpanded ? 'flex-start' : 'center', padding: isExpanded ? '1rem 1.25rem' : '1rem 0' }}
+                title="Inventory & Stok"
               >
-                <Package size={22} style={{ flexShrink: 0 }} />
+                <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                  <Package size={22} style={{ flexShrink: 0 }} />
+                  {totalUnreadCount > 0 ? (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-2px',
+                      right: '-2px',
+                      width: '9px',
+                      height: '9px',
+                      borderRadius: '50%',
+                      backgroundColor: '#10b981',
+                      border: '1.5px solid white',
+                      boxShadow: '0 0 6px rgba(16, 185, 129, 0.6)'
+                    }} />
+                  ) : openCount > 0 ? (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-2px',
+                      right: '-2px',
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#f59e0b',
+                      border: '1.5px solid white'
+                    }} />
+                  ) : null}
+                </div>
                 <NavText>Inventory & Stok</NavText>
+                {totalUnreadCount > 0 && isExpanded ? (
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    padding: '2px 7px',
+                    borderRadius: '9999px',
+                    boxShadow: '0 1px 3px rgba(16, 185, 129, 0.4)'
+                  }}>
+                    {totalUnreadCount} Chat Baru
+                  </span>
+                ) : openCount > 0 && isExpanded ? (
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    backgroundColor: '#fef3c7',
+                    color: '#92400e',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    border: '1px solid #fde68a'
+                  }}>
+                    {openCount} Chat
+                  </span>
+                ) : null}
               </NavLink>
             </>
           )}

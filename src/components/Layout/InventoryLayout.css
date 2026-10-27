@@ -1,0 +1,69 @@
+.inventory-layout-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+}
+
+.inventory-sidebar {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.04);
+  transition: width 0.18s cubic-bezier(0.2, 0, 0, 1);
+  will-change: width;
+}
+
+.inventory-nav-item {
+  display: flex;
+  align-items: center;
+  position: relative;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.inventory-nav-item:hover {
+  text-decoration: none;
+}
+
+.inventory-main-content {
+  background-color: var(--bg-secondary, #f8f9fa);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.dark .inventory-main-content {
+  background-color: #121212 !important;
+}
+
+/* Nav Item Text Transition */
+.nav-text-container {
+  transition: opacity 0.15s ease, max-width 0.18s ease;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Custom scrollbar for inventory table and chat */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.4);
+}

@@ -4,7 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import { OrderProvider } from './context/OrderContext.jsx'
 import { InventoryProvider } from './context/InventoryContext.jsx'
-
+import { InventoryCommsProvider } from './pages/InventoryPortal/context/InventoryCommsContext.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 
 // Gunakan environment variable jika ada, jika tidak fallback ke localhost atau origin server (karena menggunakan Nginx reverse proxy)
@@ -18,9 +18,11 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
       <InventoryProvider>
-        <OrderProvider>
-          <App />
-        </OrderProvider>
+        <InventoryCommsProvider>
+          <OrderProvider>
+            <App />
+          </OrderProvider>
+        </InventoryCommsProvider>
       </InventoryProvider>
     </AuthProvider>
   </StrictMode>,

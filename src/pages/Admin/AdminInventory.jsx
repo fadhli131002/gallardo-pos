@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Package, Plus, Edit2, Trash2, X, AlertTriangle, Printer, Loader2 } from 'lucide-react';
+import { Package, Plus, Edit2, Trash2, X, AlertTriangle, Printer, Loader2, MessageSquareWarning } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { useOutletContext } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
 import { useAuth } from '../../context/AuthContext';
+import { useInventoryComms } from '../InventoryPortal/context/InventoryCommsContext';
+import StockDiscrepancyComms from '../InventoryPortal/components/StockDiscrepancyComms';
+import NewDiscrepancyModal from '../InventoryPortal/components/NewDiscrepancyModal';
+import MegaphoneButton from '../../components/MegaphoneButton';
 import './AdminInventory.css';
 
 const AdminInventory = () => {
@@ -12,10 +16,20 @@ const AdminInventory = () => {
   const userRole = String(outletContext.userRole || user?.role || '').toLowerCase().trim();
   const isSuperOrOwner = userRole && ['superadmin', 'super_admin', 'super administrator', 'owner'].includes(userRole);
   const { inventory, inventoryLogs, addStock, updateStock, deleteStock, refreshInventoryFromApi } = useInventory();
+  const { openCount = 0, totalUnreadCount = 0, createTicket } = useInventoryComms();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [isPrinting, setIsPrinting] = useState(false);
   const [activeTab, setActiveTab] = useState('inventory');
+  const [isNewTicketModalOpen, setIsNewTicketModalOpen] = useState(false);
+  const [discrepancyModalItem, setDiscrepancyModalItem] = useState(null);
+
+  const handleCreateTicketSubmit = (ticketData) => {
+    createTicket(ticketData);
+    setActiveTab('comms');
+    setIsNewTicketModalOpen(false);
+    setDiscrepancyModalItem(null);
+  };
 
   useEffect(() => {
     if (typeof refreshInventoryFromApi === 'function') {
@@ -440,7 +454,8 @@ const AdminInventory = () => {
           <h1 className="page-title">Inventory & Stok</h1>
           <p className="page-subtitle">Kelola data material dan ketersediaan barang bengkel</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <MegaphoneButton showLabel={true} />
           <button className="btn-secondary" onClick={handlePrintPDF} disabled={isPrinting} style={{ opacity: isPrinting ? 0.7 : 1 }}>
             {isPrinting ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
             {isPrinting ? 'Menyiapkan PDF...' : 'Cetak Lembar Cek Fisik'}
@@ -465,8 +480,58 @@ const AdminInventory = () => {
         >
           Riwayat Pemotongan (Logs)
         </button>
+        <button 
+          onClick={() => setActiveTab('comms')}
+          style={{
+            padding: '12px 24px',
+            background: 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'comms' ? '2px solid #4f46e5' : '2px solid transparent',
+            color: activeTab === 'comms' ? '#4f46e5' : '#6b7280',
+            fontWeight: activeTab === 'comms' ? 'bold' : '500',
+            fontSize: '14px',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          <MessageSquareWarning size={16} />
+          <span>Chat Selisih Stok (Gudang)</span>
+          {totalUnreadCount > 0 ? (
+            <span style={{
+              backgroundColor: '#10b981',
+              color: '#ffffff',
+              fontSize: '11px',
+              fontWeight: 800,
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              boxShadow: '0 1px 3px rgba(16, 185, 129, 0.4)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ffffff' }} />
+              {totalUnreadCount} Pesan Baru
+            </span>
+          ) : openCount > 0 ? (
+            <span style={{
+              backgroundColor: '#fef3c7',
+              color: '#92400e',
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              border: '1px solid #fde68a'
+            }}>
+              {openCount} Open
+            </span>
+          ) : null}
+        </button>
       </div>
 
+      {(activeTab === 'inventory' || activeTab === 'logs') && (
       <div className="premium-card" style={{ padding: '0', overflow: 'hidden' }}>
         {activeTab === 'inventory' && (
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -620,6 +685,18 @@ const AdminInventory = () => {
           </div>
         )}
       </div>
+      )}
+
+      {activeTab === 'comms' && (
+        <div style={{ marginTop: '0' }}>
+          <StockDiscrepancyComms
+            onOpenNewTicketModal={() => {
+              setDiscrepancyModalItem(null);
+              setIsNewTicketModalOpen(true);
+            }}
+          />
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay animate-fade-in" style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '24px' }}>
@@ -1028,6 +1105,18 @@ const AdminInventory = () => {
           * Dokumen ini digenerate secara otomatis oleh sistem POS Gallardo.
         </div>
       </div>
+
+      {/* New Discrepancy Ticket Modal */}
+      <NewDiscrepancyModal
+        isOpen={isNewTicketModalOpen}
+        onClose={() => {
+          setIsNewTicketModalOpen(false);
+          setDiscrepancyModalItem(null);
+        }}
+        inventory={inventory}
+        preselectedItem={discrepancyModalItem}
+        onSubmitTicket={handleCreateTicketSubmit}
+      />
     </div>
   );
 };
