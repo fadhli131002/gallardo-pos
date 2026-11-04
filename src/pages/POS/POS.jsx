@@ -36,6 +36,7 @@ const POS = () => {
     carModel: '',
     carSize: '',
     carColor: '',
+    carYear: '',
     plateNumber: '',
     engineNumber: '',
     chassisNumber: '',
@@ -823,6 +824,7 @@ const POS = () => {
         car_color: formData.carColor || null,
         plate_number: formData.plateNumber || null,
         chassis_number: formData.chassisNumber || null,
+        engine_number: formData.engineNumber || null,
         car_year: formData.carYear || null,
         installation_date: formData.installationDate || null,
         installation_time: formData.installationTime || null,
@@ -1022,7 +1024,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
     setInvoiceData(null);
     setCartItems([]);
     setFormData({
-      location: userBranch, carBrand: '', sunroofQty: 0, sunroofPrice: 0, carModel: '', carSize: '', carColor: '', plateNumber: '', engineNumber: '', chassisNumber: '', installationDate: new Date().toISOString().split('T')[0], installationTime: '09:00', notes: '', customerName: '', customerHp: '', customerEmail: '', customerAddress: '', customerCity: '', customerProvince: '', customerZip: '',
+      location: userBranch, carBrand: '', sunroofQty: 0, sunroofPrice: 0, carModel: '', carSize: '', carColor: '', carYear: '', plateNumber: '', engineNumber: '', chassisNumber: '', installationDate: new Date().toISOString().split('T')[0], installationTime: '09:00', notes: '', customerName: '', customerHp: '', customerEmail: '', customerAddress: '', customerCity: '', customerProvince: '', customerZip: '',
     });
     setPaymentState({ method: 'QRIS', type: 'Lunas', dpAmount: 0, spgName: '', billType: 'Walk-In (Workshop)', useTax: false, paymentProof: null, paymentProofName: '' });
     setDiscount(0);
@@ -1384,16 +1386,20 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                     <input type="text" name="carColor" value={formData.carColor} onChange={handleInputChange} className={`input-field ${formErrors.includes('Warna Kendaraan') ? 'input-error' : ''}`} placeholder="Misal: Hitam Metalik" />
                   </div>
                   <div className="form-group">
+                    <label className="font-mono-ui text-sm text-secondary">Tahun Kendaraan</label>
+                    <input type="text" name="carYear" value={formData.carYear} onChange={handleInputChange} className="input-field" placeholder="Misal: 2024" />
+                  </div>
+                  <div className="form-group">
                     <label className="font-mono-ui text-sm text-secondary">Nomor Polisi</label>
                     <input type="text" name="plateNumber" value={formData.plateNumber} onChange={handleInputChange} className={`input-field ${formErrors.includes('Nomor Polisi') ? 'input-error' : ''}`} placeholder="B 1234 XYZ" />
                   </div>
                   <div className="form-group">
-                    <label className="font-mono-ui text-sm text-secondary">Nomor Rangka</label>
-                    <input type="text" name="chassisNumber" value={formData.chassisNumber} onChange={handleInputChange} className={`input-field ${formErrors.includes('No. Rangka') ? 'input-error' : ''}`} placeholder="Wajib diisi" />
-                  </div>
-                  <div className="form-group">
                     <label className="font-mono-ui text-sm text-secondary">Nomor Mesin</label>
                     <input type="text" name="engineNumber" value={formData.engineNumber} onChange={handleInputChange} className={`input-field ${formErrors.includes('Nomor Mesin') ? 'input-error' : ''}`} placeholder="Wajib diisi" />
+                  </div>
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label className="font-mono-ui text-sm text-secondary">Nomor Rangka</label>
+                    <input type="text" name="chassisNumber" value={formData.chassisNumber} onChange={handleInputChange} className={`input-field ${formErrors.includes('No. Rangka') ? 'input-error' : ''}`} placeholder="Wajib diisi" />
                   </div>
                 </div>
                 <div className="form-grid mt-4">

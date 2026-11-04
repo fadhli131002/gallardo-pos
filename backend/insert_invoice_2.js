@@ -28,7 +28,7 @@ async function main() {
       type: "WORKSHOP",
       event: "ROSYID", 
       payment_type: "Lunas",
-      payment_method: "Transfer Bank (BCA 6050733252 a.n GALLARDO UTAMA SENTOSA PT)",
+      payment_method: "Transfer Bank (BCA 6050733252 an GALLARDO UTAMA SENTOS PT)",
       notes: "Selesai pemasangan tgl 04 agustus 2026",
       additional_discount: 0,
       refund_amount: 0,
@@ -51,7 +51,7 @@ async function main() {
           {
             amount: 46300000,
             method: "Transfer Bank",
-            notes: "Transfer Bank (BCA 6050733252 a.n GALLARDO UTAMA SENTOSA PT)",
+            notes: "Transfer Bank (BCA 6050733252 an GALLARDO UTAMA SENTOS PT)",
             payment_date: new Date("2026-08-06T10:00:00.000Z")
           }
         ]

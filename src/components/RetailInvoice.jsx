@@ -313,8 +313,8 @@ export default function RetailInvoice({ order }) {
           <div>Barang yang sudah dibeli tidak dapat dikembalikan</div>
           <div className="mb-2">Harap membawa bukti transaksi ini saat melakukan claim</div>
           
-          <div className="font-bold">Transfer Melalui BCA</div>
-          <div className="font-bold">605-073-3252 A/n GALLARDO UTAMA SENTOSA PT</div>
+          <div className="font-bold">Transfer Melalui:</div>
+          <div className="font-bold">BCA 6050733252 an GALLARDO UTAMA SENTOS PT</div>
         </div>
       </div>
 

@@ -316,9 +316,9 @@ export default function SharedInvoice({ order }) {
               <div style={{ fontSize: '10px', color: '#111', lineHeight: '1.4' }}>
                 <div style={{ fontWeight: 'bold', marginBottom: '3px' }}>Gallardo Auto Sport</div>
                 <div style={{ marginBottom: '2px' }}>Ruko Alicante, Blok D9 - D10, Medang, Kec. Pagedangan, Kabupaten Tangerang, Banten 15334</div>
-                <div style={{ marginBottom: '2px' }}>0822-5802-6577</div>
+                <div style={{ marginBottom: '8px' }}>0822-5802-6577</div>
                 <div style={{ marginBottom: '2px' }}>(Untuk Transfer Pembayaran ke:)</div>
-                <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>No. Rekening BCA 6050733252 a.n GALLARDO UTAMA SENTOSA PT</div>
+                <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>BCA 6050733252 an GALLARDO UTAMA SENTOS PT</div>
                 <div style={{ fontStyle: 'italic', fontSize: '9px', color: '#555' }}>Kami (Gallardo Auto Sport, Deluxe, VansgardPPF, Rantiz, Performante) HANYA menggunakan rekening BCA di atas.</div>
               </div>
             </div>
