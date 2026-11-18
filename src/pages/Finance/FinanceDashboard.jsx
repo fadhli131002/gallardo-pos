@@ -579,407 +579,758 @@ const FinanceDashboard = () => {
       {/* Due Alert Banner */}
       <DueAlertBanner />
 
-      {/* ── SECTION 1: ARUS KAS RIIL (CASHFLOW) ───────────────────────── */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px',
-          marginBottom: '14px',
-          marginTop: '8px'
-        }}
-      >
-        <div>
-          <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.03em', margin: 0 }}>
-            1. Arus Kas Riil (Cashflow)
-          </h2>
-          <p style={{ fontSize: '12.5px', color: '#6b7280', margin: '2px 0 0 0' }}>
-            Uang fisik/transfer yang benar-benar diterima &amp; dikeluarkan dalam periode ini
-          </p>
-        </div>
-        <span
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: '#1d4ed8',
-            backgroundColor: '#eff6ff',
-            border: '1px solid #bfdbfe',
-            padding: '4px 12px',
-            borderRadius: '999px'
-          }}
-        >
-          Bulan: {new Date().toISOString().slice(0, 7)}
-        </span>
-      </div>
+      {(() => {
+        const kasMasukVal = Number(summary.cashflow?.kasMasuk ?? summary.totalKasMasuk ?? 0);
+        const pelunasanLamaVal = Number(summary.cashflow?.pelunasanPiutangLama ?? summary.pelunasanPiutangLama ?? 0);
+        const netCashflowVal = Number(summary.cashflow?.netCashflow ?? 0);
+        const totalPiutangVal = Number(summary.receivables?.totalPiutang ?? summary.totalPiutang ?? 0);
+        const piutangPeriodeVal = Number(summary.receivables?.totalPiutangPeriode ?? summary.totalPiutangPeriode ?? 0);
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-          gap: '16px',
-          marginBottom: '28px'
-        }}
-      >
-        {/* 1. Kas Masuk Riil */}
-        <div
-          onClick={() => handleCardClick('kas-masuk')}
-          style={{ ...cardBaseStyle, cursor: 'pointer' }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              Kas Masuk Riil
-              <ChevronRight size={14} />
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-              <span style={{ fontSize: '22px', fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>
-                {formatRupiah(summary.cashflow?.kasMasuk ?? summary.totalKasMasuk)}
-              </span>
-              <MoMBadge pct={summary.momComparison?.kas?.pct} />
-            </div>
-            <span style={{ fontSize: '12px', color: '#6b7280' }}>
-              Penerimaan kas &amp; transfer masuk
-            </span>
-          </div>
-          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#ecfdf5', color: '#059669' }}>
-            <DollarSign size={20} />
-          </div>
-        </div>
+        const totalOmsetVal = Number(summary.pl?.totalOmset ?? summary.totalOmset ?? 0);
+        const totalHppVal = Number(summary.pl?.totalHpp ?? summary.totalHpp ?? 0);
+        const totalBebanVal = Number(summary.pl?.totalBeban ?? summary.totalExpense ?? 0);
+        const totalKomisiVal = Number(summary.pl?.totalKomisi ?? summary.totalKomisi ?? 0);
+        const totalOutflowPl = totalHppVal + totalBebanVal + totalKomisiVal;
+        const labaKotorVal = Number(summary.pl?.labaKotor ?? summary.labaKotor ?? (totalOmsetVal - totalHppVal));
+        const labaBersihVal = Number(
+          summary.pl?.labaBersih ?? (totalOmsetVal - totalHppVal - totalBebanVal - totalKomisiVal)
+        );
+        const marginPct = totalOmsetVal > 0 ? Math.round((labaKotorVal / totalOmsetVal) * 100) : 0;
 
-        {/* 2. Pelunasan Piutang Lama */}
-        <div
-          onClick={() => handleCardClick('piutang-lama')}
-          style={{ ...cardBaseStyle, cursor: 'pointer' }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <span>Pelunasan Piutang Lama</span>
-              <span style={{ fontSize: '10.5px', fontWeight: 600, color: '#0f766e', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '1px 7px', borderRadius: '999px' }}>
-                Bagian Kas Masuk
-              </span>
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-              <span style={{ fontSize: '22px', fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>
-                {formatRupiah(summary.cashflow?.pelunasanPiutangLama ?? summary.pelunasanPiutangLama ?? 0)}
-              </span>
-            </div>
-            <span style={{ fontSize: '12px', color: '#6b7280' }}>
-              Cicilan / termin dari transaksi lalu
-            </span>
-          </div>
-          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#f0fdfa', color: '#0d9488' }}>
-            <CreditCard size={20} />
-          </div>
-        </div>
+        const maxChartVal = Math.max(
+          totalOmsetVal,
+          kasMasukVal,
+          Math.abs(labaKotorVal),
+          totalOutflowPl,
+          Math.abs(labaBersihVal),
+          totalPiutangVal,
+          1
+        );
 
-        {/* 3. Net Cashflow */}
-        <div style={cardBaseStyle}>
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px' }}>
-              Net Cashflow
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-              <span
+        const chartBars = [
+          { label: 'Omset', val: totalOmsetVal, color: '#4f46e5', bg: '#eef2ff' },
+          { label: 'Kas Masuk', val: kasMasukVal, color: '#059669', bg: '#ecfdf5' },
+          { label: 'Laba Kotor', val: Math.max(0, labaKotorVal), color: '#10b981', bg: '#d1fae5' },
+          { label: 'HPP+Beban', val: totalOutflowPl, color: '#e11d48', bg: '#ffe4e6' },
+          { label: 'Laba Bersih', val: Math.abs(labaBersihVal), color: labaBersihVal >= 0 ? '#0d9488' : '#dc2626', bg: '#f0fdfa' },
+          { label: 'Piutang', val: totalPiutangVal, color: '#d97706', bg: '#fef3c7' }
+        ];
+
+        const totalPOAmount = purchaseOrders.reduce((acc, po) => acc + Number(po.totalAmount || 0), 0);
+        const totalExpenseListAmount = expenses.reduce((acc, ex) => acc + Number(ex.amount || 0), 0);
+
+        return (
+          <>
+            {/* ── TOP BENTO GRID (3 ZONES: HERO CASHFLOW | 2x2 P&L MATRIX | VISUAL P&L BARS) ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+              {/* ZONE 1 (LEFT 5 COLS): 1. ARUS KAS RIIL (HERO CARD + SUB-WALLETS) */}
+              <div
+                className="lg:col-span-5"
                 style={{
-                  fontSize: '22px',
-                  fontWeight: 800,
-                  color: (summary.cashflow?.netCashflow ?? 0) >= 0 ? '#111827' : '#dc2626',
-                  lineHeight: 1.1
+                  backgroundColor: '#ffffff',
+                  borderRadius: '20px',
+                  border: '1px solid #e5e7eb',
+                  padding: '22px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)'
                 }}
               >
-                {(summary.cashflow?.netCashflow ?? 0) < 0 ? '-' : ''}
-                {formatRupiah(Math.abs(summary.cashflow?.netCashflow ?? 0))}
-              </span>
-              <MoMBadge pct={summary.momComparison?.cashflow?.pct} />
-            </div>
-            <span style={{ fontSize: '12px', color: '#6b7280' }}>
-              Selisih kas masuk dikurangi kas keluar
-            </span>
-          </div>
-          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#eff6ff', color: '#2563eb' }}>
-            <TrendingUp size={20} />
-          </div>
-        </div>
+                <div>
+                  {/* Top Header */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '14px' }}>
+                    <div>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block' }}>
+                        1. Arus Kas Riil (Cashflow)
+                      </span>
+                      <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                        Net Cashflow (Kas Masuk - Kas Keluar)
+                      </span>
+                    </div>
+                    <span
+                      style={{
+                        fontSize: '11.5px',
+                        fontWeight: 600,
+                        color: '#1d4ed8',
+                        backgroundColor: '#eff6ff',
+                        border: '1px solid #bfdbfe',
+                        padding: '3px 10px',
+                        borderRadius: '999px',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      Bulan: {new Date().toISOString().slice(0, 7)}
+                    </span>
+                  </div>
 
-        {/* 4. Sisa Piutang Berjalan */}
-        <div
-          onClick={() => handleCardClick('piutang')}
-          style={{ ...cardBaseStyle, cursor: 'pointer' }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <span>Sisa Piutang Berjalan</span>
-              <span style={{ fontSize: '10.5px', fontWeight: 600, color: '#b45309', backgroundColor: '#fef3c7', border: '1px solid #fde68a', padding: '1px 7px', borderRadius: '999px' }}>
-                Belum Lunas
-              </span>
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-              <span style={{ fontSize: '22px', fontWeight: 800, color: '#d97706', lineHeight: 1.1 }}>
-                {formatRupiah(summary.receivables?.totalPiutang ?? summary.totalPiutang)}
-              </span>
-            </div>
-            <span style={{ fontSize: '12px', color: '#6b7280' }}>
-              Bulan ini: {formatRupiah(summary.receivables?.totalPiutangPeriode ?? summary.totalPiutangPeriode)}
-            </span>
-          </div>
-          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#fef3c7', color: '#d97706' }}>
-            <Wallet size={20} />
-          </div>
-        </div>
-      </div>
+                  {/* Hero Net Cashflow Amount */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                    <span
+                      style={{
+                        fontSize: '28px',
+                        fontWeight: 800,
+                        color: netCashflowVal >= 0 ? '#111827' : '#dc2626',
+                        letterSpacing: '-0.02em',
+                        lineHeight: 1.1
+                      }}
+                    >
+                      {netCashflowVal < 0 ? '-' : ''}{formatRupiah(Math.abs(netCashflowVal))}
+                    </span>
+                    <MoMBadge pct={summary.momComparison?.cashflow?.pct} />
+                  </div>
 
-      {/* ── SECTION 2: LAPORAN LABA RUGI AKRUAL (P&L) ─────────────────── */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px',
-          marginBottom: '14px'
-        }}
-      >
-        <div>
-          <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.03em', margin: 0 }}>
-            2. Standar Laporan Keuangan SOP (Laba Rugi Akrual)
-          </h2>
-          <p style={{ fontSize: '12.5px', color: '#6b7280', margin: '2px 0 0 0' }}>
-            Dihitung berdasarkan basis akrual: Total Omset dikurangi HPP, Beban Operasional, dan Komisi
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => handleCardClick('laba-rugi')}
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: '#4338ca',
-            backgroundColor: '#eef2ff',
-            border: '1px solid #c7d2fe',
-            padding: '5px 12px',
-            borderRadius: '999px',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}
-        >
-          <span>Profit &amp; Loss Analysis</span>
-          <ChevronRight size={13} />
-        </button>
-      </div>
+                  {/* Pill Action Buttons (Like Transfer / Request in Finexy Ref) */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '18px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowPOModal(true)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        padding: '10px 14px',
+                        borderRadius: '999px',
+                        backgroundColor: '#111827',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontSize: '12.5px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <Plus size={15} />
+                      <span>Catat Pembelian</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowExpenseModal(true)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        padding: '10px 14px',
+                        borderRadius: '999px',
+                        backgroundColor: '#f3f4f6',
+                        color: '#111827',
+                        border: '1px solid #e5e7eb',
+                        fontSize: '12.5px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <Plus size={15} />
+                      <span>Input Expense</span>
+                    </button>
+                  </div>
+                </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-          gap: '16px'
-        }}
-      >
-        {/* 1. Total Omset */}
-        <div
-          onClick={() => handleCardClick('omset')}
-          style={{ ...cardBaseStyle, cursor: 'pointer' }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              Total Omset
-              <ChevronRight size={14} />
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-              <span style={{ fontSize: '22px', fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>
-                {formatRupiah(summary.pl?.totalOmset ?? summary.totalOmset)}
-              </span>
-              <MoMBadge pct={summary.momComparison?.omset?.pct} />
-            </div>
-            <span style={{ fontSize: '12px', color: '#6b7280' }}>
-              Pendapatan kotor basis akrual
-            </span>
-          </div>
-          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#eef2ff', color: '#4f46e5' }}>
-            <FileText size={20} />
-          </div>
-        </div>
+                {/* Sub-Wallets Container (3 Cashflow Breakdown Tiles) */}
+                <div
+                  style={{
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '16px',
+                    padding: '12px',
+                    border: '1px solid #f1f5f9'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', padding: '0 4px' }}>
+                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#374151' }}>
+                      Komponen Arus Kas
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#6b7280' }}>
+                      Klik kartu untuk rincian
+                    </span>
+                  </div>
 
-        {/* 2. HPP + Beban */}
-        <div style={cardBaseStyle}>
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px' }}>
-              HPP + Beban + Komisi
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-              <span style={{ fontSize: '22px', fontWeight: 800, color: '#dc2626', lineHeight: 1.1 }}>
-                {formatRupiah((summary.pl?.totalHpp ?? summary.totalHpp ?? 0) + (summary.pl?.totalBeban ?? summary.totalExpense ?? 0) + (summary.pl?.totalKomisi ?? summary.totalKomisi ?? 0))}
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11.5px', color: '#6b7280' }}>
-              <span>HPP: <strong style={{ color: '#374151' }}>{formatRupiah(summary.pl?.totalHpp ?? summary.totalHpp)}</strong></span>
-              <span>Beban: <strong style={{ color: '#374151' }}>{formatRupiah(summary.pl?.totalBeban ?? summary.totalExpense ?? 0)}</strong> &bull; Komisi: <strong style={{ color: '#374151' }}>{formatRupiah(summary.pl?.totalKomisi ?? summary.totalKomisi ?? 0)}</strong></span>
-            </div>
-          </div>
-          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#fef2f2', color: '#dc2626' }}>
-            <TrendingDown size={20} />
-          </div>
-        </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {/* Sub-card 1: Kas Masuk Riil */}
+                    <div
+                      onClick={() => handleCardClick('kas-masuk')}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: '12px',
+                        padding: '12px',
+                        border: '1px solid #e5e7eb',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '6px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ width: '26px', height: '26px', borderRadius: '7px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <DollarSign size={14} />
+                        </div>
+                        <ChevronRight size={13} style={{ color: '#9ca3af' }} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '11px', fontWeight: 600, color: '#6b7280', marginBottom: '2px' }}>
+                          Kas Masuk Riil
+                        </div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#111827', wordBreak: 'break-word' }}>
+                          {formatRupiah(kasMasukVal)}
+                        </div>
+                      </div>
+                      <div>
+                        <MoMBadge pct={summary.momComparison?.kas?.pct} />
+                      </div>
+                    </div>
 
-        {/* 3. Laba Kotor */}
-        <div style={cardBaseStyle}>
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span>Laba Kotor</span>
-              {summary.pl?.totalOmset > 0 && (
-                <span style={{ fontSize: '10.5px', fontWeight: 600, color: '#059669', backgroundColor: '#ecfdf5', padding: '1px 7px', borderRadius: '999px' }}>
-                  {Math.round((summary.pl?.labaKotor / summary.pl?.totalOmset) * 100)}% margin
-                </span>
-              )}
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-              <span style={{ fontSize: '22px', fontWeight: 800, color: '#059669', lineHeight: 1.1 }}>
-                {formatRupiah(summary.pl?.labaKotor ?? summary.labaKotor)}
-              </span>
-            </div>
-            <span style={{ fontSize: '12px', color: '#6b7280' }}>
-              Total Omset dikurangi HPP
-            </span>
-          </div>
-          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#ecfdf5', color: '#059669' }}>
-            <TrendingUp size={20} />
-          </div>
-        </div>
+                    {/* Sub-card 2: Pelunasan Piutang Lama */}
+                    <div
+                      onClick={() => handleCardClick('piutang-lama')}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: '12px',
+                        padding: '12px',
+                        border: '1px solid #e5e7eb',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '6px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ width: '26px', height: '26px', borderRadius: '7px', backgroundColor: '#f0fdfa', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CreditCard size={14} />
+                        </div>
+                        <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#0f766e', backgroundColor: '#f0fdfa', padding: '1px 6px', borderRadius: '999px' }}>
+                          Termin Lalu
+                        </span>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '11px', fontWeight: 600, color: '#6b7280', marginBottom: '2px' }}>
+                          Pelunasan Piutang
+                        </div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#111827', wordBreak: 'break-word' }}>
+                          {formatRupiah(pelunasanLamaVal)}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '10.5px', color: '#0d9488', fontWeight: 600 }}>
+                        Bagian Kas Masuk
+                      </div>
+                    </div>
 
-        {/* 4. Laba Bersih */}
-        {(() => {
-          const labaBersihVal = summary.pl?.labaBersih ?? ((summary.pl?.totalOmset ?? summary.totalOmset ?? 0) - (summary.pl?.totalHpp ?? summary.totalHpp ?? 0) - (summary.pl?.totalBeban ?? summary.totalExpense ?? 0) - (summary.pl?.totalKomisi ?? summary.totalKomisi ?? 0));
-          return (
-            <div
-              onClick={() => handleCardClick('laba-rugi')}
-              style={{ ...cardBaseStyle, cursor: 'pointer' }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                  <span>Laba Bersih</span>
-                  <span
+                    {/* Sub-card 3: Sisa Piutang Berjalan */}
+                    <div
+                      onClick={() => handleCardClick('piutang')}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: '12px',
+                        padding: '12px',
+                        border: '1px solid #e5e7eb',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '6px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ width: '26px', height: '26px', borderRadius: '7px', backgroundColor: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Wallet size={14} />
+                        </div>
+                        <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#b45309', backgroundColor: '#fef3c7', padding: '1px 6px', borderRadius: '999px' }}>
+                          Belum Lunas
+                        </span>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '11px', fontWeight: 600, color: '#6b7280', marginBottom: '2px' }}>
+                          Sisa Piutang
+                        </div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#d97706', wordBreak: 'break-word' }}>
+                          {formatRupiah(totalPiutangVal)}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '10.5px', color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        Bln ini: {formatRupiah(piutangPeriodeVal)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ZONE 2 (MIDDLE 4 COLS): 2x2 BENTO MATRIX FOR SOP LABA RUGI AKRUAL */}
+              <div
+                className="lg:col-span-4"
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '20px',
+                  border: '1px solid #e5e7eb',
+                  padding: '18px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                  boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
+                  <div>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block' }}>
+                      2. Laporan SOP (Laba Rugi Akrual)
+                    </span>
+                    <span style={{ fontSize: '11.5px', color: '#6b7280' }}>
+                      Omset dikurangi HPP, Beban &amp; Komisi
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
+                  {/* Tile 1 (Featured Highlight Tile): Laba Bersih */}
+                  <div
+                    onClick={() => handleCardClick('laba-rugi')}
                     style={{
-                      fontSize: '10.5px',
-                      fontWeight: 600,
-                      color: labaBersihVal >= 0 ? '#059669' : '#dc2626',
-                      backgroundColor: labaBersihVal >= 0 ? '#ecfdf5' : '#fef2f2',
-                      border: `1px solid ${labaBersihVal >= 0 ? '#a7f3d0' : '#fecaca'}`,
-                      padding: '1px 7px',
-                      borderRadius: '999px'
+                      backgroundColor: '#111827',
+                      color: '#ffffff',
+                      borderRadius: '16px',
+                      padding: '16px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      gap: '10px',
+                      boxShadow: '0 8px 20px rgba(17, 24, 39, 0.14)'
                     }}
                   >
-                    {labaBersihVal >= 0 ? 'Surplus Laba' : 'Defisit Rugi'}
-                  </span>
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '22px', fontWeight: 800, color: labaBersihVal >= 0 ? '#059669' : '#dc2626', lineHeight: 1.1 }}>
-                    {labaBersihVal < 0 ? '-' : ''}{formatRupiah(Math.abs(labaBersihVal))}
-                  </span>
-                  <MoMBadge pct={summary.momComparison?.laba?.pct} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#9ca3af' }}>
+                        Laba Bersih
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          padding: '2px 7px',
+                          borderRadius: '999px',
+                          backgroundColor: labaBersihVal >= 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                          color: labaBersihVal >= 0 ? '#34d399' : '#f87171'
+                        }}
+                      >
+                        {labaBersihVal >= 0 ? 'Surplus' : 'Defisit'}
+                      </span>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '19px', fontWeight: 800, color: '#ffffff', lineHeight: 1.15, wordBreak: 'break-word' }}>
+                        {labaBersihVal < 0 ? '-' : ''}{formatRupiah(Math.abs(labaBersihVal))}
+                      </div>
+                      <div style={{ marginTop: '6px' }}>
+                        <MoMBadge pct={summary.momComparison?.laba?.pct} />
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '10.5px', color: '#9ca3af' }}>
+                      Omset - HPP - Beban - Komisi
+                    </div>
+                  </div>
+
+                  {/* Tile 2: Total Omset */}
+                  <div
+                    onClick={() => handleCardClick('omset')}
+                    style={{
+                      backgroundColor: '#f8fafc',
+                      borderRadius: '16px',
+                      padding: '16px',
+                      border: '1px solid #f1f5f9',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      gap: '10px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#4b5563' }}>
+                        Total Omset
+                      </span>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: '#eef2ff', color: '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <FileText size={15} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '19px', fontWeight: 800, color: '#111827', lineHeight: 1.15, wordBreak: 'break-word' }}>
+                        {formatRupiah(totalOmsetVal)}
+                      </div>
+                      <div style={{ marginTop: '6px' }}>
+                        <MoMBadge pct={summary.momComparison?.omset?.pct} />
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '10.5px', color: '#6b7280' }}>
+                      Basis Akrual (Klik rincian)
+                    </div>
+                  </div>
+
+                  {/* Tile 3: Laba Kotor */}
+                  <div
+                    style={{
+                      backgroundColor: '#f8fafc',
+                      borderRadius: '16px',
+                      padding: '16px',
+                      border: '1px solid #f1f5f9',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      gap: '10px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#4b5563' }}>
+                        Laba Kotor
+                      </span>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <TrendingUp size={15} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '19px', fontWeight: 800, color: '#059669', lineHeight: 1.15, wordBreak: 'break-word' }}>
+                        {formatRupiah(labaKotorVal)}
+                      </div>
+                      <div style={{ marginTop: '6px' }}>
+                        <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#059669', backgroundColor: '#ecfdf5', padding: '2px 7px', borderRadius: '999px' }}>
+                          {marginPct}% Margin
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '10.5px', color: '#6b7280' }}>
+                      Omset dikurangi HPP
+                    </div>
+                  </div>
+
+                  {/* Tile 4: HPP + Beban + Komisi */}
+                  <div
+                    style={{
+                      backgroundColor: '#f8fafc',
+                      borderRadius: '16px',
+                      padding: '16px',
+                      border: '1px solid #f1f5f9',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      gap: '8px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#4b5563' }}>
+                        HPP + Beban
+                      </span>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <TrendingDown size={15} />
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '19px', fontWeight: 800, color: '#dc2626', lineHeight: 1.15, wordBreak: 'break-word' }}>
+                      {formatRupiah(totalOutflowPl)}
+                    </div>
+                    <div style={{ fontSize: '10.5px', color: '#6b7280', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                      <span>HPP: <strong style={{ color: '#374151' }}>{formatRupiah(totalHppVal)}</strong></span>
+                      <span>Beban: <strong style={{ color: '#374151' }}>{formatRupiah(totalBebanVal)}</strong></span>
+                      <span>Komisi: <strong style={{ color: '#374151' }}>{formatRupiah(totalKomisiVal)}</strong></span>
+                    </div>
+                  </div>
                 </div>
-                <span style={{ fontSize: '12px', color: '#6b7280' }}>
-                  Omset - HPP - Beban - Komisi
-                </span>
               </div>
+
+              {/* ZONE 3 (RIGHT 3 COLS): VISUAL PROFIT & LOSS PILLAR CHART (LIKE FINEXY / FINNOVA REF) */}
               <div
+                className="lg:col-span-3"
                 style={{
-                  ...iconBoxBaseStyle,
-                  backgroundColor: labaBersihVal >= 0 ? '#ecfdf5' : '#fef2f2',
-                  color: labaBersihVal >= 0 ? '#059669' : '#dc2626'
+                  backgroundColor: '#ffffff',
+                  borderRadius: '20px',
+                  border: '1px solid #e5e7eb',
+                  padding: '22px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)'
                 }}
               >
-                <PieChart size={20} />
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' }}>
+                    <div>
+                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#111827', margin: 0 }}>
+                        Profit &amp; Loss
+                      </h3>
+                      <p style={{ fontSize: '11.5px', color: '#6b7280', margin: '2px 0 0 0' }}>
+                        Proporsi visual metrik keuangan
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCardClick('laba-rugi')}
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: '#4338ca',
+                        backgroundColor: '#eef2ff',
+                        border: '1px solid #c7d2fe',
+                        padding: '4px 10px',
+                        borderRadius: '999px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '2px',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      <span>Analisis</span>
+                      <ChevronRight size={12} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Vertical Pillar Bars */}
+                <div
+                  style={{
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '16px',
+                    padding: '16px 12px 12px',
+                    border: '1px solid #f1f5f9',
+                    margin: '10px 0'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '140px', gap: '8px', paddingBottom: '8px', borderBottom: '1px dashed #e2e8f0' }}>
+                    {chartBars.map((bar, idx) => {
+                      const heightPct = Math.max(12, Math.round((bar.val / maxChartVal) * 100));
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            flex: 1,
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'flex-end',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                          title={`${bar.label}: ${formatRupiah(bar.val)}`}
+                        >
+                          <div
+                            style={{
+                              width: '100%',
+                              maxWidth: '28px',
+                              height: `${heightPct}%`,
+                              backgroundColor: bar.color,
+                              borderRadius: '8px 8px 4px 4px',
+                              transition: 'height 0.4s ease'
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '4px', marginTop: '8px' }}>
+                    {chartBars.map((bar, idx) => (
+                      <div key={idx} style={{ flex: 1, textAlign: 'center', fontSize: '9.5px', fontWeight: 600, color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {bar.label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bottom Ratio Summary Strip */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px' }}>
+                    <span style={{ color: '#6b7280', fontWeight: 500 }}>Rasio Beban + HPP</span>
+                    <span style={{ fontWeight: 700, color: '#111827' }}>
+                      {totalOmsetVal > 0 ? `${Math.min(100, Math.round((totalOutflowPl / totalOmsetVal) * 100))}% dari Omset` : '0%'}
+                    </span>
+                  </div>
+                  <div style={{ width: '100%', height: '8px', backgroundColor: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div
+                      style={{
+                        width: `${totalOmsetVal > 0 ? Math.min(100, Math.round((totalOutflowPl / totalOmsetVal) * 100)) : 0}%`,
+                        height: '100%',
+                        backgroundColor: '#e11d48',
+                        borderRadius: '999px',
+                        transition: 'width 0.3s ease'
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-          );
-        })()}
-      </div>
 
-      
-      {/* TABLES: Expenses & PO */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* PO Table */}
-        <div className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-6 flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <Package size={20} className="text-indigo-600" /> Laporan Pembelian
-            </h2>
-            <button onClick={() => setShowPOModal(true)} className="flex items-center gap-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
-              <Plus size={16} /> Catat Pembelian
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50 text-gray-500 uppercase">
-                <tr>
-                  <th className="px-4 py-3">Tanggal</th>
-                  <th className="px-4 py-3">Supplier / Item</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Total Biaya</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {purchaseOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="text-center py-6 text-gray-400">Belum ada data pembelian.</td>
-                  </tr>
-                ) : purchaseOrders.map(po => (
-                  <tr key={po.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600">{new Date(po.date).toLocaleDateString('id-ID')}</td>
-                    <td className="px-4 py-3 font-medium text-gray-800">{po.supplier}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${po.status === 'Received' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                        {po.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right font-bold text-gray-900">{formatRupiah(po.totalAmount)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+            {/* ── BOTTOM BENTO ROW: SPENDING PROGRESS + TABLES (PO & EXPENSES) ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-2">
+              {/* LEFT 6 COLS: Laporan Pembelian (PO) Bento Card */}
+              <div
+                className="lg:col-span-6"
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '20px',
+                  border: '1px solid #e5e7eb',
+                  padding: '22px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#eef2ff', color: '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Package size={19} />
+                    </div>
+                    <div>
+                      <h2 style={{ fontSize: '16px', fontWeight: 800, color: '#111827', margin: 0 }}>
+                        Laporan Pembelian
+                      </h2>
+                      <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>
+                        Total PO: <strong style={{ color: '#111827' }}>{formatRupiah(totalPOAmount)}</strong> ({purchaseOrders.length} transaksi)
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowPOModal(true)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      backgroundColor: '#111827',
+                      color: '#ffffff',
+                      padding: '8px 14px',
+                      borderRadius: '999px',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Plus size={15} />
+                    <span>Catat Pembelian</span>
+                  </button>
+                </div>
 
-        {/* Expenses Table */}
-        <div className="bg-white rounded-2xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-6 flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <FileText size={20} className="text-rose-600" /> Beban Operasional
-            </h2>
-            <button onClick={() => setShowExpenseModal(true)} className="flex items-center gap-2 bg-rose-50 text-rose-700 hover:bg-rose-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
-              <Plus size={16} /> Input Expense
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50 text-gray-500 uppercase">
-                <tr>
-                  <th className="px-4 py-3">Tanggal</th>
-                  <th className="px-4 py-3">Keterangan</th>
-                  <th className="px-4 py-3">Kategori</th>
-                  <th className="px-4 py-3 text-right">Nominal</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {expenses.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="text-center py-6 text-gray-400">Belum ada data pengeluaran.</td>
-                  </tr>
-                ) : expenses.map(exp => (
-                  <tr key={exp.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600">{new Date(exp.date).toLocaleDateString('id-ID')}</td>
-                    <td className="px-4 py-3 font-medium text-gray-800">{exp.title}</td>
-                    <td className="px-4 py-3 text-gray-500">{exp.category}</td>
-                    <td className="px-4 py-3 text-right font-bold text-gray-900">{formatRupiah(exp.amount)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+                <div style={{ overflowX: 'auto', border: '1px solid #f1f5f9', borderRadius: '14px' }}>
+                  <table className="w-full text-sm text-left">
+                    <thead style={{ backgroundColor: '#f8fafc', color: '#6b7280', fontSize: '11.5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      <tr>
+                        <th className="px-4 py-3 font-semibold">Tanggal</th>
+                        <th className="px-4 py-3 font-semibold">Supplier / Item</th>
+                        <th className="px-4 py-3 font-semibold">Status</th>
+                        <th className="px-4 py-3 font-semibold text-right">Total Biaya</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {purchaseOrders.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="text-center py-8 text-gray-400 text-xs">
+                            Belum ada data pembelian pada periode ini.
+                          </td>
+                        </tr>
+                      ) : (
+                        purchaseOrders.map(po => (
+                          <tr key={po.id} className="hover:bg-gray-50/80 transition-colors">
+                            <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{new Date(po.date).toLocaleDateString('id-ID')}</td>
+                            <td className="px-4 py-3 font-semibold text-gray-800">{po.supplier}</td>
+                            <td className="px-4 py-3">
+                              <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider ${po.status === 'Received' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
+                                {po.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right font-bold text-gray-900 whitespace-nowrap">{formatRupiah(po.totalAmount)}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* RIGHT 6 COLS: Beban Operasional (Expenses) Bento Card */}
+              <div
+                className="lg:col-span-6"
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '20px',
+                  border: '1px solid #e5e7eb',
+                  padding: '22px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#fff1f2', color: '#e11d48', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FileText size={19} />
+                    </div>
+                    <div>
+                      <h2 style={{ fontSize: '16px', fontWeight: 800, color: '#111827', margin: 0 }}>
+                        Beban Operasional
+                      </h2>
+                      <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>
+                        Total Beban: <strong style={{ color: '#e11d48' }}>{formatRupiah(totalExpenseListAmount)}</strong> ({expenses.length} catatan)
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowExpenseModal(true)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      backgroundColor: '#fff1f2',
+                      color: '#be123c',
+                      border: '1px solid #fecdd3',
+                      padding: '8px 14px',
+                      borderRadius: '999px',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Plus size={15} />
+                    <span>Input Expense</span>
+                  </button>
+                </div>
+
+                <div style={{ overflowX: 'auto', border: '1px solid #f1f5f9', borderRadius: '14px' }}>
+                  <table className="w-full text-sm text-left">
+                    <thead style={{ backgroundColor: '#f8fafc', color: '#6b7280', fontSize: '11.5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      <tr>
+                        <th className="px-4 py-3 font-semibold">Tanggal</th>
+                        <th className="px-4 py-3 font-semibold">Keterangan</th>
+                        <th className="px-4 py-3 font-semibold">Kategori</th>
+                        <th className="px-4 py-3 font-semibold text-right">Nominal</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {expenses.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="text-center py-8 text-gray-400 text-xs">
+                            Belum ada data pengeluaran pada periode ini.
+                          </td>
+                        </tr>
+                      ) : (
+                        expenses.map(exp => (
+                          <tr key={exp.id} className="hover:bg-gray-50/80 transition-colors">
+                            <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{new Date(exp.date).toLocaleDateString('id-ID')}</td>
+                            <td className="px-4 py-3 font-semibold text-gray-800">{exp.title}</td>
+                            <td className="px-4 py-3">
+                              <span className="inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-700">
+                                {exp.category}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right font-bold text-gray-900 whitespace-nowrap">{formatRupiah(exp.amount)}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* MODALS for Expense and PO */}
       {showExpenseModal && (

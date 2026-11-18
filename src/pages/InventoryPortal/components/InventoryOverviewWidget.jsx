@@ -2,23 +2,22 @@ import React from 'react';
 import { Package, AlertTriangle, ArrowUpDown, MessageSquareWarning, ChevronRight } from '@/icons/itshover';
 import '../../Dashboard/Dashboard.css';
 
-const cardBaseStyle = {
+const bentoCardStyle = {
   backgroundColor: '#ffffff',
-  borderRadius: '12px',
+  borderRadius: '18px',
   border: '1px solid #e5e7eb',
   padding: '18px 20px',
   display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'flex-start',
+  flexDirection: 'column',
   justifyContent: 'space-between',
-  gap: '12px',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
+  gap: '14px',
+  boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)',
   transition: 'all 0.18s ease'
 };
 
 const iconBoxBaseStyle = {
-  width: '40px',
-  height: '40px',
+  width: '36px',
+  height: '36px',
   borderRadius: '10px',
   display: 'flex',
   alignItems: 'center',
@@ -36,11 +35,16 @@ const InventoryOverviewWidget = ({
 }) => {
   const totalItems = inventory.length;
 
+  const ppfCount = inventory.filter(i => i.kategori === 'PPF').length;
+  const kacaFilmCount = inventory.filter(i => i.kategori === 'Kaca Film').length;
+  const coatingCount = inventory.filter(i => i.kategori === 'Coating').length;
+
   const lowStockItems = inventory.filter(item => {
     const min = item.minStok !== undefined ? item.minStok : 2;
     return Number(item.stokUtama || 0) <= min;
   });
   const lowStockCount = lowStockItems.length;
+  const healthyPct = totalItems > 0 ? Math.max(0, Math.round(((totalItems - lowStockCount) / totalItems) * 100)) : 100;
 
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
@@ -61,7 +65,7 @@ const InventoryOverviewWidget = ({
           style={{
             backgroundColor: '#fef2f2',
             border: '1px solid #f87171',
-            borderRadius: '10px',
+            borderRadius: '14px',
             padding: '14px 20px',
             marginBottom: '1.25rem',
             display: 'flex',
@@ -87,7 +91,7 @@ const InventoryOverviewWidget = ({
             onClick={onToggleLowStockFilter}
             style={{
               padding: '7px 14px',
-              borderRadius: '8px',
+              borderRadius: '999px',
               fontSize: '12.5px',
               fontWeight: 600,
               backgroundColor: isLowStockOnly ? '#dc2626' : '#ffffff',
@@ -102,40 +106,43 @@ const InventoryOverviewWidget = ({
         </div>
       )}
 
-      {/* 4 Kartu Statistik Gudang */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-          gap: '16px'
-        }}
-      >
+      {/* 4 Kartu Bento Gudang (Gaya Finnova / Finexy Reference) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 1. Total Master Item */}
-        <div style={cardBaseStyle}>
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px' }}>
-              Total Master Item
-            </span>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '28px', fontWeight: 800, color: '#111827', lineHeight: 1 }}>
+        <div style={bentoCardStyle}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>
+                Total Master Item
+              </span>
+              <div style={{ ...iconBoxBaseStyle, backgroundColor: '#eef2ff', color: '#4f46e5' }}>
+                <Package size={18} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+              <span style={{ fontSize: '30px', fontWeight: 800, color: '#111827', lineHeight: 1 }}>
                 {totalItems}
               </span>
               <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>
                 SKU Aktif
               </span>
             </div>
-            <span style={{ fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              Kaca Film, Coating, PPF &amp; Tools
-            </span>
           </div>
-          <div
-            style={{
-              ...iconBoxBaseStyle,
-              backgroundColor: '#eef2ff',
-              color: '#4f46e5'
-            }}
-          >
-            <Package size={20} />
+
+          {/* Bottom Bento Mini-Cards (Category Breakdown) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+            <div style={{ backgroundColor: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '10px', padding: '7px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '13px', fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>{kacaFilmCount}</div>
+              <div style={{ fontSize: '10px', fontWeight: 600, color: '#6b7280', marginTop: '2px' }}>Kaca Film</div>
+            </div>
+            <div style={{ backgroundColor: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '10px', padding: '7px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '13px', fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>{coatingCount}</div>
+              <div style={{ fontSize: '10px', fontWeight: 600, color: '#6b7280', marginTop: '2px' }}>Coating</div>
+            </div>
+            <div style={{ backgroundColor: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '10px', padding: '7px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '13px', fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>{ppfCount}</div>
+              <div style={{ fontSize: '10px', fontWeight: 600, color: '#6b7280', marginTop: '2px' }}>PPF</div>
+            </div>
           </div>
         </div>
 
@@ -143,21 +150,31 @@ const InventoryOverviewWidget = ({
         <div
           onClick={onToggleLowStockFilter}
           style={{
-            ...cardBaseStyle,
+            ...bentoCardStyle,
             cursor: 'pointer',
             borderColor: isLowStockOnly ? '#ef4444' : '#e5e7eb',
             backgroundColor: isLowStockOnly ? '#fff5f5' : '#ffffff'
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              Stok Menipis (&le; 2)
-              <ChevronRight size={14} />
-            </span>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '8px' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>
+                Stok Menipis (&le; 2)
+              </span>
+              <div
+                style={{
+                  ...iconBoxBaseStyle,
+                  backgroundColor: lowStockCount > 0 ? '#fef2f2' : '#ecfdf5',
+                  color: lowStockCount > 0 ? '#dc2626' : '#10b981'
+                }}
+              >
+                <AlertTriangle size={18} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span
                 style={{
-                  fontSize: '28px',
+                  fontSize: '30px',
                   fontWeight: 800,
                   color: lowStockCount > 0 ? '#dc2626' : '#111827',
                   lineHeight: 1
@@ -167,8 +184,8 @@ const InventoryOverviewWidget = ({
               </span>
               <span
                 style={{
-                  fontSize: '11.5px',
-                  fontWeight: 600,
+                  fontSize: '11px',
+                  fontWeight: 700,
                   padding: '2px 8px',
                   borderRadius: '999px',
                   backgroundColor: lowStockCount > 0 ? '#fef2f2' : '#ecfdf5',
@@ -178,18 +195,19 @@ const InventoryOverviewWidget = ({
                 {lowStockCount > 0 ? 'Perlu Restock' : 'Stok Aman'}
               </span>
             </div>
-            <span style={{ fontSize: '12px', color: isLowStockOnly ? '#dc2626' : '#6b7280', fontWeight: isLowStockOnly ? 600 : 400 }}>
-              {isLowStockOnly ? 'Filter aktif (Klik untuk reset)' : 'Klik untuk filter tabel'}
-            </span>
           </div>
-          <div
-            style={{
-              ...iconBoxBaseStyle,
-              backgroundColor: lowStockCount > 0 ? '#fef2f2' : '#ecfdf5',
-              color: lowStockCount > 0 ? '#dc2626' : '#10b981'
-            }}
-          >
-            <AlertTriangle size={20} />
+
+          {/* Bottom Bento Health Progress Bar */}
+          <div style={{ backgroundColor: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '10px', padding: '9px 10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', marginBottom: '5px' }}>
+              <span style={{ color: '#6b7280', fontWeight: 600 }}>
+                {isLowStockOnly ? 'Filter Aktif (Reset)' : 'Klik untuk filter tabel'}
+              </span>
+              <span style={{ fontWeight: 700, color: '#111827' }}>{healthyPct}% Aman</span>
+            </div>
+            <div style={{ width: '100%', height: '6px', backgroundColor: '#fee2e2', borderRadius: '999px', overflow: 'hidden' }}>
+              <div style={{ width: `${healthyPct}%`, height: '100%', backgroundColor: '#10b981', borderRadius: '999px' }} />
+            </div>
           </div>
         </div>
 
@@ -197,37 +215,39 @@ const InventoryOverviewWidget = ({
         <div
           onClick={() => onSwitchTab && onSwitchTab('logs')}
           style={{
-            ...cardBaseStyle,
+            ...bentoCardStyle,
             cursor: 'pointer'
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              Mutasi Stok Hari Ini
-              <ChevronRight size={14} />
-            </span>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '28px', fontWeight: 800, color: '#111827', lineHeight: 1 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>
+                Mutasi Stok Hari Ini
+              </span>
+              <div style={{ ...iconBoxBaseStyle, backgroundColor: '#eff6ff', color: '#2563eb' }}>
+                <ArrowUpDown size={18} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+              <span style={{ fontSize: '30px', fontWeight: 800, color: '#111827', lineHeight: 1 }}>
                 {todayLogs.length}
               </span>
               <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>
                 Aktivitas
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-              <span style={{ color: '#059669', fontWeight: 600 }}>+{restockTodayCount} Masuk</span>
-              <span style={{ color: '#d1d5db' }}>&bull;</span>
-              <span style={{ color: '#dc2626', fontWeight: 600 }}>-{deductTodayCount} Terpakai</span>
-            </div>
           </div>
-          <div
-            style={{
-              ...iconBoxBaseStyle,
-              backgroundColor: '#eff6ff',
-              color: '#2563eb'
-            }}
-          >
-            <ArrowUpDown size={20} />
+
+          {/* Bottom Bento Split Pills (+Masuk / -Terpakai) */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+            <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #d1fae5', borderRadius: '10px', padding: '7px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '11px', fontWeight: 600, color: '#047857' }}>Masuk</span>
+              <span style={{ fontSize: '12.5px', fontWeight: 800, color: '#059669' }}>+{restockTodayCount}</span>
+            </div>
+            <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '10px', padding: '7px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '11px', fontWeight: 600, color: '#b91c1c' }}>Terpakai</span>
+              <span style={{ fontSize: '12.5px', fontWeight: 800, color: '#dc2626' }}>-{deductTodayCount}</span>
+            </div>
           </div>
         </div>
 
@@ -235,19 +255,29 @@ const InventoryOverviewWidget = ({
         <div
           onClick={() => onSwitchTab && onSwitchTab('comms')}
           style={{
-            ...cardBaseStyle,
+            ...bentoCardStyle,
             cursor: 'pointer'
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              Tiket Selisih Stok
-              <ChevronRight size={14} />
-            </span>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '8px' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>
+                Tiket Selisih Stok
+              </span>
+              <div
+                style={{
+                  ...iconBoxBaseStyle,
+                  backgroundColor: openDiscrepancies > 0 ? '#fef3c7' : '#f3f4f6',
+                  color: openDiscrepancies > 0 ? '#d97706' : '#6b7280'
+                }}
+              >
+                <MessageSquareWarning size={18} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span
                 style={{
-                  fontSize: '28px',
+                  fontSize: '30px',
                   fontWeight: 800,
                   color: openDiscrepancies > 0 ? '#d97706' : '#111827',
                   lineHeight: 1
@@ -257,8 +287,8 @@ const InventoryOverviewWidget = ({
               </span>
               <span
                 style={{
-                  fontSize: '11.5px',
-                  fontWeight: 600,
+                  fontSize: '11px',
+                  fontWeight: 700,
                   padding: '2px 8px',
                   borderRadius: '999px',
                   backgroundColor: openDiscrepancies > 0 ? '#fef3c7' : '#f3f4f6',
@@ -268,18 +298,16 @@ const InventoryOverviewWidget = ({
                 {openDiscrepancies > 0 ? 'Tiket Terbuka' : 'Clear'}
               </span>
             </div>
-            <span style={{ fontSize: '12px', color: '#6b7280' }}>
+          </div>
+
+          {/* Bottom Bento Action Box */}
+          <div style={{ backgroundColor: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '10px', padding: '9px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#6b7280' }}>
               Diskusi Gudang &amp; Admin
             </span>
-          </div>
-          <div
-            style={{
-              ...iconBoxBaseStyle,
-              backgroundColor: openDiscrepancies > 0 ? '#fef3c7' : '#f3f4f6',
-              color: openDiscrepancies > 0 ? '#d97706' : '#6b7280'
-            }}
-          >
-            <MessageSquareWarning size={20} />
+            <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#111827', display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+              Buka Chat <ChevronRight size={13} />
+            </span>
           </div>
         </div>
       </div>

@@ -134,14 +134,18 @@ const InventoryPortalDashboard = () => {
         onSwitchTab={(tab) => setActiveTab(tab)}
       />
 
-      {/* 2. Navigation Tabs identik dengan AdminInventory.jsx */}
+      {/* 2. Navigation Tabs bergaya Pill Bento (Seragam dengan Referensi UI) */}
       <div
         style={{
-          display: 'flex',
-          gap: '16px',
-          marginBottom: '24px',
-          borderBottom: '1px solid #e5e7eb',
-          paddingBottom: '0',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          marginBottom: '20px',
+          backgroundColor: '#f1f5f9',
+          padding: '5px',
+          borderRadius: '14px',
+          border: '1px solid #e2e8f0',
+          maxWidth: '100%',
           overflowX: 'auto'
         }}
       >
@@ -149,89 +153,116 @@ const InventoryPortalDashboard = () => {
           type="button"
           onClick={() => setActiveTab('master')}
           style={{
-            padding: '12px 24px',
-            background: 'transparent',
+            padding: '8px 16px',
+            borderRadius: '10px',
+            fontWeight: 700,
+            fontSize: '13.5px',
+            color: activeTab === 'master' ? '#ffffff' : '#64748b',
+            backgroundColor: activeTab === 'master' ? '#111827' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'master' ? '2px solid #111' : '2px solid transparent',
-            color: activeTab === 'master' ? '#111' : '#6b7280',
-            fontWeight: activeTab === 'master' ? 'bold' : '500',
-            fontSize: '14px',
             cursor: 'pointer',
-            transition: 'all 0.2s',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: activeTab === 'master' ? '0 2px 6px rgba(17, 24, 39, 0.15)' : 'none',
+            transition: 'all 0.18s ease'
           }}
         >
-          Data Master Inventory
+          <span>Data Master Inventory</span>
+          <span
+            style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '1px 7px',
+              borderRadius: '999px',
+              backgroundColor: activeTab === 'master' ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
+              color: activeTab === 'master' ? '#ffffff' : '#475569'
+            }}
+          >
+            {inventory.length}
+          </span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('logs')}
           style={{
-            padding: '12px 24px',
-            background: 'transparent',
+            padding: '8px 16px',
+            borderRadius: '10px',
+            fontWeight: 700,
+            fontSize: '13.5px',
+            color: activeTab === 'logs' ? '#ffffff' : '#64748b',
+            backgroundColor: activeTab === 'logs' ? '#111827' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'logs' ? '2px solid #111' : '2px solid transparent',
-            color: activeTab === 'logs' ? '#111' : '#6b7280',
-            fontWeight: activeTab === 'logs' ? 'bold' : '500',
-            fontSize: '14px',
             cursor: 'pointer',
-            transition: 'all 0.2s',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: activeTab === 'logs' ? '0 2px 6px rgba(17, 24, 39, 0.15)' : 'none',
+            transition: 'all 0.18s ease'
           }}
         >
-          Riwayat Pemotongan (Logs)
+          <span>Riwayat Pemotongan (Logs)</span>
+          <span
+            style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '1px 7px',
+              borderRadius: '999px',
+              backgroundColor: activeTab === 'logs' ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
+              color: activeTab === 'logs' ? '#ffffff' : '#475569'
+            }}
+          >
+            {inventoryLogs.length}
+          </span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('comms')}
           style={{
-            padding: '12px 24px',
-            background: 'transparent',
+            padding: '8px 16px',
+            borderRadius: '10px',
+            fontWeight: 700,
+            fontSize: '13.5px',
+            color: activeTab === 'comms' ? '#ffffff' : '#64748b',
+            backgroundColor: activeTab === 'comms' ? '#111827' : 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'comms' ? '2px solid #4f46e5' : '2px solid transparent',
-            color: activeTab === 'comms' ? '#4f46e5' : '#6b7280',
-            fontWeight: activeTab === 'comms' ? 'bold' : '500',
-            fontSize: '14px',
             cursor: 'pointer',
-            transition: 'all 0.2s',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            boxShadow: activeTab === 'comms' ? '0 2px 6px rgba(17, 24, 39, 0.15)' : 'none',
+            transition: 'all 0.18s ease'
           }}
         >
-          <MessageSquareWarning size={16} />
+          <MessageSquareWarning size={15} />
           <span>Chat Selisih Stok (Gudang)</span>
           {totalUnreadCount > 0 ? (
             <span
               style={{
                 backgroundColor: '#10b981',
                 color: '#ffffff',
-                fontSize: '11px',
-                fontWeight: 800,
-                padding: '2px 8px',
+                padding: '1px 7px',
                 borderRadius: '9999px',
-                boxShadow: '0 1px 3px rgba(16, 185, 129, 0.4)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
+                fontSize: '11px',
+                fontWeight: 800
               }}
             >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ffffff' }} />
               {totalUnreadCount} Pesan Baru
             </span>
           ) : openCount > 0 ? (
             <span
               style={{
-                backgroundColor: '#fef3c7',
-                color: '#92400e',
-                fontSize: '11px',
-                fontWeight: 700,
-                padding: '2px 8px',
+                backgroundColor: activeTab === 'comms' ? '#f59e0b' : '#fef3c7',
+                color: activeTab === 'comms' ? '#ffffff' : '#92400e',
+                padding: '1px 7px',
                 borderRadius: '9999px',
-                border: '1px solid #fde68a'
+                fontSize: '11px',
+                fontWeight: 700
               }}
             >
               {openCount} Open
