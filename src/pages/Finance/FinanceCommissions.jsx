@@ -103,11 +103,11 @@ const FinanceCommissions = () => {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+    <div className="h-full flex flex-col animate-fade-in">
+      <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 hidden">Laporan Komisi Sales</h1>
-          <p className="text-sm font-semibold text-gray-800">Rekapitulasi komisi berdasarkan transaksi lunas</p>
+          <h1 className="page-title">Laporan Komisi Sales</h1>
+          <p className="page-subtitle">Rekapitulasi komisi berdasarkan transaksi lunas</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-auto">

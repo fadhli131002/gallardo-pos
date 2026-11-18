@@ -94,11 +94,6 @@ h1, h2, h3, h4, h5, h6 {
 .bg-secondary { background-color: var(--bg-secondary); }
 .bg-inverse { background-color: var(--bg-inverse); }
 
-/* Custom Utilities since Tailwind is missing */
-.hidden {
-  display: none !important;
-}
-
 /* Premium Automotive Button */
 .btn-primary {
   display: inline-flex;

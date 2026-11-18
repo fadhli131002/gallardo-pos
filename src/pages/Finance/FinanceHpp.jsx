@@ -63,52 +63,51 @@ const FinanceHpp = () => {
 
   return (
     <div className="w-full space-y-6 animate-fade-in text-slate-800">
-      {/* A. Top Page Header (Left-Aligned Structure) */}
-      <div className="flex flex-col text-left">
-        <h1 className="text-2xl font-extrabold text-[#0F172A] tracking-tight flex items-center gap-2.5">
-          <ShieldCheck size={26} className="text-emerald-600 flex-shrink-0" />
-          Atur Harga Modal (HPP Material)
-        </h1>
-        <p className="text-sm text-slate-500 mt-1 font-normal">
-          Kelola harga pokok penjualan (HPP) setiap material untuk penghitungan laba/rugi dan analisis margin keuntungan bisnis
-        </p>
+      {/* A. Top Page Header */}
+      <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: 0 }}>
+        <div>
+          <h1 className="page-title">Atur Harga Modal (HPP Material)</h1>
+          <p className="page-subtitle">
+            Kelola harga pokok penjualan (HPP) setiap material untuk penghitungan laba/rugi dan analisis margin keuntungan bisnis
+          </p>
+        </div>
       </div>
 
       {/* B. Top Metric Cards (3-Column Grid) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card 1: Total Material */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 transition-all hover:border-slate-300">
-          <div className="w-12 h-12 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
-            <Package size={22} />
-          </div>
+        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-start justify-between gap-4">
           <div className="flex flex-col">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Material</span>
-            <span className="text-2xl font-bold text-[#0F172A] mt-0.5 leading-tight">{totalItems} Item</span>
-            <span className="text-xs text-slate-500 mt-0.5">{itemsWithPrice} telah diatur harga jual</span>
+            <span className="text-[13px] font-semibold text-gray-500 mb-1.5">Total Material</span>
+            <span className="text-2xl font-extrabold text-gray-900 leading-tight">{totalItems} Item</span>
+            <span className="text-xs text-gray-500 mt-1.5">{itemsWithPrice} telah diatur harga jual</span>
+          </div>
+          <div className="w-10 h-10 rounded-[10px] bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0">
+            <Package size={20} />
           </div>
         </div>
 
         {/* Card 2: Status Input HPP */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 transition-all hover:border-slate-300">
-          <div className="w-12 h-12 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
-            <DollarSign size={22} />
-          </div>
+        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-start justify-between gap-4">
           <div className="flex flex-col">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status Input HPP</span>
-            <span className="text-2xl font-bold text-[#0F172A] mt-0.5 leading-tight">{itemsWithHpp} / {totalItems}</span>
-            <span className="text-xs text-slate-500 mt-0.5">{totalItems - itemsWithHpp} material belum diisi HPP</span>
+            <span className="text-[13px] font-semibold text-gray-500 mb-1.5">Status Input HPP</span>
+            <span className="text-2xl font-extrabold text-gray-900 leading-tight">{itemsWithHpp} / {totalItems}</span>
+            <span className="text-xs text-gray-500 mt-1.5">{totalItems - itemsWithHpp} material belum diisi HPP</span>
+          </div>
+          <div className="w-10 h-10 rounded-[10px] bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
+            <DollarSign size={20} />
           </div>
         </div>
 
         {/* Card 3: Otomasi Finansial */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 transition-all hover:border-slate-300">
-          <div className="w-12 h-12 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
-            <TrendingUp size={22} />
-          </div>
+        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-start justify-between gap-4">
           <div className="flex flex-col">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Otomasi Finansial</span>
-            <span className="text-2xl font-bold text-blue-600 mt-0.5 leading-tight">Aktif</span>
-            <span className="text-xs text-slate-500 mt-0.5">HPP otomatis memotong laba bersih</span>
+            <span className="text-[13px] font-semibold text-gray-500 mb-1.5">Otomasi Finansial</span>
+            <span className="text-2xl font-extrabold text-blue-600 leading-tight">Aktif</span>
+            <span className="text-xs text-gray-500 mt-1.5">HPP otomatis memotong laba bersih</span>
+          </div>
+          <div className="w-10 h-10 rounded-[10px] bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0">
+            <TrendingUp size={20} />
           </div>
         </div>
       </div>

@@ -195,13 +195,15 @@ const FinanceReceivables = () => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-5">
+    <div className="h-full flex flex-col space-y-5 animate-fade-in">
       {/* Page Header */}
-      <div className="text-left">
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Piutang & Aging Schedule</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Pantau sisa tagihan pelanggan berdasarkan umur piutang sesuai kesepakatan tanggal jatuh tempo (termin).
-        </p>
+      <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: 0 }}>
+        <div>
+          <h1 className="page-title">Piutang &amp; Aging Schedule</h1>
+          <p className="page-subtitle">
+            Pantau sisa tagihan pelanggan berdasarkan umur piutang sesuai kesepakatan tanggal jatuh tempo (termin)
+          </p>
+        </div>
       </div>
 
       {/* Due Alert Banner (H-3 Termin Alert) */}

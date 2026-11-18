@@ -2,14 +2,6 @@
   width: 100%;
 }
 
-.mb-6 { margin-bottom: 1.5rem; }
-.flex { display: flex; }
-.justify-between { justify-content: space-between; }
-.items-center { align-items: center; }
-.gap-2 { gap: 0.5rem; }
-.text-xs { font-size: 0.75rem; }
-.truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
 .calendar-layout {
   display: grid;
   grid-template-columns: 1fr;

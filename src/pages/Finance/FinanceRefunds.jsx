@@ -162,10 +162,16 @@ const FinanceRefunds = () => {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+    <div className="h-full flex flex-col animate-fade-in">
+      <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 hidden">Refund Transaksi</h1>
+          <h1 className="page-title">Riwayat &amp; Pengajuan Refund</h1>
+          <p className="page-subtitle">Kelola pengembalian dana pelanggan dan pantau histori transaksi refund</p>
+        </div>
+      </div>
+
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+        <div>
           <div className="flex bg-gray-100 p-1 rounded-lg">
             <button
               onClick={() => setActiveTab('history')}

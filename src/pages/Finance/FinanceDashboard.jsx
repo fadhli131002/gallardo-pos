@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { DollarSign, CreditCard, TrendingUp, TrendingDown, FileText, PieChart, Download, Calendar as CalendarIcon, Loader2, Package, Plus, ArrowUpRight, ArrowDownRight, Minus } from '@/icons/itshover';
+import { DollarSign, CreditCard, TrendingUp, TrendingDown, FileText, PieChart, Download, Calendar as CalendarIcon, Loader2, Package, Plus, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, Wallet } from '@/icons/itshover';
 import { toast } from 'sonner';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -8,6 +8,31 @@ import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import DashboardDetailsModal from '../../components/DashboardDetailsModal';
 import DueAlertBanner from '../../components/DueAlertBanner';
+import MegaphoneButton from '../../components/MegaphoneButton';
+
+const cardBaseStyle = {
+  backgroundColor: '#ffffff',
+  borderRadius: '12px',
+  border: '1px solid #e5e7eb',
+  padding: '18px 20px',
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'flex-start',
+  justifyContent: 'space-between',
+  gap: '12px',
+  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
+  transition: 'all 0.18s ease'
+};
+
+const iconBoxBaseStyle = {
+  width: '40px',
+  height: '40px',
+  borderRadius: '10px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0
+};
 
 /**
  * MoMBadge — Badge persentase Month-over-Month
@@ -457,19 +482,34 @@ const FinanceDashboard = () => {
   }
 
   return (
-    <div className="max-w-full">
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+    <div className="dashboard-container animate-fade-in">
+      {/* Page Header seragam dengan Admin & Inventory */}
+      <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Dashboard Keuangan</h1>
-          <p className="text-sm text-gray-500 mt-1">Pantau performa kas, piutang, dan laba rugi bisnis Anda secara real-time</p>
+          <h1 className="page-title">Dashboard Keuangan</h1>
+          <p className="page-subtitle">Pantau performa kas, piutang, dan laba rugi bisnis secara real-time</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <select 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <MegaphoneButton showLabel={true} />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <CalendarIcon size={15} style={{ position: 'absolute', left: '12px', color: '#6b7280', pointerEvents: 'none' }} />
+            <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm appearance-none cursor-pointer min-w-[140px]"
+              style={{
+                paddingLeft: '34px',
+                paddingRight: '28px',
+                paddingTop: '8px',
+                paddingBottom: '8px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                color: '#111827',
+                cursor: 'pointer',
+                minWidth: '140px'
+              }}
             >
               <option value="Hari Ini">Hari Ini</option>
               <option value="Bulan Ini">Bulan Ini</option>
@@ -478,273 +518,381 @@ const FinanceDashboard = () => {
               <option value="Custom">Pilih Tanggal (Custom)</option>
             </select>
           </div>
-          
+
           {dateFilter === 'Custom' && (
-            <div className="flex items-center gap-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm"
+                style={{
+                  padding: '7px 12px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '0.85rem',
+                  fontWeight: 500
+                }}
               />
-              <span className="text-gray-500">-</span>
+              <span style={{ color: '#6b7280' }}>-</span>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm"
+                style={{
+                  padding: '7px 12px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '0.85rem',
+                  fontWeight: 500
+                }}
               />
             </div>
           )}
 
-          <button  
+          <button
+            type="button"
             onClick={generatePDFReport}
             disabled={isGeneratingPdf}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
+            className="btn-primary"
+            style={{
+              gap: '8px',
+              backgroundColor: '#111827',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              opacity: isGeneratingPdf ? 0.7 : 1
+            }}
           >
             {isGeneratingPdf ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 size={16} className="animate-spin" />
             ) : (
-              <Download className="w-4 h-4" />
+              <Download size={16} />
             )}
-            {isGeneratingPdf ? 'Memproses PDF...' : 'Unduh Laporan PDF'}
+            <span>{isGeneratingPdf ? 'Memproses PDF...' : 'Unduh Laporan PDF'}</span>
           </button>
         </div>
       </div>
 
-      {/* Due Alert Banner — notifikasi piutang jatuh tempo H-3 */}
+      {/* Due Alert Banner */}
       <DueAlertBanner />
 
       {/* ── SECTION 1: ARUS KAS RIIL (CASHFLOW) ───────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4 pb-1">
-        <div className="text-left">
-          <h2 className="text-sm font-bold text-[#101828] uppercase tracking-wider">1. ARUS KAS RIIL (CASHFLOW)</h2>
-          <p className="text-xs text-[#475467] mt-1">Uang fisik/transfer yang benar-benar diterima & dikeluarkan dalam periode ini</p>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px',
+          marginBottom: '14px',
+          marginTop: '8px'
+        }}
+      >
+        <div>
+          <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.03em', margin: 0 }}>
+            1. Arus Kas Riil (Cashflow)
+          </h2>
+          <p style={{ fontSize: '12.5px', color: '#6b7280', margin: '2px 0 0 0' }}>
+            Uang fisik/transfer yang benar-benar diterima &amp; dikeluarkan dalam periode ini
+          </p>
         </div>
-        <span className="text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200/60 px-3 py-1 rounded-full shrink-0 self-start sm:self-auto">
+        <span
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            color: '#1d4ed8',
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            padding: '4px 12px',
+            borderRadius: '999px'
+          }}
+        >
           Bulan: {new Date().toISOString().slice(0, 7)}
         </span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Kas Masuk */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+          gap: '16px',
+          marginBottom: '28px'
+        }}
+      >
+        {/* 1. Kas Masuk Riil */}
+        <div
           onClick={() => handleCardClick('kas-masuk')}
-          className="bg-white border border-[#EAECF0] rounded-xl p-5 hover:shadow-sm transition-all duration-200 flex flex-col justify-between cursor-pointer"
+          style={{ ...cardBaseStyle, cursor: 'pointer' }}
         >
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-[#667085] uppercase tracking-wider">Kas Masuk Riil</span>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap my-1.5">
-              <span className="text-2xl font-bold text-[#101828] tracking-tight">{formatRupiah(summary.cashflow?.kasMasuk ?? summary.totalKasMasuk)}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              Kas Masuk Riil
+              <ChevronRight size={14} />
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+              <span style={{ fontSize: '22px', fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>
+                {formatRupiah(summary.cashflow?.kasMasuk ?? summary.totalKasMasuk)}
+              </span>
               <MoMBadge pct={summary.momComparison?.kas?.pct} />
             </div>
+            <span style={{ fontSize: '12px', color: '#6b7280' }}>
+              Penerimaan kas &amp; transfer masuk
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 font-medium pt-3 mt-1 border-t border-[#EAECF0]">
-            <DollarSign className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span className="truncate">Kas Masuk Riil</span>
+          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#ecfdf5', color: '#059669' }}>
+            <DollarSign size={20} />
           </div>
-        </motion.div>
+        </div>
 
-        {/* Pelunasan Piutang Lama (Termin Masuk) */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          onClick={() => handleOpenDetails('piutang-lama')}
-          className="bg-white border border-[#EAECF0] rounded-xl p-5 hover:shadow-sm transition-all duration-200 flex flex-col justify-between cursor-pointer"
+        {/* 2. Pelunasan Piutang Lama */}
+        <div
+          onClick={() => handleCardClick('piutang-lama')}
+          style={{ ...cardBaseStyle, cursor: 'pointer' }}
         >
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-[#667085] uppercase tracking-wider">Pelunasan Piutang Lama</span>
-              <span className="text-[10px] font-semibold text-teal-700 bg-teal-50 border border-teal-200/80 px-2 py-0.5 rounded-full">Bagian Kas Masuk</span>
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span>Pelunasan Piutang Lama</span>
+              <span style={{ fontSize: '10.5px', fontWeight: 600, color: '#0f766e', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '1px 7px', borderRadius: '999px' }}>
+                Bagian Kas Masuk
+              </span>
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+              <span style={{ fontSize: '22px', fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>
+                {formatRupiah(summary.cashflow?.pelunasanPiutangLama ?? summary.pelunasanPiutangLama ?? 0)}
+              </span>
             </div>
-            <div className="flex items-center gap-2 flex-wrap my-1.5">
-              <span className="text-2xl font-bold text-[#101828] tracking-tight">{formatRupiah(summary.cashflow?.pelunasanPiutangLama ?? summary.pelunasanPiutangLama ?? 0)}</span>
-            </div>
+            <span style={{ fontSize: '12px', color: '#6b7280' }}>
+              Cicilan / termin dari transaksi lalu
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 font-medium pt-3 mt-1 border-t border-[#EAECF0]">
-            <CreditCard className="w-4 h-4 text-teal-600 shrink-0" />
-            <span className="truncate">Cicilan / Termin dari Transaksi Lalu</span>
+          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#f0fdfa', color: '#0d9488' }}>
+            <CreditCard size={20} />
           </div>
-        </motion.div>
+        </div>
 
-        {/* Net Cashflow */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white border border-[#EAECF0] rounded-xl p-5 hover:shadow-sm transition-all duration-200 flex flex-col justify-between"
-        >
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-[#667085] uppercase tracking-wider">Net Cashflow</span>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap my-1.5">
-              <span className={`text-2xl font-bold tracking-tight ${
-                (summary.cashflow?.netCashflow ?? 0) >= 0 ? 'text-[#101828]' : 'text-red-600'
-              }`}>
-                {(summary.cashflow?.netCashflow ?? 0) < 0 ? '-' : ''}{formatRupiah(Math.abs(summary.cashflow?.netCashflow ?? 0))}
+        {/* 3. Net Cashflow */}
+        <div style={cardBaseStyle}>
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px' }}>
+              Net Cashflow
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+              <span
+                style={{
+                  fontSize: '22px',
+                  fontWeight: 800,
+                  color: (summary.cashflow?.netCashflow ?? 0) >= 0 ? '#111827' : '#dc2626',
+                  lineHeight: 1.1
+                }}
+              >
+                {(summary.cashflow?.netCashflow ?? 0) < 0 ? '-' : ''}
+                {formatRupiah(Math.abs(summary.cashflow?.netCashflow ?? 0))}
               </span>
               <MoMBadge pct={summary.momComparison?.cashflow?.pct} />
             </div>
+            <span style={{ fontSize: '12px', color: '#6b7280' }}>
+              Selisih kas masuk dikurangi kas keluar
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 font-medium pt-3 mt-1 border-t border-[#EAECF0]">
-            <TrendingUp className="w-4 h-4 text-cyan-600 shrink-0" />
-            <span className="truncate">Kas Masuk - Kas Keluar</span>
+          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#eff6ff', color: '#2563eb' }}>
+            <TrendingUp size={20} />
           </div>
-        </motion.div>
+        </div>
 
-        {/* Piutang */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
+        {/* 4. Sisa Piutang Berjalan */}
+        <div
           onClick={() => handleCardClick('piutang')}
-          className="bg-white border border-[#EAECF0] rounded-xl p-5 hover:shadow-sm transition-all duration-200 flex flex-col justify-between cursor-pointer"
+          style={{ ...cardBaseStyle, cursor: 'pointer' }}
         >
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-[#667085] uppercase tracking-wider">Sisa Piutang Berjalan</span>
-              <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-full">Belum Lunas</span>
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span>Sisa Piutang Berjalan</span>
+              <span style={{ fontSize: '10.5px', fontWeight: 600, color: '#b45309', backgroundColor: '#fef3c7', border: '1px solid #fde68a', padding: '1px 7px', borderRadius: '999px' }}>
+                Belum Lunas
+              </span>
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+              <span style={{ fontSize: '22px', fontWeight: 800, color: '#d97706', lineHeight: 1.1 }}>
+                {formatRupiah(summary.receivables?.totalPiutang ?? summary.totalPiutang)}
+              </span>
             </div>
-            <div className="flex items-center gap-2 flex-wrap my-1.5">
-              <span className="text-2xl font-bold text-[#101828] tracking-tight">{formatRupiah(summary.receivables?.totalPiutang ?? summary.totalPiutang)}</span>
-            </div>
+            <span style={{ fontSize: '12px', color: '#6b7280' }}>
+              Bulan ini: {formatRupiah(summary.receivables?.totalPiutangPeriode ?? summary.totalPiutangPeriode)}
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 font-medium pt-3 mt-1 border-t border-[#EAECF0]">
-            <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
-            <span className="truncate">Bulan ini: {formatRupiah(summary.receivables?.totalPiutangPeriode ?? summary.totalPiutangPeriode)}</span>
+          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#fef3c7', color: '#d97706' }}>
+            <Wallet size={20} />
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* ── SECTION 2: LAPORAN LABA RUGI AKRUAL (P&L) ─────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4 pb-1 pt-2">
-        <div className="text-left">
-          <h2 className="text-sm font-bold text-[#101828] uppercase tracking-wider">2. STANDAR LAPORAN KEUANGAN SOP (LABA RUGI AKRUAL)</h2>
-          <p className="text-xs text-[#475467] mt-1">Dihitung berdasarkan basis akrual — Total Omset dikurangi HPP, Beban Operasional, dan Komisi</p>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px',
+          marginBottom: '14px'
+        }}
+      >
+        <div>
+          <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.03em', margin: 0 }}>
+            2. Standar Laporan Keuangan SOP (Laba Rugi Akrual)
+          </h2>
+          <p style={{ fontSize: '12.5px', color: '#6b7280', margin: '2px 0 0 0' }}>
+            Dihitung berdasarkan basis akrual: Total Omset dikurangi HPP, Beban Operasional, dan Komisi
+          </p>
         </div>
-        <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-3 py-1 rounded-full shrink-0 self-start sm:self-auto cursor-pointer hover:underline" onClick={() => handleCardClick('laba-rugi')}>
-          Profit &amp; Loss Analysis →
-        </span>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Omset Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          onClick={() => handleCardClick('omset')}
-          className="bg-white border border-[#EAECF0] rounded-xl p-5 hover:shadow-sm transition-all duration-200 flex flex-col justify-between cursor-pointer"
+        <button
+          type="button"
+          onClick={() => handleCardClick('laba-rugi')}
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            color: '#4338ca',
+            backgroundColor: '#eef2ff',
+            border: '1px solid #c7d2fe',
+            padding: '5px 12px',
+            borderRadius: '999px',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}
         >
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-[#667085] uppercase tracking-wider">Total Omset</span>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap my-1.5">
-              <span className="text-2xl font-bold text-[#101828] tracking-tight">{formatRupiah(summary.pl?.totalOmset ?? summary.totalOmset)}</span>
+          <span>Profit &amp; Loss Analysis</span>
+          <ChevronRight size={13} />
+        </button>
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+          gap: '16px'
+        }}
+      >
+        {/* 1. Total Omset */}
+        <div
+          onClick={() => handleCardClick('omset')}
+          style={{ ...cardBaseStyle, cursor: 'pointer' }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              Total Omset
+              <ChevronRight size={14} />
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+              <span style={{ fontSize: '22px', fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>
+                {formatRupiah(summary.pl?.totalOmset ?? summary.totalOmset)}
+              </span>
               <MoMBadge pct={summary.momComparison?.omset?.pct} />
             </div>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 font-medium pt-3 mt-1 border-t border-[#EAECF0]">
-            <FileText className="w-4 h-4 text-blue-600 shrink-0" />
-            <span className="truncate">Basis Akrual</span>
-          </div>
-        </motion.div>
-
-        {/* HPP + Beban Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white border border-[#EAECF0] rounded-xl p-5 hover:shadow-sm transition-all duration-200 flex flex-col justify-between"
-        >
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-[#667085] uppercase tracking-wider">HPP + Beban</span>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap my-1.5">
-              <span className="text-2xl font-bold text-red-600 tracking-tight">{formatRupiah((summary.pl?.totalHpp ?? summary.totalHpp) + (summary.pl?.totalBeban ?? summary.totalExpense ?? 0))}</span>
-            </div>
-          </div>
-          <div className="flex flex-col gap-1 text-[11px] text-gray-500 pt-3 mt-1 border-t border-[#EAECF0]">
-            <div className="flex justify-between">
-              <span>HPP (Modal):</span>
-              <span className="font-semibold text-gray-700">{formatRupiah(summary.pl?.totalHpp ?? summary.totalHpp)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Beban Ops:</span>
-              <span className="font-semibold text-gray-700">{formatRupiah(summary.pl?.totalBeban ?? summary.totalExpense ?? 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Komisi:</span>
-              <span className="font-semibold text-gray-700">{formatRupiah(summary.pl?.totalKomisi ?? summary.totalKomisi ?? 0)}</span>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Laba Kotor Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white border border-[#EAECF0] rounded-xl p-5 hover:shadow-sm transition-all duration-200 flex flex-col justify-between"
-        >
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-[#667085] uppercase tracking-wider">Laba Kotor</span>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap my-1.5">
-              <span className="text-2xl font-bold text-emerald-700 tracking-tight">{formatRupiah(summary.pl?.labaKotor ?? summary.labaKotor)}</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500 font-medium pt-3 mt-1 border-t border-[#EAECF0]">
-            <div className="flex items-center gap-1.5">
-              <TrendingUp className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Omset - HPP</span>
-            </div>
-            <span className="text-xs text-emerald-700 font-semibold">
-              {summary.pl?.totalOmset > 0
-                ? `${Math.round((summary.pl?.labaKotor / summary.pl?.totalOmset) * 100)}% margin`
-                : '—'}
+            <span style={{ fontSize: '12px', color: '#6b7280' }}>
+              Pendapatan kotor basis akrual
             </span>
           </div>
-        </motion.div>
+          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#eef2ff', color: '#4f46e5' }}>
+            <FileText size={20} />
+          </div>
+        </div>
 
-        {/* Laba Bersih Card */}
+        {/* 2. HPP + Beban */}
+        <div style={cardBaseStyle}>
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px' }}>
+              HPP + Beban + Komisi
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+              <span style={{ fontSize: '22px', fontWeight: 800, color: '#dc2626', lineHeight: 1.1 }}>
+                {formatRupiah((summary.pl?.totalHpp ?? summary.totalHpp ?? 0) + (summary.pl?.totalBeban ?? summary.totalExpense ?? 0) + (summary.pl?.totalKomisi ?? summary.totalKomisi ?? 0))}
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11.5px', color: '#6b7280' }}>
+              <span>HPP: <strong style={{ color: '#374151' }}>{formatRupiah(summary.pl?.totalHpp ?? summary.totalHpp)}</strong></span>
+              <span>Beban: <strong style={{ color: '#374151' }}>{formatRupiah(summary.pl?.totalBeban ?? summary.totalExpense ?? 0)}</strong> &bull; Komisi: <strong style={{ color: '#374151' }}>{formatRupiah(summary.pl?.totalKomisi ?? summary.totalKomisi ?? 0)}</strong></span>
+            </div>
+          </div>
+          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#fef2f2', color: '#dc2626' }}>
+            <TrendingDown size={20} />
+          </div>
+        </div>
+
+        {/* 3. Laba Kotor */}
+        <div style={cardBaseStyle}>
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span>Laba Kotor</span>
+              {summary.pl?.totalOmset > 0 && (
+                <span style={{ fontSize: '10.5px', fontWeight: 600, color: '#059669', backgroundColor: '#ecfdf5', padding: '1px 7px', borderRadius: '999px' }}>
+                  {Math.round((summary.pl?.labaKotor / summary.pl?.totalOmset) * 100)}% margin
+                </span>
+              )}
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+              <span style={{ fontSize: '22px', fontWeight: 800, color: '#059669', lineHeight: 1.1 }}>
+                {formatRupiah(summary.pl?.labaKotor ?? summary.labaKotor)}
+              </span>
+            </div>
+            <span style={{ fontSize: '12px', color: '#6b7280' }}>
+              Total Omset dikurangi HPP
+            </span>
+          </div>
+          <div style={{ ...iconBoxBaseStyle, backgroundColor: '#ecfdf5', color: '#059669' }}>
+            <TrendingUp size={20} />
+          </div>
+        </div>
+
+        {/* 4. Laba Bersih */}
         {(() => {
           const labaBersihVal = summary.pl?.labaBersih ?? ((summary.pl?.totalOmset ?? summary.totalOmset ?? 0) - (summary.pl?.totalHpp ?? summary.totalHpp ?? 0) - (summary.pl?.totalBeban ?? summary.totalExpense ?? 0) - (summary.pl?.totalKomisi ?? summary.totalKomisi ?? 0));
           return (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+            <div
               onClick={() => handleCardClick('laba-rugi')}
-              className="bg-white border border-[#EAECF0] rounded-xl p-5 hover:shadow-sm transition-all duration-200 flex flex-col justify-between cursor-pointer"
+              style={{ ...cardBaseStyle, cursor: 'pointer' }}
             >
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-xs font-semibold text-[#667085] uppercase tracking-wider">Laba Bersih</span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${labaBersihVal >= 0 ? 'text-emerald-700 bg-emerald-50 border border-emerald-200/80' : 'text-red-700 bg-red-50 border border-red-200/80'}`}>
+              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span>Laba Bersih</span>
+                  <span
+                    style={{
+                      fontSize: '10.5px',
+                      fontWeight: 600,
+                      color: labaBersihVal >= 0 ? '#059669' : '#dc2626',
+                      backgroundColor: labaBersihVal >= 0 ? '#ecfdf5' : '#fef2f2',
+                      border: `1px solid ${labaBersihVal >= 0 ? '#a7f3d0' : '#fecaca'}`,
+                      padding: '1px 7px',
+                      borderRadius: '999px'
+                    }}
+                  >
                     {labaBersihVal >= 0 ? 'Surplus Laba' : 'Defisit Rugi'}
                   </span>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap my-1.5">
-                  <span className={`text-2xl font-bold tracking-tight ${labaBersihVal >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '22px', fontWeight: 800, color: labaBersihVal >= 0 ? '#059669' : '#dc2626', lineHeight: 1.1 }}>
                     {labaBersihVal < 0 ? '-' : ''}{formatRupiah(Math.abs(labaBersihVal))}
                   </span>
                   <MoMBadge pct={summary.momComparison?.laba?.pct} />
                 </div>
+                <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                  Omset - HPP - Beban - Komisi
+                </span>
               </div>
-              <div className="flex items-center justify-between gap-1.5 pt-3 mt-1 border-t border-[#EAECF0]">
-                <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 font-medium">
-                  <div className={`w-2 h-2 rounded-full ${labaBersihVal >= 0 ? 'bg-emerald-500' : 'bg-red-500'} shrink-0`} />
-                  <span className="text-[11px] uppercase font-medium text-gray-500">Omset - HPP - Beban - Komisi</span>
-                </div>
+              <div
+                style={{
+                  ...iconBoxBaseStyle,
+                  backgroundColor: labaBersihVal >= 0 ? '#ecfdf5' : '#fef2f2',
+                  color: labaBersihVal >= 0 ? '#059669' : '#dc2626'
+                }}
+              >
+                <PieChart size={20} />
               </div>
-            </motion.div>
+            </div>
           );
         })()}
       </div>
