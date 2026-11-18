@@ -73,60 +73,68 @@ const FinanceHpp = () => {
         </div>
       </div>
 
-      {/* B. Top Metric Cards (3-Column Grid) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* B. Top Metric Cards (3-Column Grid - Compact) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         {/* Card 1: Total Material */}
-        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-start justify-between gap-4">
+        <div style={{ padding: '14px 16px', borderRadius: '14px' }} className="bg-white border border-gray-200 shadow-sm flex items-start justify-between gap-3">
           <div className="flex flex-col">
-            <span className="text-[13px] font-semibold text-gray-500 mb-1.5">Total Material</span>
-            <span className="text-2xl font-extrabold text-gray-900 leading-tight">{totalItems} Item</span>
-            <span className="text-xs text-gray-500 mt-1.5">{itemsWithPrice} telah diatur harga jual</span>
+            <span className="text-xs font-semibold text-gray-500 mb-1">Total Material</span>
+            <span className="text-xl font-extrabold text-gray-900 leading-tight">{totalItems} Item</span>
+            <span className="text-xs text-gray-500 mt-1">{itemsWithPrice} telah diatur harga jual</span>
           </div>
-          <div className="w-10 h-10 rounded-[10px] bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0">
-            <Package size={20} />
+          <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0">
+            <Package size={18} />
           </div>
         </div>
 
         {/* Card 2: Status Input HPP */}
-        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-start justify-between gap-4">
+        <div style={{ padding: '14px 16px', borderRadius: '14px' }} className="bg-white border border-gray-200 shadow-sm flex items-start justify-between gap-3">
           <div className="flex flex-col">
-            <span className="text-[13px] font-semibold text-gray-500 mb-1.5">Status Input HPP</span>
-            <span className="text-2xl font-extrabold text-gray-900 leading-tight">{itemsWithHpp} / {totalItems}</span>
-            <span className="text-xs text-gray-500 mt-1.5">{totalItems - itemsWithHpp} material belum diisi HPP</span>
+            <span className="text-xs font-semibold text-gray-500 mb-1">Status Input HPP</span>
+            <span className="text-xl font-extrabold text-gray-900 leading-tight">{itemsWithHpp} / {totalItems}</span>
+            <span className="text-xs text-gray-500 mt-1">{totalItems - itemsWithHpp} material belum diisi HPP</span>
           </div>
-          <div className="w-10 h-10 rounded-[10px] bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
-            <DollarSign size={20} />
+          <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
+            <DollarSign size={18} />
           </div>
         </div>
 
         {/* Card 3: Otomasi Finansial */}
-        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-start justify-between gap-4">
+        <div style={{ padding: '14px 16px', borderRadius: '14px' }} className="bg-white border border-gray-200 shadow-sm flex items-start justify-between gap-3">
           <div className="flex flex-col">
-            <span className="text-[13px] font-semibold text-gray-500 mb-1.5">Otomasi Finansial</span>
-            <span className="text-2xl font-extrabold text-blue-600 leading-tight">Aktif</span>
-            <span className="text-xs text-gray-500 mt-1.5">HPP otomatis memotong laba bersih</span>
+            <span className="text-xs font-semibold text-gray-500 mb-1">Otomasi Finansial</span>
+            <span className="text-xl font-extrabold text-blue-600 leading-tight">Aktif</span>
+            <span className="text-xs text-gray-500 mt-1">HPP otomatis memotong laba bersih</span>
           </div>
-          <div className="w-10 h-10 rounded-[10px] bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0">
-            <TrendingUp size={20} />
+          <div className="w-9 h-9 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0">
+            <TrendingUp size={18} />
           </div>
         </div>
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col">
-        {/* C. Unified Filter & Search Toolbar (Single Row Flexbox, Left & Right Aligned) */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full mb-4">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col">
+        {/* C. Unified Filter & Search Toolbar */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
           {/* Left: Category Segmented Pill Buttons */}
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', backgroundColor: '#f1f5f9', padding: '4px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
             {['Semua', 'Kaca Film', 'PPF', 'Coating', 'Tools & Equipment'].map((cat) => (
               <button
+                type="button"
                 key={cat}
                 onClick={() => setInvCategoryFilter(cat)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  invCategoryFilter === cat
-                    ? 'bg-[#0F172A] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
-                }`}
+                style={{
+                  padding: '6px 13px',
+                  borderRadius: '8px',
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  border: 'none',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  backgroundColor: invCategoryFilter === cat ? '#111827' : 'transparent',
+                  color: invCategoryFilter === cat ? '#ffffff' : '#64748b',
+                  transition: 'all 0.15s ease'
+                }}
               >
                 {cat}
               </button>
@@ -134,14 +142,35 @@ const FinanceHpp = () => {
           </div>
 
           {/* Right: Search Bar */}
-          <div className="relative w-full md:w-80 flex-shrink-0">
-            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <div style={{ position: 'relative', width: '280px', maxWidth: '100%' }}>
+            <Search
+              size={15}
+              style={{
+                position: 'absolute',
+                left: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#94a3b8',
+                pointerEvents: 'none'
+              }}
+            />
             <input
               type="text"
               placeholder="Cari ID, brand, varian..."
               value={invSearch}
               onChange={(e) => setInvSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm"
+              style={{
+                width: '100%',
+                height: '38px',
+                paddingLeft: '36px',
+                paddingRight: '14px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                fontSize: '13px',
+                color: '#0f172a',
+                outline: 'none'
+              }}
             />
           </div>
         </div>

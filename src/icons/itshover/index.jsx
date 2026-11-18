@@ -159,38 +159,33 @@ function withItsHover(BaseComponent, displayName) {
       const resolvedSize = size !== undefined ? size : inferSizeFromClassName(className);
       const resolvedColor = (style && style.color) ? style.color : color;
 
-      const iconElement = (
-        <BaseComponent
-          ref={ref}
-          size={resolvedSize}
-          color={resolvedColor}
-          strokeWidth={strokeWidth}
+      return (
+        <span
+          id={id}
+          title={title}
+          onClick={onClick}
           className={className}
-          {...rest}
-        />
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: resolvedSize,
+            height: resolvedSize,
+            flexShrink: 0,
+            lineHeight: 0,
+            ...style,
+          }}
+        >
+          <BaseComponent
+            ref={ref}
+            size={resolvedSize}
+            color={resolvedColor}
+            strokeWidth={strokeWidth}
+            className=""
+            {...rest}
+          />
+        </span>
       );
-
-      if (style || onClick || title || id) {
-        return (
-          <span
-            id={id}
-            title={title}
-            onClick={onClick}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              lineHeight: 0,
-              ...style,
-            }}
-          >
-            {iconElement}
-          </span>
-        );
-      }
-
-      return iconElement;
     }
   );
   Wrapped.displayName = displayName || BaseComponent.displayName || "ItsHoverIcon";

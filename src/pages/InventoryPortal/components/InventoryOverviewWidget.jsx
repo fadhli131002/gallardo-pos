@@ -4,21 +4,21 @@ import '../../Dashboard/Dashboard.css';
 
 const bentoCardStyle = {
   backgroundColor: '#ffffff',
-  borderRadius: '18px',
+  borderRadius: '14px',
   border: '1px solid #e5e7eb',
-  padding: '18px 20px',
+  padding: '14px 16px',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
-  gap: '14px',
-  boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)',
+  gap: '10px',
+  boxShadow: '0 1px 4px rgba(15, 23, 42, 0.03)',
   transition: 'all 0.18s ease'
 };
 
 const iconBoxBaseStyle = {
-  width: '36px',
-  height: '36px',
-  borderRadius: '10px',
+  width: '32px',
+  height: '32px',
+  borderRadius: '8px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -120,7 +120,7 @@ const InventoryOverviewWidget = ({
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-              <span style={{ fontSize: '30px', fontWeight: 800, color: '#111827', lineHeight: 1 }}>
+              <span style={{ fontSize: '24px', fontWeight: 800, color: '#111827', lineHeight: 1 }}>
                 {totalItems}
               </span>
               <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>
@@ -174,7 +174,7 @@ const InventoryOverviewWidget = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span
                 style={{
-                  fontSize: '30px',
+                  fontSize: '24px',
                   fontWeight: 800,
                   color: lowStockCount > 0 ? '#dc2626' : '#111827',
                   lineHeight: 1
@@ -229,7 +229,7 @@ const InventoryOverviewWidget = ({
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-              <span style={{ fontSize: '30px', fontWeight: 800, color: '#111827', lineHeight: 1 }}>
+              <span style={{ fontSize: '24px', fontWeight: 800, color: '#111827', lineHeight: 1 }}>
                 {todayLogs.length}
               </span>
               <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>
@@ -277,7 +277,7 @@ const InventoryOverviewWidget = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span
                 style={{
-                  fontSize: '30px',
+                  fontSize: '24px',
                   fontWeight: 800,
                   color: openDiscrepancies > 0 ? '#d97706' : '#111827',
                   lineHeight: 1

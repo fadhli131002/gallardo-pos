@@ -210,158 +210,163 @@ const FinanceReceivables = () => {
       <DueAlertBanner />
 
       {/* ── AGING SCHEDULE PANEL ────────────────────────────────────────── */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-              <TrendingUp className="w-5 h-5" />
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 flex items-center justify-center bg-blue-50 text-blue-600 rounded-lg">
+              <TrendingUp size={16} />
             </div>
             <div>
               <h2 className="text-sm font-bold text-gray-900">Aging Schedule Piutang</h2>
               <p className="text-xs text-gray-500">
-                Total Piutang Berjalan: <span className="font-semibold text-gray-900">{formatRupiah(agingStats.total)}</span>
+                Total Piutang Berjalan: <span className="font-bold text-gray-900">{formatRupiah(agingStats.total)}</span>
               </p>
             </div>
           </div>
           {agingFilter !== 'Semua' && (
             <button
+              type="button"
               onClick={() => setAgingFilter('Semua')}
-              className="self-start sm:self-auto flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Reset Filter Aging ({getAgingLabel(agingFilter)})
+              <RotateCcw size={13} />
+              <span>Reset Filter ({getAgingLabel(agingFilter)})</span>
             </button>
           )}
         </div>
 
-        {/* 4 Aging Cards */}
+        {/* 4 Aging Cards (Compact & Proportional) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* 1. Belum Jatuh Tempo (Current) */}
           <div
             onClick={() => setAgingFilter(agingFilter === 'current' ? 'Semua' : 'current')}
-            className={`p-4 rounded-xl border transition-all cursor-pointer ${
+            style={{ padding: '12px 14px', borderRadius: '12px' }}
+            className={`border transition-all cursor-pointer ${
               agingFilter === 'current'
                 ? 'bg-emerald-50/80 border-emerald-400 ring-2 ring-emerald-500/20 shadow-sm'
                 : 'bg-gray-50/70 hover:bg-gray-50 border-gray-200'
             }`}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <CheckCircle2 size={14} className="text-emerald-600" />
                 Belum Jatuh Tempo
               </span>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+              <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
                 {agingStats.current.count} trx
               </span>
             </div>
-            <div className="text-lg font-bold text-gray-900 tracking-tight">
+            <div className="text-base font-extrabold text-gray-900 tracking-tight">
               {formatRupiah(agingStats.current.amount)}
             </div>
-            <p className="text-[11px] text-gray-500 mt-1">Sesuai kesepakatan termin</p>
+            <p className="text-[11px] text-gray-500 mt-0.5">Sesuai kesepakatan termin</p>
           </div>
 
-          {/* 2. 1–30 Hari */}
+          {/* 2. 1-30 Hari */}
           <div
             onClick={() => setAgingFilter(agingFilter === '1-30' ? 'Semua' : '1-30')}
-            className={`p-4 rounded-xl border transition-all cursor-pointer ${
+            style={{ padding: '12px 14px', borderRadius: '12px' }}
+            className={`border transition-all cursor-pointer ${
               agingFilter === '1-30'
                 ? 'bg-amber-50/80 border-amber-400 ring-2 ring-amber-500/20 shadow-sm'
                 : 'bg-gray-50/70 hover:bg-gray-50 border-gray-200'
             }`}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-semibold text-amber-800 flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-amber-600" />
-                Menunggak 1–30 Hari
+                <Clock size={14} className="text-amber-600" />
+                Menunggak 1-30 Hari
               </span>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+              <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
                 {agingStats['1-30'].count} trx
               </span>
             </div>
-            <div className="text-lg font-bold text-gray-900 tracking-tight">
+            <div className="text-base font-extrabold text-gray-900 tracking-tight">
               {formatRupiah(agingStats['1-30'].amount)}
             </div>
-            <p className="text-[11px] text-gray-500 mt-1">Keterlambatan ringan</p>
+            <p className="text-[11px] text-gray-500 mt-0.5">Keterlambatan ringan</p>
           </div>
 
-          {/* 3. 31–60 Hari */}
+          {/* 3. 31-60 Hari */}
           <div
             onClick={() => setAgingFilter(agingFilter === '31-60' ? 'Semua' : '31-60')}
-            className={`p-4 rounded-xl border transition-all cursor-pointer ${
+            style={{ padding: '12px 14px', borderRadius: '12px' }}
+            className={`border transition-all cursor-pointer ${
               agingFilter === '31-60'
                 ? 'bg-orange-50/80 border-orange-400 ring-2 ring-orange-500/20 shadow-sm'
                 : 'bg-gray-50/70 hover:bg-gray-50 border-gray-200'
             }`}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-semibold text-orange-800 flex items-center gap-1.5">
-                <AlertCircle className="w-4 h-4 text-orange-600" />
-                Menunggak 31–60 Hari
+                <AlertCircle size={14} className="text-orange-600" />
+                Menunggak 31-60 Hari
               </span>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800">
+              <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800">
                 {agingStats['31-60'].count} trx
               </span>
             </div>
-            <div className="text-lg font-bold text-gray-900 tracking-tight">
+            <div className="text-base font-extrabold text-gray-900 tracking-tight">
               {formatRupiah(agingStats['31-60'].amount)}
             </div>
-            <p className="text-[11px] text-gray-500 mt-1">Perlu peringatan resmi</p>
+            <p className="text-[11px] text-gray-500 mt-0.5">Perlu peringatan resmi</p>
           </div>
 
           {/* 4. Macet / Bad Debt (>60 Hari) */}
           <div
             onClick={() => setAgingFilter(agingFilter === 'bad_debt' ? 'Semua' : 'bad_debt')}
-            className={`p-4 rounded-xl border transition-all cursor-pointer ${
+            style={{ padding: '12px 14px', borderRadius: '12px' }}
+            className={`border transition-all cursor-pointer ${
               agingFilter === 'bad_debt'
                 ? 'bg-rose-50/90 border-rose-400 ring-2 ring-rose-500/20 shadow-sm'
                 : 'bg-gray-50/70 hover:bg-gray-50 border-gray-200'
             }`}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-semibold text-rose-800 flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4 text-rose-600" />
+                <AlertTriangle size={14} className="text-rose-600" />
                 Macet (&gt;60 Hari)
               </span>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
+              <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
                 {agingStats.bad_debt.count} trx
               </span>
             </div>
-            <div className="text-lg font-bold text-rose-700 tracking-tight">
+            <div className="text-base font-extrabold text-rose-700 tracking-tight">
               {formatRupiah(agingStats.bad_debt.amount)}
             </div>
-            <p className="text-[11px] text-rose-600 font-medium mt-1">Kritis · Potensi Bad Debt</p>
+            <p className="text-[11px] text-rose-600 font-medium mt-0.5">Kritis - Potensi Bad Debt</p>
           </div>
         </div>
 
         {/* Visual Distribution Bar */}
         {agingStats.total > 0 && (
-          <div className="mt-4 pt-3 border-t border-gray-100">
-            <div className="flex justify-between items-center text-xs text-gray-500 mb-1.5">
-              <span>Distribusi Risiko Portofolio Piutang</span>
-              <span>
-                {((agingStats.current.amount / agingStats.total) * 100).toFixed(0)}% Lancar ·{' '}
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <div className="flex justify-between items-center text-xs text-gray-600 mb-1.5">
+              <span className="font-medium">Distribusi Risiko Portofolio Piutang</span>
+              <span className="font-semibold">
+                {((agingStats.current.amount / agingStats.total) * 100).toFixed(0)}% Lancar &bull;{' '}
                 {(((agingStats['1-30'].amount + agingStats['31-60'].amount + agingStats.bad_debt.amount) / agingStats.total) * 100).toFixed(0)}% Menunggak
               </span>
             </div>
-            <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden flex">
+            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden flex">
               <div
                 style={{ width: `${(agingStats.current.amount / agingStats.total) * 100}%` }}
-                className="bg-emerald-500 hover:opacity-90 transition-all"
+                className="bg-emerald-500 transition-all"
                 title={`Belum Jatuh Tempo: ${formatRupiah(agingStats.current.amount)}`}
               />
               <div
                 style={{ width: `${(agingStats['1-30'].amount / agingStats.total) * 100}%` }}
-                className="bg-amber-400 hover:opacity-90 transition-all"
+                className="bg-amber-400 transition-all"
                 title={`1-30 Hari: ${formatRupiah(agingStats['1-30'].amount)}`}
               />
               <div
                 style={{ width: `${(agingStats['31-60'].amount / agingStats.total) * 100}%` }}
-                className="bg-orange-500 hover:opacity-90 transition-all"
+                className="bg-orange-500 transition-all"
                 title={`31-60 Hari: ${formatRupiah(agingStats['31-60'].amount)}`}
               />
               <div
                 style={{ width: `${(agingStats.bad_debt.amount / agingStats.total) * 100}%` }}
-                className="bg-rose-600 hover:opacity-90 transition-all"
+                className="bg-rose-600 transition-all"
                 title={`Macet >60 Hari: ${formatRupiah(agingStats.bad_debt.amount)}`}
               />
             </div>
@@ -370,27 +375,85 @@ const FinanceReceivables = () => {
       </div>
 
       {/* ── TOOLBAR & FILTERS ───────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <div className="flex flex-col sm:flex-row gap-3 flex-1">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Cari Pelanggan, Plat Nomor, atau ID TRX..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm outline-none transition-all"
-            />
-          </div>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '10px',
+          backgroundColor: '#ffffff',
+          padding: '12px 16px',
+          borderRadius: '14px',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)'
+        }}
+      >
+        {/* Search Input */}
+        <div style={{ position: 'relative', flex: '1 1 240px', minWidth: '200px' }}>
+          <Search
+            size={16}
+            style={{
+              position: 'absolute',
+              left: '12px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#9ca3af',
+              pointerEvents: 'none'
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Cari Pelanggan, Plat Nomor, atau ID TRX..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: '100%',
+              height: '38px',
+              paddingLeft: '36px',
+              paddingRight: '14px',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              fontSize: '13.5px',
+              color: '#111827',
+              outline: 'none'
+            }}
+          />
+        </div>
 
+        {/* Right Controls: Status + Aging + Export */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
           {/* Status Filter */}
-          <div className="relative w-full sm:w-44 flex-shrink-0">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500 w-4 h-4" />
+          <div style={{ position: 'relative', width: '175px' }}>
+            <Filter
+              size={15}
+              style={{
+                position: 'absolute',
+                left: '11px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#f59e0b',
+                pointerEvents: 'none'
+              }}
+            />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm outline-none transition-all appearance-none cursor-pointer"
+              style={{
+                width: '100%',
+                height: '38px',
+                paddingLeft: '34px',
+                paddingRight: '26px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#374151',
+                cursor: 'pointer',
+                outline: 'none'
+              }}
             >
               <option value="Semua">Semua Status</option>
               <option value="Belum Bayar">Belum Lunas</option>
@@ -399,30 +462,67 @@ const FinanceReceivables = () => {
           </div>
 
           {/* Aging Filter Dropdown */}
-          <div className="relative w-full sm:w-52 flex-shrink-0">
-            <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 w-4 h-4" />
+          <div style={{ position: 'relative', width: '195px' }}>
+            <Clock
+              size={15}
+              style={{
+                position: 'absolute',
+                left: '11px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#3b82f6',
+                pointerEvents: 'none'
+              }}
+            />
             <select
               value={agingFilter}
               onChange={(e) => setAgingFilter(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm outline-none transition-all appearance-none cursor-pointer"
+              style={{
+                width: '100%',
+                height: '38px',
+                paddingLeft: '34px',
+                paddingRight: '26px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#374151',
+                cursor: 'pointer',
+                outline: 'none'
+              }}
             >
               <option value="Semua">Semua Aging</option>
               <option value="current">Belum Jatuh Tempo</option>
-              <option value="1-30">Menunggak 1–30 Hari</option>
-              <option value="31-60">Menunggak 31–60 Hari</option>
+              <option value="1-30">Menunggak 1-30 Hari</option>
+              <option value="31-60">Menunggak 31-60 Hari</option>
               <option value="bad_debt">Macet (&gt;60 Hari)</option>
             </select>
           </div>
-        </div>
 
-        <div className="flex-shrink-0">
-          <button 
+          {/* Export Button */}
+          <button
+            type="button"
             onClick={handleExport}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm relative group"
+            style={{
+              height: '38px',
+              padding: '0 14px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #d1d5db',
+              borderRadius: '10px',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#374151',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
             title="Unduh Data Piutang & Aging Schedule (CSV)"
           >
-            <Download className="w-4 h-4" />
-            Export CSV
+            <Download size={15} />
+            <span>Export CSV</span>
           </button>
         </div>
       </div>
@@ -546,36 +646,36 @@ const FinanceReceivables = () => {
 
                       {/* Aksi */}
                       <td className="py-3 px-5 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
+                            type="button"
                             onClick={() => setSelectedTransaction(tx)}
                             title="Lihat Bukti"
-                            className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                            aria-label="Lihat Bukti"
+                            className="p-1.5 text-gray-600 bg-white border border-gray-200 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 rounded-lg transition-colors"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye size={15} />
                           </button>
-                          <button 
+                          <button
+                            type="button"
                             onClick={() => { const cleanId = String(tx.id).replace(/\//g, '-'); window.open(`/sales/invoices/print/${cleanId}`, '_blank'); }}
-                            className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                            className="p-1.5 text-gray-600 bg-white border border-gray-200 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 rounded-lg transition-colors"
                             title="Cetak Invoice"
+                            aria-label="Cetak Invoice"
                           >
-                            <Printer className="w-4 h-4" />
+                            <Printer size={15} />
                           </button>
                           {hasWarranty(tx) && (
                             <button
+                              type="button"
                               onClick={() => { setSelectedPrintWarranty(tx); setIsPrintWarrantyOpen(true); }}
                               title="Cetak Garansi"
-                              className="p-1.5 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors"
+                              aria-label="Cetak Garansi"
+                              className="p-1.5 text-amber-600 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-lg transition-colors"
                             >
-                              <Shield className="w-4 h-4" />
+                              <Shield size={15} />
                             </button>
                           )}
-                          <button
-                            title="Lainnya"
-                            className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
-                          >
-                            <MoreHorizontal className="w-4 h-4" />
-                          </button>
                         </div>
                       </td>
                     </tr>

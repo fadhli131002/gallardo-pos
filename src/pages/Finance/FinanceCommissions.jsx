@@ -109,13 +109,36 @@ const FinanceCommissions = () => {
           <h1 className="page-title">Laporan Komisi Sales</h1>
           <p className="page-subtitle">Rekapitulasi komisi berdasarkan transaksi lunas</p>
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative w-full sm:w-auto">
-            <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <select 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative', width: '160px' }}>
+            <CalendarIcon
+              size={15}
+              style={{
+                position: 'absolute',
+                left: '11px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#9ca3af',
+                pointerEvents: 'none'
+              }}
+            />
+            <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="pl-9 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white text-sm font-medium transition-all appearance-none cursor-pointer w-full sm:w-auto min-w-[140px]"
+              style={{
+                width: '100%',
+                height: '38px',
+                paddingLeft: '34px',
+                paddingRight: '26px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #d1d5db',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#111827',
+                cursor: 'pointer',
+                outline: 'none'
+              }}
             >
               <option value="Hari Ini">Hari Ini</option>
               <option value="Bulan Ini">Bulan Ini</option>
@@ -123,12 +146,27 @@ const FinanceCommissions = () => {
               <option value="Semua Waktu">Semua Waktu</option>
             </select>
           </div>
-          <button 
+          <button
+            type="button"
             onClick={handleExport}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm whitespace-nowrap"
+            style={{
+              height: '38px',
+              padding: '0 14px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #d1d5db',
+              borderRadius: '10px',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#374151',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
           >
-            <Download className="w-4 h-4" />
-            Export
+            <Download size={15} />
+            <span>Export</span>
           </button>
         </div>
       </div>
@@ -152,13 +190,13 @@ const FinanceCommissions = () => {
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan="4" className="p-8 text-center text-gray-500">
+                  <td colSpan="5" className="p-8 text-center text-gray-500">
                     Memuat data komisi...
                   </td>
                 </tr>
               ) : commissions.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="p-8 text-center text-gray-500">
+                  <td colSpan="5" className="p-8 text-center text-gray-500">
                     Tidak ada data transaksi lunas pada periode ini.
                   </td>
                 </tr>

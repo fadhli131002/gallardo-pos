@@ -622,40 +622,40 @@ const FinanceDashboard = () => {
         return (
           <>
             {/* ── TOP BENTO GRID (3 ZONES: HERO CASHFLOW | 2x2 P&L MATRIX | VISUAL P&L BARS) ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-5">
               {/* ZONE 1 (LEFT 5 COLS): 1. ARUS KAS RIIL (HERO CARD + SUB-WALLETS) */}
               <div
                 className="lg:col-span-5"
                 style={{
                   backgroundColor: '#ffffff',
-                  borderRadius: '20px',
+                  borderRadius: '14px',
                   border: '1px solid #e5e7eb',
-                  padding: '22px',
+                  padding: '16px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)'
+                  boxShadow: '0 1px 4px rgba(15, 23, 42, 0.03)'
                 }}
               >
                 <div>
                   {/* Top Header */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '10px' }}>
                     <div>
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block' }}>
+                      <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block' }}>
                         1. Arus Kas Riil (Cashflow)
                       </span>
-                      <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                      <span style={{ fontSize: '11.5px', color: '#6b7280' }}>
                         Net Cashflow (Kas Masuk - Kas Keluar)
                       </span>
                     </div>
                     <span
                       style={{
-                        fontSize: '11.5px',
+                        fontSize: '11px',
                         fontWeight: 600,
                         color: '#1d4ed8',
                         backgroundColor: '#eff6ff',
                         border: '1px solid #bfdbfe',
-                        padding: '3px 10px',
+                        padding: '2px 9px',
                         borderRadius: '999px',
                         whiteSpace: 'nowrap'
                       }}
@@ -665,10 +665,10 @@ const FinanceDashboard = () => {
                   </div>
 
                   {/* Hero Net Cashflow Amount */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
                     <span
                       style={{
-                        fontSize: '28px',
+                        fontSize: '22px',
                         fontWeight: 800,
                         color: netCashflowVal >= 0 ? '#111827' : '#dc2626',
                         letterSpacing: '-0.02em',
@@ -680,8 +680,8 @@ const FinanceDashboard = () => {
                     <MoMBadge pct={summary.momComparison?.cashflow?.pct} />
                   </div>
 
-                  {/* Pill Action Buttons (Like Transfer / Request in Finexy Ref) */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '18px' }}>
+                  {/* Pill Action Buttons */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
                     <button
                       type="button"
                       onClick={() => setShowPOModal(true)}
@@ -690,18 +690,18 @@ const FinanceDashboard = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '6px',
-                        padding: '10px 14px',
+                        padding: '7px 12px',
                         borderRadius: '999px',
                         backgroundColor: '#111827',
                         color: '#ffffff',
                         border: 'none',
-                        fontSize: '12.5px',
+                        fontSize: '12px',
                         fontWeight: 600,
                         cursor: 'pointer',
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      <Plus size={15} />
+                      <Plus size={14} />
                       <span>Catat Pembelian</span>
                     </button>
                     <button
@@ -712,18 +712,18 @@ const FinanceDashboard = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '6px',
-                        padding: '10px 14px',
+                        padding: '7px 12px',
                         borderRadius: '999px',
                         backgroundColor: '#f3f4f6',
                         color: '#111827',
                         border: '1px solid #e5e7eb',
-                        fontSize: '12.5px',
+                        fontSize: '12px',
                         fontWeight: 600,
                         cursor: 'pointer',
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      <Plus size={15} />
+                      <Plus size={14} />
                       <span>Input Expense</span>
                     </button>
                   </div>
@@ -733,47 +733,47 @@ const FinanceDashboard = () => {
                 <div
                   style={{
                     backgroundColor: '#f8fafc',
-                    borderRadius: '16px',
-                    padding: '12px',
+                    borderRadius: '12px',
+                    padding: '10px',
                     border: '1px solid #f1f5f9'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', padding: '0 4px' }}>
-                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#374151' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', padding: '0 2px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#374151' }}>
                       Komponen Arus Kas
                     </span>
-                    <span style={{ fontSize: '11px', color: '#6b7280' }}>
+                    <span style={{ fontSize: '10.5px', color: '#6b7280' }}>
                       Klik kartu untuk rincian
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {/* Sub-card 1: Kas Masuk Riil */}
                     <div
                       onClick={() => handleCardClick('kas-masuk')}
                       style={{
                         backgroundColor: '#ffffff',
-                        borderRadius: '12px',
-                        padding: '12px',
+                        borderRadius: '10px',
+                        padding: '9px 10px',
                         border: '1px solid #e5e7eb',
                         cursor: 'pointer',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        gap: '6px'
+                        gap: '4px'
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ width: '26px', height: '26px', borderRadius: '7px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <DollarSign size={14} />
+                        <div style={{ width: '22px', height: '22px', borderRadius: '6px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <DollarSign size={13} />
                         </div>
-                        <ChevronRight size={13} style={{ color: '#9ca3af' }} />
+                        <ChevronRight size={12} style={{ color: '#9ca3af' }} />
                       </div>
                       <div>
-                        <div style={{ fontSize: '11px', fontWeight: 600, color: '#6b7280', marginBottom: '2px' }}>
+                        <div style={{ fontSize: '10.5px', fontWeight: 600, color: '#6b7280' }}>
                           Kas Masuk Riil
                         </div>
-                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#111827', wordBreak: 'break-word' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: '#111827', wordBreak: 'break-word' }}>
                           {formatRupiah(kasMasukVal)}
                         </div>
                       </div>
@@ -787,33 +787,33 @@ const FinanceDashboard = () => {
                       onClick={() => handleCardClick('piutang-lama')}
                       style={{
                         backgroundColor: '#ffffff',
-                        borderRadius: '12px',
-                        padding: '12px',
+                        borderRadius: '10px',
+                        padding: '9px 10px',
                         border: '1px solid #e5e7eb',
                         cursor: 'pointer',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        gap: '6px'
+                        gap: '4px'
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ width: '26px', height: '26px', borderRadius: '7px', backgroundColor: '#f0fdfa', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <CreditCard size={14} />
+                        <div style={{ width: '22px', height: '22px', borderRadius: '6px', backgroundColor: '#f0fdfa', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CreditCard size={13} />
                         </div>
-                        <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#0f766e', backgroundColor: '#f0fdfa', padding: '1px 6px', borderRadius: '999px' }}>
-                          Termin Lalu
+                        <span style={{ fontSize: '9px', fontWeight: 700, color: '#0f766e', backgroundColor: '#f0fdfa', padding: '1px 5px', borderRadius: '999px' }}>
+                          Termin
                         </span>
                       </div>
                       <div>
-                        <div style={{ fontSize: '11px', fontWeight: 600, color: '#6b7280', marginBottom: '2px' }}>
-                          Pelunasan Piutang
+                        <div style={{ fontSize: '10.5px', fontWeight: 600, color: '#6b7280' }}>
+                          Pelunasan Lama
                         </div>
-                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#111827', wordBreak: 'break-word' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: '#111827', wordBreak: 'break-word' }}>
                           {formatRupiah(pelunasanLamaVal)}
                         </div>
                       </div>
-                      <div style={{ fontSize: '10.5px', color: '#0d9488', fontWeight: 600 }}>
+                      <div style={{ fontSize: '10px', color: '#0d9488', fontWeight: 600 }}>
                         Bagian Kas Masuk
                       </div>
                     </div>
@@ -823,33 +823,33 @@ const FinanceDashboard = () => {
                       onClick={() => handleCardClick('piutang')}
                       style={{
                         backgroundColor: '#ffffff',
-                        borderRadius: '12px',
-                        padding: '12px',
+                        borderRadius: '10px',
+                        padding: '9px 10px',
                         border: '1px solid #e5e7eb',
                         cursor: 'pointer',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        gap: '6px'
+                        gap: '4px'
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ width: '26px', height: '26px', borderRadius: '7px', backgroundColor: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Wallet size={14} />
+                        <div style={{ width: '22px', height: '22px', borderRadius: '6px', backgroundColor: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Wallet size={13} />
                         </div>
-                        <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#b45309', backgroundColor: '#fef3c7', padding: '1px 6px', borderRadius: '999px' }}>
-                          Belum Lunas
+                        <span style={{ fontSize: '9px', fontWeight: 700, color: '#b45309', backgroundColor: '#fef3c7', padding: '1px 5px', borderRadius: '999px' }}>
+                          Piutang
                         </span>
                       </div>
                       <div>
-                        <div style={{ fontSize: '11px', fontWeight: 600, color: '#6b7280', marginBottom: '2px' }}>
+                        <div style={{ fontSize: '10.5px', fontWeight: 600, color: '#6b7280' }}>
                           Sisa Piutang
                         </div>
-                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#d97706', wordBreak: 'break-word' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: '#d97706', wordBreak: 'break-word' }}>
                           {formatRupiah(totalPiutangVal)}
                         </div>
                       </div>
-                      <div style={{ fontSize: '10.5px', color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ fontSize: '10px', color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         Bln ini: {formatRupiah(piutangPeriodeVal)}
                       </div>
                     </div>
@@ -862,19 +862,19 @@ const FinanceDashboard = () => {
                 className="lg:col-span-4"
                 style={{
                   backgroundColor: '#ffffff',
-                  borderRadius: '20px',
+                  borderRadius: '14px',
                   border: '1px solid #e5e7eb',
-                  padding: '18px',
+                  padding: '16px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  gap: '12px',
-                  boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)'
+                  gap: '10px',
+                  boxShadow: '0 1px 4px rgba(15, 23, 42, 0.03)'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block' }}>
+                    <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block' }}>
                       2. Laporan SOP (Laba Rugi Akrual)
                     </span>
                     <span style={{ fontSize: '11.5px', color: '#6b7280' }}>
@@ -883,32 +883,31 @@ const FinanceDashboard = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
                   {/* Tile 1 (Featured Highlight Tile): Laba Bersih */}
                   <div
                     onClick={() => handleCardClick('laba-rugi')}
                     style={{
                       backgroundColor: '#111827',
                       color: '#ffffff',
-                      borderRadius: '16px',
-                      padding: '16px',
+                      borderRadius: '12px',
+                      padding: '12px 14px',
                       cursor: 'pointer',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
-                      gap: '10px',
-                      boxShadow: '0 8px 20px rgba(17, 24, 39, 0.14)'
+                      gap: '6px'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#9ca3af' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
+                      <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#9ca3af' }}>
                         Laba Bersih
                       </span>
                       <span
                         style={{
-                          fontSize: '10px',
+                          fontSize: '9.5px',
                           fontWeight: 700,
-                          padding: '2px 7px',
+                          padding: '1px 6px',
                           borderRadius: '999px',
                           backgroundColor: labaBersihVal >= 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
                           color: labaBersihVal >= 0 ? '#34d399' : '#f87171'
@@ -918,14 +917,14 @@ const FinanceDashboard = () => {
                       </span>
                     </div>
                     <div>
-                      <div style={{ fontSize: '19px', fontWeight: 800, color: '#ffffff', lineHeight: 1.15, wordBreak: 'break-word' }}>
+                      <div style={{ fontSize: '16.5px', fontWeight: 800, color: '#ffffff', lineHeight: 1.15, wordBreak: 'break-word' }}>
                         {labaBersihVal < 0 ? '-' : ''}{formatRupiah(Math.abs(labaBersihVal))}
                       </div>
-                      <div style={{ marginTop: '6px' }}>
+                      <div style={{ marginTop: '4px' }}>
                         <MoMBadge pct={summary.momComparison?.laba?.pct} />
                       </div>
                     </div>
-                    <div style={{ fontSize: '10.5px', color: '#9ca3af' }}>
+                    <div style={{ fontSize: '10px', color: '#9ca3af' }}>
                       Omset - HPP - Beban - Komisi
                     </div>
                   </div>
@@ -935,33 +934,33 @@ const FinanceDashboard = () => {
                     onClick={() => handleCardClick('omset')}
                     style={{
                       backgroundColor: '#f8fafc',
-                      borderRadius: '16px',
-                      padding: '16px',
+                      borderRadius: '12px',
+                      padding: '12px 14px',
                       border: '1px solid #f1f5f9',
                       cursor: 'pointer',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
-                      gap: '10px'
+                      gap: '6px'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#4b5563' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
+                      <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#4b5563' }}>
                         Total Omset
                       </span>
-                      <div style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: '#eef2ff', color: '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <FileText size={15} />
+                      <div style={{ width: '24px', height: '24px', borderRadius: '7px', backgroundColor: '#eef2ff', color: '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <FileText size={13} />
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '19px', fontWeight: 800, color: '#111827', lineHeight: 1.15, wordBreak: 'break-word' }}>
+                      <div style={{ fontSize: '16.5px', fontWeight: 800, color: '#111827', lineHeight: 1.15, wordBreak: 'break-word' }}>
                         {formatRupiah(totalOmsetVal)}
                       </div>
-                      <div style={{ marginTop: '6px' }}>
+                      <div style={{ marginTop: '4px' }}>
                         <MoMBadge pct={summary.momComparison?.omset?.pct} />
                       </div>
                     </div>
-                    <div style={{ fontSize: '10.5px', color: '#6b7280' }}>
+                    <div style={{ fontSize: '10px', color: '#6b7280' }}>
                       Basis Akrual (Klik rincian)
                     </div>
                   </div>
@@ -970,34 +969,34 @@ const FinanceDashboard = () => {
                   <div
                     style={{
                       backgroundColor: '#f8fafc',
-                      borderRadius: '16px',
-                      padding: '16px',
+                      borderRadius: '12px',
+                      padding: '12px 14px',
                       border: '1px solid #f1f5f9',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
-                      gap: '10px'
+                      gap: '6px'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#4b5563' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
+                      <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#4b5563' }}>
                         Laba Kotor
                       </span>
-                      <div style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <TrendingUp size={15} />
+                      <div style={{ width: '24px', height: '24px', borderRadius: '7px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <TrendingUp size={13} />
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '19px', fontWeight: 800, color: '#059669', lineHeight: 1.15, wordBreak: 'break-word' }}>
+                      <div style={{ fontSize: '16.5px', fontWeight: 800, color: '#059669', lineHeight: 1.15, wordBreak: 'break-word' }}>
                         {formatRupiah(labaKotorVal)}
                       </div>
-                      <div style={{ marginTop: '6px' }}>
-                        <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#059669', backgroundColor: '#ecfdf5', padding: '2px 7px', borderRadius: '999px' }}>
+                      <div style={{ marginTop: '4px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#059669', backgroundColor: '#ecfdf5', padding: '1px 6px', borderRadius: '999px' }}>
                           {marginPct}% Margin
                         </span>
                       </div>
                     </div>
-                    <div style={{ fontSize: '10.5px', color: '#6b7280' }}>
+                    <div style={{ fontSize: '10px', color: '#6b7280' }}>
                       Omset dikurangi HPP
                     </div>
                   </div>
@@ -1006,27 +1005,27 @@ const FinanceDashboard = () => {
                   <div
                     style={{
                       backgroundColor: '#f8fafc',
-                      borderRadius: '16px',
-                      padding: '16px',
+                      borderRadius: '12px',
+                      padding: '12px 14px',
                       border: '1px solid #f1f5f9',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
-                      gap: '8px'
+                      gap: '6px'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#4b5563' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
+                      <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#4b5563' }}>
                         HPP + Beban
                       </span>
-                      <div style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <TrendingDown size={15} />
+                      <div style={{ width: '24px', height: '24px', borderRadius: '7px', backgroundColor: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <TrendingDown size={13} />
                       </div>
                     </div>
-                    <div style={{ fontSize: '19px', fontWeight: 800, color: '#dc2626', lineHeight: 1.15, wordBreak: 'break-word' }}>
+                    <div style={{ fontSize: '16.5px', fontWeight: 800, color: '#dc2626', lineHeight: 1.15, wordBreak: 'break-word' }}>
                       {formatRupiah(totalOutflowPl)}
                     </div>
-                    <div style={{ fontSize: '10.5px', color: '#6b7280', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                    <div style={{ fontSize: '10px', color: '#6b7280', display: 'flex', flexDirection: 'column', gap: '1px' }}>
                       <span>HPP: <strong style={{ color: '#374151' }}>{formatRupiah(totalHppVal)}</strong></span>
                       <span>Beban: <strong style={{ color: '#374151' }}>{formatRupiah(totalBebanVal)}</strong></span>
                       <span>Komisi: <strong style={{ color: '#374151' }}>{formatRupiah(totalKomisiVal)}</strong></span>
@@ -1035,40 +1034,40 @@ const FinanceDashboard = () => {
                 </div>
               </div>
 
-              {/* ZONE 3 (RIGHT 3 COLS): VISUAL PROFIT & LOSS PILLAR CHART (LIKE FINEXY / FINNOVA REF) */}
+              {/* ZONE 3 (RIGHT 3 COLS): VISUAL PROFIT & LOSS PILLAR CHART */}
               <div
                 className="lg:col-span-3"
                 style={{
                   backgroundColor: '#ffffff',
-                  borderRadius: '20px',
+                  borderRadius: '14px',
                   border: '1px solid #e5e7eb',
-                  padding: '22px',
+                  padding: '16px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  boxShadow: '0 2px 10px rgba(15, 23, 42, 0.03)'
+                  boxShadow: '0 1px 4px rgba(15, 23, 42, 0.03)'
                 }}
               >
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
                     <div>
-                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#111827', margin: 0 }}>
+                      <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#111827', margin: 0 }}>
                         Profit &amp; Loss
                       </h3>
-                      <p style={{ fontSize: '11.5px', color: '#6b7280', margin: '2px 0 0 0' }}>
-                        Proporsi visual metrik keuangan
+                      <p style={{ fontSize: '11px', color: '#6b7280', margin: '1px 0 0 0' }}>
+                        Proporsi metrik keuangan
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => handleCardClick('laba-rugi')}
                       style={{
-                        fontSize: '11px',
+                        fontSize: '10.5px',
                         fontWeight: 700,
                         color: '#4338ca',
                         backgroundColor: '#eef2ff',
                         border: '1px solid #c7d2fe',
-                        padding: '4px 10px',
+                        padding: '3px 9px',
                         borderRadius: '999px',
                         cursor: 'pointer',
                         display: 'inline-flex',
@@ -1078,7 +1077,7 @@ const FinanceDashboard = () => {
                       }}
                     >
                       <span>Analisis</span>
-                      <ChevronRight size={12} />
+                      <ChevronRight size={11} />
                     </button>
                   </div>
                 </div>
@@ -1087,13 +1086,13 @@ const FinanceDashboard = () => {
                 <div
                   style={{
                     backgroundColor: '#f8fafc',
-                    borderRadius: '16px',
-                    padding: '16px 12px 12px',
+                    borderRadius: '12px',
+                    padding: '12px 10px 8px',
                     border: '1px solid #f1f5f9',
-                    margin: '10px 0'
+                    margin: '8px 0'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '140px', gap: '8px', paddingBottom: '8px', borderBottom: '1px dashed #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '104px', gap: '6px', paddingBottom: '6px', borderBottom: '1px dashed #e2e8f0' }}>
                     {chartBars.map((bar, idx) => {
                       const heightPct = Math.max(12, Math.round((bar.val / maxChartVal) * 100));
                       return (
@@ -1106,17 +1105,17 @@ const FinanceDashboard = () => {
                             flexDirection: 'column',
                             justifyContent: 'flex-end',
                             alignItems: 'center',
-                            gap: '6px'
+                            gap: '4px'
                           }}
                           title={`${bar.label}: ${formatRupiah(bar.val)}`}
                         >
                           <div
                             style={{
                               width: '100%',
-                              maxWidth: '28px',
+                              maxWidth: '22px',
                               height: `${heightPct}%`,
                               backgroundColor: bar.color,
-                              borderRadius: '8px 8px 4px 4px',
+                              borderRadius: '6px 6px 3px 3px',
                               transition: 'height 0.4s ease'
                             }}
                           />
@@ -1124,9 +1123,9 @@ const FinanceDashboard = () => {
                       );
                     })}
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '4px', marginTop: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '4px', marginTop: '6px' }}>
                     {chartBars.map((bar, idx) => (
-                      <div key={idx} style={{ flex: 1, textAlign: 'center', fontSize: '9.5px', fontWeight: 600, color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div key={idx} style={{ flex: 1, textAlign: 'center', fontSize: '9px', fontWeight: 600, color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {bar.label}
                       </div>
                     ))}
@@ -1134,14 +1133,14 @@ const FinanceDashboard = () => {
                 </div>
 
                 {/* Bottom Ratio Summary Strip */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
                     <span style={{ color: '#6b7280', fontWeight: 500 }}>Rasio Beban + HPP</span>
                     <span style={{ fontWeight: 700, color: '#111827' }}>
                       {totalOmsetVal > 0 ? `${Math.min(100, Math.round((totalOutflowPl / totalOmsetVal) * 100))}% dari Omset` : '0%'}
                     </span>
                   </div>
-                  <div style={{ width: '100%', height: '8px', backgroundColor: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
+                  <div style={{ width: '100%', height: '6px', backgroundColor: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
                     <div
                       style={{
                         width: `${totalOmsetVal > 0 ? Math.min(100, Math.round((totalOutflowPl / totalOmsetVal) * 100)) : 0}%`,

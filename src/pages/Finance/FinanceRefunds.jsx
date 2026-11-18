@@ -170,42 +170,123 @@ const FinanceRefunds = () => {
         </div>
       </div>
 
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-        <div>
-          <div className="flex bg-gray-100 p-1 rounded-lg">
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'history' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              Riwayat Refund
-            </button>
-            <button
-              onClick={() => setActiveTab('create')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'create' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              Buat Refund Baru
-            </button>
-          </div>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          backgroundColor: '#ffffff',
+          padding: '12px 16px',
+          borderRadius: '14px',
+          border: '1px solid #e5e7eb',
+          marginBottom: '20px',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)'
+        }}
+      >
+        <div
+          style={{
+            display: 'inline-flex',
+            backgroundColor: '#f1f5f9',
+            padding: '4px',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
+            flexShrink: 0
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setActiveTab('history')}
+            style={{
+              padding: '7px 16px',
+              fontSize: '13px',
+              fontWeight: 700,
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              backgroundColor: activeTab === 'history' ? '#111827' : 'transparent',
+              color: activeTab === 'history' ? '#ffffff' : '#64748b',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            Riwayat Refund
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('create')}
+            style={{
+              padding: '7px 16px',
+              fontSize: '13px',
+              fontWeight: 700,
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              backgroundColor: activeTab === 'create' ? '#111827' : 'transparent',
+              color: activeTab === 'create' ? '#ffffff' : '#64748b',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            Buat Refund Baru
+          </button>
         </div>
-        
+
         {activeTab === 'history' && (
-          <div className="flex gap-3 w-full sm:w-auto">
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', width: '260px', maxWidth: '100%' }}>
+              <Search
+                size={15}
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#9ca3af',
+                  pointerEvents: 'none'
+                }}
+              />
               <input
                 type="text"
                 placeholder="Cari pelanggan / ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white text-sm outline-none transition-all"
+                style={{
+                  width: '100%',
+                  height: '38px',
+                  paddingLeft: '36px',
+                  paddingRight: '14px',
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  fontSize: '13px',
+                  color: '#111827',
+                  outline: 'none'
+                }}
               />
             </div>
-            <button 
+            <button
+              type="button"
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm whitespace-nowrap"
+              style={{
+                height: '38px',
+                padding: '0 14px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #d1d5db',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#374151',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
             >
-              <Download className="w-4 h-4" />
-              Export
+              <Download size={15} />
+              <span>Export</span>
             </button>
           </div>
         )}
