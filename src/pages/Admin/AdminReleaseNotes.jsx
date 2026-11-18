@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Megaphone, Plus, Search, Edit3, Trash2, Eye, Globe, Lock, CheckCircle2, 
   Clock, Sparkles, Tag, Calendar, ShieldCheck, RefreshCw, X, AlertTriangle, Send
-} from 'lucide-react';
+} from '@/icons/itshover';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
 import ReleaseNoteModal from '../../components/ReleaseNoteModal';
@@ -112,11 +112,11 @@ const AdminReleaseNotes = () => {
   const handleInsertTemplate = (type) => {
     let templateText = '';
     if (type === 'features') {
-      templateText = `\n### 🚀 Fitur Baru:\n- **Nama Fitur**: Penjelasan singkat kegunaan fitur baru bagi kasir/admin.\n- **Fitur Tambahan**: Deskripsi alur kerja baru yang lebih cepat.\n`;
+      templateText = `\n### Fitur Baru:\n- **Nama Fitur**: Penjelasan singkat kegunaan fitur baru bagi kasir/admin.\n- **Fitur Tambahan**: Deskripsi alur kerja baru yang lebih cepat.\n`;
     } else if (type === 'fixes') {
-      templateText = `\n### 🛠️ Perbaikan & Bug Fixes:\n- **Perbaikan Perhitungan**: Mengoreksi rumus rekonsiliasi kas.\n- **Optimasi UI**: Perbaikan tata letak modal agar tepat di tengah layar.\n`;
+      templateText = `\n### Perbaikan & Bug Fixes:\n- **Perbaikan Perhitungan**: Mengoreksi rumus rekonsiliasi kas.\n- **Optimasi UI**: Perbaikan tata letak modal agar tepat di tengah layar.\n`;
     } else if (type === 'guide') {
-      templateText = `\n### 💡 Panduan Singkat:\n1. Buka menu terkait di bilah navigasi kiri.\n2. Klik tombol tindakan yang tersedia untuk memulai.\n`;
+      templateText = `\n### Panduan Singkat:\n1. Buka menu terkait di bilah navigasi kiri.\n2. Klik tombol tindakan yang tersedia untuk memulai.\n`;
     }
 
     setFormData(prev => ({

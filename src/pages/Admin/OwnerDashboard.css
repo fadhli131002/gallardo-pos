@@ -155,7 +155,7 @@
   margin-bottom: 24px;
 }
 
-.metric-card {
+.owner-dashboard .metric-card {
   background-color: #ffffff;
   border-radius: 12px;
   padding: 20px;
@@ -165,7 +165,7 @@
   flex-direction: column;
 }
 
-.metric-card:hover {
+.owner-dashboard .metric-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 

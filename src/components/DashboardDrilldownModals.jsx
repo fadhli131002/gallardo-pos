@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Search, Users, ShoppingBag, Wrench, Award, Phone, ExternalLink, Calendar, Car, ArrowUpDown, CheckCircle, Clock, Filter, Sparkles } from 'lucide-react';
+import { X, Search, Users, ShoppingBag, Wrench, Award, Trophy, Medal, Phone, ExternalLink, Calendar, Car, ArrowUpDown, CheckCircle, Clock, Filter, Sparkles } from '@/icons/itshover';
 
 /**
  * 1. CustomerDetailModal (Drilldown Total Customer)
@@ -243,15 +243,17 @@ export const CustomerDetailModal = ({ isOpen, onClose, customers = [], selectedM
                             display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: '28px',
-                            height: '28px',
-                            borderRadius: '50%',
+                            gap: '3px',
+                            padding: '2px 8px',
+                            height: '26px',
+                            borderRadius: '999px',
                             backgroundColor: rank === 1 ? '#fef3c7' : (rank === 2 ? '#e2e8f0' : '#ffedd5'),
                             color: rank === 1 ? '#b45309' : (rank === 2 ? '#475569' : '#c2410c'),
-                            fontSize: '0.82rem',
+                            fontSize: '0.8rem',
                             fontWeight: '800'
                           }}>
-                            {rank === 1 ? '👑 1' : (rank === 2 ? '🥈 2' : '🥉 3')}
+                            {rank === 1 ? <Trophy size={13} /> : (rank === 2 ? <Medal size={13} /> : <Award size={13} />)}
+                            <span>{rank}</span>
                           </span>
                         ) : (
                           <span style={{ color: '#64748b' }}>#{rank}</span>

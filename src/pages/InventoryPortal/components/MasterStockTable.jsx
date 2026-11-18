@@ -6,11 +6,11 @@ import {
   Flag,
   AlertTriangle,
   ArrowUpDown,
-  Filter,
-  CheckCircle2,
-  XCircle,
-  Package
-} from 'lucide-react';
+  Package,
+  ArrowLeftRight,
+  Check
+} from '@/icons/itshover';
+import { getConversionDetails, formatThousand } from '../utils/unitConversion';
 
 const CATEGORIES = ['Semua', 'Kaca Film', 'Coating', 'PPF', 'Tools & Equipment'];
 
@@ -24,19 +24,17 @@ const MasterStockTable = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
-  const [sortBy, setSortBy] = useState('id'); // 'id' | 'brand' | 'stokUtama'
+  const [sortBy, setSortBy] = useState('id'); // 'id' | 'brand' | 'stokUtama' | 'totalKonversi'
   const [sortAsc, setSortAsc] = useState(true);
+  const [unitMode, setUnitMode] = useState('default'); // 'default' | 'converted'
 
-  // Filtered & Sorted items
   const filteredItems = useMemo(() => {
     return inventory
       .filter((item) => {
-        // Category filter
         if (selectedCategory !== 'Semua' && item.kategori !== selectedCategory) {
           return false;
         }
 
-        // Low stock filter (stokUtama <= minStok, default 2)
         if (isLowStockOnly) {
           const min = item.minStok !== undefined ? item.minStok : 2;
           if (Number(item.stokUtama || 0) > min) {
@@ -44,7 +42,6 @@ const MasterStockTable = ({
           }
         }
 
-        // Search filter (id, brand, varian, kegelapan)
         if (searchQuery.trim() !== '') {
           const q = searchQuery.toLowerCase().trim();
           const matchId = (item.id || '').toLowerCase().includes(q);
@@ -57,17 +54,22 @@ const MasterStockTable = ({
         return true;
       })
       .sort((a, b) => {
-        let valA = a[sortBy];
-        let valB = b[sortBy];
-
         if (sortBy === 'stokUtama') {
-          valA = Number(valA || 0);
-          valB = Number(valB || 0);
+          const valA = Number(a.stokUtama || 0);
+          const valB = Number(b.stokUtama || 0);
           return sortAsc ? valA - valB : valB - valA;
         }
 
-        valA = String(valA || '').toLowerCase();
-        valB = String(valB || '').toLowerCase();
+        if (sortBy === 'totalKonversi') {
+          const convA = getConversionDetails(a);
+          const convB = getConversionDetails(b);
+          const valA = convA.type === 'FILM_PPF' ? convA.totalCM : convA.type === 'COATING' ? convA.totalML : convA.utama;
+          const valB = convB.type === 'FILM_PPF' ? convB.totalCM : convB.type === 'COATING' ? convB.totalML : convB.utama;
+          return sortAsc ? valA - valB : valB - valA;
+        }
+
+        const valA = String(a[sortBy] || '').toLowerCase();
+        const valB = String(b[sortBy] || '').toLowerCase();
         if (valA < valB) return sortAsc ? -1 : 1;
         if (valA > valB) return sortAsc ? 1 : -1;
         return 0;
@@ -83,242 +85,570 @@ const MasterStockTable = ({
     }
   };
 
+  const isConvertedMode = unitMode === 'converted';
+
+  const stickyThStyle = {
+    position: 'sticky',
+    top: 0,
+    zIndex: 20,
+    backgroundColor: '#f5f5f5',
+    boxShadow: 'inset 0 -2px 0 #e5e5e5',
+    padding: '0.85rem 0.9rem',
+    color: 'var(--color-secondary)',
+    fontSize: '0.75rem',
+    letterSpacing: '0.05em',
+    fontWeight: 600,
+    whiteSpace: 'nowrap'
+  };
+
   return (
-    <div className="bg-white border border-slate-200/90 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden transition-colors">
-      {/* Table Toolbar - High-End Bento SaaS Single Row */}
+    <div className="premium-card" style={{ padding: 0, overflow: 'hidden' }}>
+      {/* Toolbar Filter & Mode Satuan */}
       <div
-        className="px-6 py-4 border-b border-slate-100 flex flex-row items-center justify-between gap-4 bg-slate-50/50 w-full"
-        style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+        style={{
+          padding: '0.9rem 1.25rem',
+          backgroundColor: '#f9fafb',
+          borderBottom: '1px solid #e5e7eb',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px'
+        }}
       >
         {/* Left: Search Input */}
-        <div className="relative w-72 sm:w-80 flex-shrink-0">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        <div style={{ position: 'relative', minWidth: '240px', flex: '1 1 240px', maxWidth: '320px' }}>
+          <Search
+            size={16}
+            style={{
+              position: 'absolute',
+              left: '12px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#9ca3af'
+            }}
+          />
           <input
             type="text"
-            placeholder="Cari ID SKU, Brand, Varian..."
+            placeholder="Cari ID Barang, Brand, Varian..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 pl-9 pr-8 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:outline-none transition-all placeholder:text-slate-400 text-slate-800 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+            style={{
+              width: '100%',
+              padding: '8px 32px 8px 36px',
+              fontSize: '14px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              color: '#111827',
+              outline: 'none'
+            }}
           />
           {searchQuery && (
             <button
+              type="button"
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold"
+              style={{
+                position: 'absolute',
+                right: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                color: '#6b7280',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
             >
               &times;
             </button>
           )}
         </div>
 
-        {/* Right: Category Filter Pills + Low Stock Toggle */}
-        <div className="flex items-center gap-2.5 flex-shrink-0">
-          {/* Bento Category Segmented Control */}
-          <div className="inline-flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200/80">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`h-8 px-3 text-xs font-semibold rounded-lg whitespace-nowrap transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+        {/* Right: Category Segmented Pills + Mode Satuan Segmented Pills + Stok Menipis */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+          {/* Filter Kategori */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px',
+              backgroundColor: '#e5e7eb',
+              borderRadius: '10px'
+            }}
+          >
+            {CATEGORIES.map((cat) => {
+              const active = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '13px',
+                    fontWeight: active ? 600 : 500,
+                    borderRadius: '7px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    backgroundColor: active ? '#111827' : 'transparent',
+                    color: active ? '#ffffff' : '#374151',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {cat}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Soft Amber Low Stock Filter Toggle */}
-          <button
-            onClick={onToggleLowStockFilter}
-            className={`h-10 px-3.5 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-all border ${
-              isLowStockOnly
-                ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
-                : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50 shadow-sm'
-            }`}
+          {/* Segmented Control Mode Satuan: Roll / Botol ⇄ CM / Unit */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px',
+              backgroundColor: '#e5e7eb',
+              borderRadius: '10px'
+            }}
+            title="Mode Satuan: Roll/Botol ⇄ CM/Unit"
           >
-            <AlertTriangle size={14} className={isLowStockOnly ? 'text-white' : 'text-amber-600'} />
-            <span>Stok &le; 2 {isLowStockOnly && '✓'}</span>
+            <span
+              style={{
+                padding: '0 8px',
+                fontSize: '12px',
+                fontWeight: 600,
+                color: '#4b5563',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <ArrowLeftRight size={13} />
+              <span>Mode Satuan:</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setUnitMode('default')}
+              style={{
+                padding: '6px 12px',
+                fontSize: '13px',
+                fontWeight: !isConvertedMode ? 600 : 500,
+                borderRadius: '7px',
+                border: 'none',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                backgroundColor: !isConvertedMode ? '#111827' : 'transparent',
+                color: !isConvertedMode ? '#ffffff' : '#374151',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              Roll / Botol
+            </button>
+            <button
+              type="button"
+              onClick={() => setUnitMode('converted')}
+              style={{
+                padding: '6px 12px',
+                fontSize: '13px',
+                fontWeight: isConvertedMode ? 600 : 500,
+                borderRadius: '7px',
+                border: 'none',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                backgroundColor: isConvertedMode ? '#111827' : 'transparent',
+                color: isConvertedMode ? '#ffffff' : '#374151',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              CM / Unit
+            </button>
+          </div>
+
+          {/* Filter Stok Menipis */}
+          <button
+            type="button"
+            onClick={onToggleLowStockFilter}
+            style={{
+              padding: '8px 14px',
+              fontSize: '13px',
+              fontWeight: 600,
+              borderRadius: '8px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              backgroundColor: isLowStockOnly ? '#dc2626' : '#ffffff',
+              color: isLowStockOnly ? '#ffffff' : '#dc2626',
+              border: '1px solid #fca5a5',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <AlertTriangle size={14} />
+            <span>Stok &le; 2</span>
+            {isLowStockOnly && <Check size={13} />}
           </button>
         </div>
       </div>
 
-      {/* Table Content */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
-          <thead className="bg-slate-50/75 border-b border-slate-200/80 text-slate-500 uppercase tracking-wider text-[11px] font-bold">
+      {/* Info Bar Standar Konversi */}
+      <div
+        style={{
+          padding: '8px 20px',
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #e5e7eb',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '8px',
+          fontSize: '13px',
+          color: '#4b5563'
+        }}
+      >
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+          <strong style={{ color: '#111827' }}>Standar Konversi Gudang:</strong>
+          <span>
+            <strong>PPF:</strong> 1 Roll = 1.500 CM (15 m)
+          </span>
+          <span>&bull;</span>
+          <span>
+            <strong>Kaca Film:</strong> 1 Roll = 3.000 CM (30 m)
+          </span>
+          <span>&bull;</span>
+          <span>
+            <strong>Coating:</strong> 1 Botol = 50 ML (3 UNIT) | 1 LITER = 1.000 ML (60 UNIT)
+          </span>
+        </div>
+        <span
+          style={{
+            padding: '2px 8px',
+            backgroundColor: '#f3f4f6',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: '#111827'
+          }}
+        >
+          {isConvertedMode ? 'Prioritas: CM / UNIT / ML' : 'Prioritas: Roll / Botol + Sub-Konversi'}
+        </span>
+      </div>
+
+      {/* Scrollable Table Container with Standby Horizontal Scrollbar & Sticky Header */}
+      <div
+        style={{
+          maxHeight: 'calc(100vh - 280px)',
+          overflow: 'auto',
+          position: 'relative',
+          width: '100%'
+        }}
+      >
+        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'left' }}>
+          <thead style={{ position: 'sticky', top: 0, zIndex: 20, backgroundColor: '#f5f5f5' }}>
             <tr>
               <th
                 onClick={() => handleSort('id')}
-                className="py-3.5 px-4 cursor-pointer hover:text-slate-900 select-none whitespace-nowrap"
+                style={{ ...stickyThStyle, cursor: 'pointer' }}
               >
-                <div className="flex items-center gap-1">
-                  <span>ID SKU</span>
-                  <ArrowUpDown size={12} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span>ID BARANG</span>
+                  <ArrowUpDown size={13} />
                 </div>
               </th>
-              <th className="py-3.5 px-4 whitespace-nowrap">Kategori</th>
+              <th style={stickyThStyle}>JENIS LAYANAN</th>
               <th
                 onClick={() => handleSort('brand')}
-                className="py-3.5 px-4 cursor-pointer hover:text-slate-900 select-none whitespace-nowrap"
+                style={{ ...stickyThStyle, cursor: 'pointer' }}
               >
-                <div className="flex items-center gap-1">
-                  <span>Brand & Varian</span>
-                  <ArrowUpDown size={12} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span>BRAND &amp; SERIES</span>
+                  <ArrowUpDown size={13} />
+                </div>
+              </th>
+              <th style={stickyThStyle}>VARIAN / KEGELAPAN</th>
+              <th
+                onClick={() => handleSort('stokUtama')}
+                style={{ ...stickyThStyle, cursor: 'pointer' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span>{isConvertedMode ? 'STOK UTAMA (CM/UNIT)' : 'STOK UTAMA'}</span>
+                  <ArrowUpDown size={13} />
+                </div>
+              </th>
+              <th style={stickyThStyle}>
+                {isConvertedMode ? 'PECAHAN (CM/ML)' : 'PECAHAN'}
+              </th>
+              <th
+                onClick={() => handleSort('totalKonversi')}
+                style={{ ...stickyThStyle, cursor: 'pointer' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span>TOTAL KONVERSI</span>
+                  <ArrowUpDown size={13} />
                 </div>
               </th>
               <th
-                onClick={() => handleSort('stokUtama')}
-                className="py-3.5 px-4 cursor-pointer hover:text-slate-900 select-none text-right whitespace-nowrap"
+                style={{
+                  ...stickyThStyle,
+                  position: 'sticky',
+                  right: 0,
+                  zIndex: 30,
+                  textAlign: 'center',
+                  borderLeft: '1px solid #e5e7eb',
+                  boxShadow: 'inset 0 -2px 0 #e5e5e5, -2px 0 6px rgba(0, 0, 0, 0.04)'
+                }}
               >
-                <div className="flex items-center justify-end gap-1">
-                  <span>Stok Utama</span>
-                  <ArrowUpDown size={12} />
-                </div>
+                AKSI GUDANG
               </th>
-              <th className="py-3.5 px-4 text-right whitespace-nowrap">Pecahan</th>
-              <th className="py-3.5 px-4 text-center whitespace-nowrap">Status</th>
-              <th className="py-3.5 px-4 text-center whitespace-nowrap">Aksi Cepat Gudang</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody>
             {filteredItems.length === 0 ? (
               <tr>
-                <td colSpan="7" className="py-12 text-center text-slate-400">
-                  <div className="flex flex-col items-center justify-center">
-                    <Filter size={32} className="mb-2 text-slate-300" />
-                    <p className="font-semibold text-xs text-slate-700">Tidak ada item inventaris yang cocok</p>
-                    <p className="text-[11px] mt-0.5 text-slate-400">Coba ubah kata kunci pencarian atau reset filter kategori.</p>
-                  </div>
+                <td colSpan="8" style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-secondary)' }}>
+                  <Package size={48} style={{ margin: '0 auto', opacity: 0.2, marginBottom: '1rem' }} />
+                  <p style={{ fontSize: '14px', fontWeight: 500 }}>Tidak ada data inventaris yang cocok.</p>
                 </td>
               </tr>
             ) : (
               filteredItems.map((item) => {
                 const min = item.minStok !== undefined ? item.minStok : 2;
-                const isOutOfStock = Number(item.stokUtama || 0) === 0 && Number(item.stokPecahan || 0) === 0;
-                const isLowStock = Number(item.stokUtama || 0) <= min;
+                const isLowStock =
+                  (item.kategori === 'Tools & Equipment' && Number(item.stokUtama || 0) <= min) ||
+                  (item.kategori !== 'Tools & Equipment' && Number(item.stokUtama || 0) <= min);
+                const conv = getConversionDetails(item);
+                const cellBaseStyle = {
+                  padding: '0.85rem 0.9rem',
+                  borderBottom: '1px solid var(--border-light)'
+                };
 
                 return (
                   <tr
                     key={item.id}
-                    className={`transition-colors hover:bg-slate-50/70 ${
-                      isOutOfStock
-                        ? 'bg-rose-50/20'
-                        : isLowStock
-                        ? 'bg-amber-50/20'
-                        : ''
-                    }`}
+                    style={{ transition: 'background-color 0.15s ease', backgroundColor: '#ffffff' }}
+                    className="hover:bg-gray-50 group"
                   >
-                    {/* SKU ID */}
-                    <td className="py-3.5 px-4 font-mono font-medium text-slate-700 whitespace-nowrap">
+                    {/* 1. ID BARANG */}
+                    <td style={{ ...cellBaseStyle, fontWeight: 500, color: 'var(--color-black)', fontSize: '14px', whiteSpace: 'nowrap' }}>
                       {item.id}
                     </td>
 
-                    {/* Kategori */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
-                        item.kategori === 'Kaca Film'
-                          ? 'bg-blue-50 text-blue-700 border-blue-200/80'
-                          : item.kategori === 'Coating'
-                          ? 'bg-purple-50 text-purple-700 border-purple-200/80'
-                          : item.kategori === 'PPF'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
-                          : 'bg-slate-100 text-slate-700 border-slate-200/80'
-                      }`}>
+                    {/* 2. JENIS LAYANAN */}
+                    <td style={{ ...cellBaseStyle, whiteSpace: 'nowrap' }}>
+                      <span
+                        style={{
+                          padding: '4px 8px',
+                          backgroundColor: 'var(--color-gray-100)',
+                          borderRadius: '4px',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          color: 'var(--color-black)'
+                        }}
+                      >
                         {item.kategori}
                       </span>
                     </td>
 
-                    {/* Brand & Varian */}
-                    <td className="py-3.5 px-4">
-                      <div className="font-semibold text-slate-900 text-xs">
-                        {item.brand} {item.varian}
-                      </div>
-                      {item.kegelapan && (
-                        <span className="text-[10px] text-slate-500 font-mono">
-                          Kegelapan: {item.kegelapan}
-                        </span>
-                      )}
+                    {/* 3. BRAND & SERIES */}
+                    <td style={{ ...cellBaseStyle, fontWeight: 600, color: 'var(--color-black)', fontSize: '14px' }}>
+                      {item.brand || '-'}
                     </td>
 
-                    {/* Stok Utama */}
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5 font-mono">
-                        <span className={`text-sm font-bold ${
-                          isOutOfStock
-                            ? 'text-rose-600'
-                            : isLowStock
-                            ? 'text-amber-600'
-                            : 'text-slate-900'
-                        }`}>
-                          {item.stokUtama}
-                        </span>
-                        <span className="text-slate-500 text-xs">
-                          {item.satuan}
-                        </span>
+                    {/* 4. VARIAN / KEGELAPAN */}
+                    <td style={{ ...cellBaseStyle, fontWeight: 600, color: 'var(--color-black)', fontSize: '14px' }}>
+                      <div>
+                        {item.varian || '-'}
+                        {item.kategori === 'Kaca Film' && item.kegelapan ? ` (Kegelapan ${item.kegelapan})` : ''}
                       </div>
                     </td>
 
-                    {/* Pecahan */}
-                    <td className="py-3.5 px-4 text-right font-mono text-slate-600 whitespace-nowrap">
-                      {item.stokPecahan > 0 ? (
-                        <span className="font-semibold text-slate-800">
-                          {item.stokPecahan} {item.kategori === 'Coating' ? 'ml' : 'm'}
-                        </span>
+                    {/* 5. STOK UTAMA */}
+                    <td style={{ ...cellBaseStyle, whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {!isConvertedMode ? (
+                            <span style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--color-black)' }}>
+                              {formatThousand(item.stokUtama)} {item.satuan}
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--color-black)' }}>
+                              {conv.type === 'FILM_PPF'
+                                ? `${formatThousand(conv.utamaCM)} CM`
+                                : conv.type === 'COATING'
+                                ? `${formatThousand(conv.utamaUnit)} UNIT`
+                                : `${formatThousand(conv.utama)} ${item.satuan}`}
+                            </span>
+                          )}
+
+                          {isLowStock && (
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                color: '#ef4444',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                backgroundColor: '#fef2f2',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                border: '1px solid #fca5a5'
+                              }}
+                            >
+                              <AlertTriangle size={12} />
+                              [Stok Menipis]
+                            </span>
+                          )}
+                        </div>
+
+                        {conv.isConvertible && (
+                          <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 500 }}>
+                            {!isConvertedMode
+                              ? conv.type === 'FILM_PPF'
+                                ? `(${formatThousand(conv.utamaCM)} CM)`
+                                : `(${formatThousand(conv.utamaUnit)} UNIT / ${formatThousand(conv.utamaML)} ML)`
+                              : conv.type === 'FILM_PPF'
+                              ? `(${formatThousand(conv.utama)} Roll)`
+                              : `(${formatThousand(conv.utama)} ${conv.satuan} / ${formatThousand(conv.utamaML)} ML)`}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* 6. PECAHAN */}
+                    <td style={{ ...cellBaseStyle, whiteSpace: 'nowrap' }}>
+                      {!conv.isConvertible ? (
+                        <span style={{ color: '#9ca3af', fontSize: '14px' }}>-</span>
+                      ) : conv.type === 'FILM_PPF' ? (
+                        !isConvertedMode ? (
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-black)' }}>
+                            {formatThousand(conv.pecahan, 2)} m{' '}
+                            <span style={{ color: '#4b5563', fontSize: '13px' }}>
+                              ({formatThousand(conv.pecahanCM)} CM)
+                            </span>
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-black)' }}>
+                            {formatThousand(conv.pecahanCM)} CM{' '}
+                            <span style={{ color: '#4b5563', fontSize: '13px' }}>
+                              ({formatThousand(conv.pecahan, 2)} m)
+                            </span>
+                          </span>
+                        )
                       ) : (
-                        <span className="text-slate-300">-</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-black)' }}>
+                            {formatThousand(conv.pecahanML, 2)} ml
+                          </span>
+                          {conv.pecahanUnit > 0 && (
+                            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 500 }}>
+                              (≈ {formatThousand(conv.pecahanUnit)} UNIT)
+                            </span>
+                          )}
+                        </div>
                       )}
                     </td>
 
-                    {/* Status Badge */}
-                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                      {isOutOfStock ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                          <XCircle size={12} />
-                          HABIS (0)
-                        </span>
-                      ) : isLowStock ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                          <AlertTriangle size={12} />
-                          MENIPIS (&le;2)
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          <CheckCircle2 size={12} />
-                          AMAN
-                        </span>
-                      )}
+                    {/* 7. TOTAL KONVERSI */}
+                    <td style={{ ...cellBaseStyle, whiteSpace: 'nowrap' }}>
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          padding: '5px 10px',
+                          backgroundColor: 'var(--color-gray-100)',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '6px',
+                          fontSize: '0.9rem',
+                          fontWeight: 700,
+                          color: 'var(--color-black)'
+                        }}
+                      >
+                        {conv.totalKonversiDisplay}
+                      </span>
                     </td>
 
-                    {/* Quick Action Buttons (Uniform height & crisp spacing) */}
-                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                      <div className="flex items-center justify-center gap-1.5">
-                        {/* 1. Restock */}
+                    {/* 8. AKSI GUDANG (Sticky Right agar tidak pernah terpotong di layar laptop) */}
+                    <td
+                      style={{
+                        ...cellBaseStyle,
+                        position: 'sticky',
+                        right: 0,
+                        zIndex: 10,
+                        backgroundColor: '#ffffff',
+                        borderLeft: '1px solid #e5e7eb',
+                        boxShadow: '-2px 0 6px rgba(0, 0, 0, 0.04)',
+                        textAlign: 'center',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                         <button
+                          type="button"
                           onClick={() => onOpenRestock(item)}
                           title="Restock Barang Masuk"
-                          className="h-7 px-2.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/80 rounded-lg flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
+                          style={{
+                            padding: '6px 10px',
+                            fontSize: '12.5px',
+                            fontWeight: 600,
+                            backgroundColor: '#111827',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            cursor: 'pointer'
+                          }}
                         >
                           <PackagePlus size={13} />
                           <span>Restock</span>
                         </button>
 
-                        {/* 2. Adjust (Stok Opname) */}
                         <button
+                          type="button"
                           onClick={() => onOpenAdjust(item)}
-                          title="Stok Opname / Penyesuaian Fisik"
-                          className="h-7 px-2.5 text-[11px] font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100/80 border border-amber-200/80 rounded-lg flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
+                          title="Penyesuaian Stok / Potong CM / Unit"
+                          style={{
+                            padding: '6px 10px',
+                            fontSize: '12.5px',
+                            fontWeight: 600,
+                            backgroundColor: '#ffffff',
+                            color: '#111827',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '6px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            cursor: 'pointer'
+                          }}
                         >
                           <SlidersHorizontal size={13} />
                           <span>Adjust</span>
                         </button>
 
-                        {/* 3. Flag Discrepancy Comms */}
                         <button
+                          type="button"
                           onClick={() => onOpenDiscrepancy(item)}
                           title="Laporkan Selisih ke Admin"
-                          className="h-7 px-2.5 text-[11px] font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
+                          style={{
+                            padding: '6px 10px',
+                            fontSize: '12.5px',
+                            fontWeight: 600,
+                            backgroundColor: '#f9fafb',
+                            color: '#4b5563',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '6px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            cursor: 'pointer'
+                          }}
                         >
                           <Flag size={13} />
                           <span>Lapor</span>
@@ -333,10 +663,25 @@ const MasterStockTable = ({
         </table>
       </div>
 
-      {/* Table Footer info */}
-      <div className="p-3.5 bg-slate-50/60 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-        <span>Menampilkan <strong>{filteredItems.length}</strong> dari {inventory.length} SKU total</span>
-        <span className="text-[11px] text-slate-400">Sistem POS otomatis memotong stok saat order selesai</span>
+      {/* Table Footer */}
+      <div
+        style={{
+          padding: '12px 20px',
+          backgroundColor: '#f9fafb',
+          borderTop: '1px solid #e5e7eb',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '13px',
+          color: '#6b7280'
+        }}
+      >
+        <span>
+          Menampilkan <strong style={{ color: '#111827' }}>{filteredItems.length}</strong> dari{' '}
+          <strong style={{ color: '#111827' }}>{inventory.length}</strong> barang
+        </span>
+        <span>Sistem POS otomatis memotong stok saat order selesai</span>
       </div>
     </div>
   );

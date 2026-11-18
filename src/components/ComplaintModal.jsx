@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, CheckCircle2, AlertCircle, Plus, Trash2 } from 'lucide-react';
+import { X, Upload, CheckCircle2, AlertCircle, Plus, Trash2 } from '@/icons/itshover';
 import { toast } from 'sonner';
 import Select from 'react-select';
 import { useOrders } from '../context/OrderContext';

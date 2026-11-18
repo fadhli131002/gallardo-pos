@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
-import { Users, ShoppingBag, CheckCircle, Clock, Bell, AlertTriangle } from 'lucide-react';
+import { Users, ShoppingBag, CheckCircle, Clock, Bell, AlertTriangle, Sparkles, Check } from '@/icons/itshover';
 import { useOutletContext } from 'react-router-dom';
 import { useOrders } from '../../context/OrderContext';
 import { toast } from 'sonner';
@@ -162,7 +162,7 @@ const Dashboard = () => {
       {/* HEADER */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Halo, {userName || 'Sales'} 👋</h1>
+          <h1 className="page-title">Halo, {userName || 'Sales'}</h1>
           <p className="page-subtitle">Dashboard Operasional - Ringkasan aktivitas dan performa bengkel hari ini</p>
         </div>
 
@@ -170,7 +170,7 @@ const Dashboard = () => {
         <div className="flex items-center gap-4 hidden sm:flex">
           <MegaphoneButton showLabel={true} />
           <button className="btn-secondary rounded-full flex items-center gap-2 px-4">
-            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">✨</span>
+            <Sparkles size={16} className="text-indigo-500" />
             Tanya AI
           </button>
           <div className="w-10 h-10 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer">
@@ -251,10 +251,13 @@ const Dashboard = () => {
                     borderRadius: '6px',
                     fontSize: '0.78rem',
                     fontWeight: '600',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
                   }}
                 >
-                  Selesai Diperiksa ✓
+                  <Check size={14} /> Selesai Diperiksa
                 </button>
               </div>
             </div>

@@ -11,7 +11,7 @@ import {
   addMonths, 
   subMonths 
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle2 } from '@/icons/itshover';
 import { useOutletContext } from 'react-router-dom';
 import { useOrders } from '../../context/OrderContext';
 import { useInventory } from '../../context/InventoryContext';

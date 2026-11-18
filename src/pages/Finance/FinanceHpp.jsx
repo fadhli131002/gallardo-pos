@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldCheck, Search, Loader2, Check, Save, TrendingUp, Package, DollarSign } from 'lucide-react';
+import { ShieldCheck, Search, Loader2, Check, Save, TrendingUp, Package, DollarSign } from '@/icons/itshover';
 import { toast } from 'sonner';
 import { useInventory } from '../../context/InventoryContext';
 

@@ -22,14 +22,14 @@
   margin-bottom: 1.5rem;
 }
 
-.metric-card {
+.approx-dashboard .metric-card {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease;
 }
 
-.metric-card:hover {
+.approx-dashboard .metric-card:hover {
   transform: translateY(-3px);
 }
 

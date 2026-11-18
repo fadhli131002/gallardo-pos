@@ -20,7 +20,7 @@ import {
   MoreVertical,
   Sun,
   Moon
-} from 'lucide-react';
+} from '@/icons/itshover';
 import {
   LineChart,
   Line,
@@ -261,7 +261,7 @@ export default function OwnerDashboard() {
       {/* HEADER */}
       <div className="dashboard-header">
         <div>
-          <h1 className="page-title font-bold text-slate-900" style={{ color: '#0F172A', fontWeight: 'bold' }}>Halo, {userName} 👋</h1>
+          <h1 className="page-title font-bold text-slate-900" style={{ color: '#0F172A', fontWeight: 'bold' }}>Halo, {userName}</h1>
           <p className="page-subtitle text-slate-500" style={{ marginTop: '4px' }}>Executive Dashboard - Ringkasan kinerja bisnis, pendapatan, dan efisiensi operasional</p>
         </div>
         <div className="header-actions">

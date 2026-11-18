@@ -5,7 +5,7 @@ import { PRICING_MATRIX, CAR_BRANDS, formatCurrency, PRODUCT_CATALOG } from '../
 import { useOrders } from '../../context/OrderContext';
 import { useInventory } from '../../context/InventoryContext';
 import { format } from 'date-fns';
-import { Trash2, Plus, Minus, Calculator, Wallet, User, Car, CheckCircle, Package, Search, Tag, Settings, CreditCard, ChevronDown, ChevronRight, Check, CheckSquare, Printer, MessageCircle, X, ShoppingCart, Loader2, FileText, CarFront, Upload, Percent, Banknote, QrCode, Gift, Bike, Armchair, Sparkles } from 'lucide-react';
+import { Trash2, Plus, Minus, Calculator, Wallet, User, Car, CheckCircle, Package, Search, Tag, Settings, CreditCard, ChevronDown, ChevronRight, ArrowRight, Check, CheckSquare, Printer, MessageCircle, X, ShoppingCart, Loader2, FileText, CarFront, Upload, Percent, Banknote, QrCode, Gift, Bike, Armchair, Sparkles } from '@/icons/itshover';
 import html2pdf from 'html2pdf.js';
 import SharedInvoice from '../../components/SharedInvoice';
 import logoGallardo from '../../assets/logo-gallardo.png';
@@ -753,11 +753,11 @@ const POS = () => {
         const resJson = await response.json().catch(() => ({}));
 
         if (!response.ok) {
-          toast.error(`❌ ${resJson.message || 'Gagal menyimpan perubahan transaksi.'}`);
+          toast.error(`${resJson.message || 'Gagal menyimpan perubahan transaksi.'}`);
           return;
         }
 
-        toast.success('✅ Transaksi berhasil diperbarui!');
+        toast.success('Transaksi berhasil diperbarui!');
         if (refreshOrdersFromApi) {
           await refreshOrdersFromApi();
         }
@@ -769,7 +769,7 @@ const POS = () => {
         return;
       } catch (err) {
         console.error('Error updating transaction in POS:', err);
-        toast.error(`❌ ${err.message || 'Gagal menyimpan perubahan transaksi.'}`);
+        toast.error(`${err.message || 'Gagal menyimpan perubahan transaksi.'}`);
         return;
       }
     }
@@ -848,7 +848,7 @@ const POS = () => {
         inventory_items: finalizedCartItems
           .filter(item => item.trackInventory)
           .map(item => {
-            // ✅ PERBAIKAN: Selalu utamakan item.id_barang, jika tidak ada baru ambil format INV- dari item.id
+            // PERBAIKAN: Selalu utamakan item.id_barang, jika tidak ada baru ambil format INV- dari item.id
             let realInventoryId = item.id_barang;
             if (!realInventoryId && typeof item.id === 'string') {
               const match = item.id.match(/(INV-\d+)/);
@@ -897,7 +897,7 @@ const POS = () => {
 
       if (!response.ok) {
         const errMsg = resJson.message || 'Gagal menyimpan ke database backend.';
-        toast.error(`❌ ${errMsg}`);
+        toast.error(`${errMsg}`);
         return; // Batalkan checkout
       } else {
         // Refresh seluruh data dari backend agar ID dan struktur sama persis
@@ -920,7 +920,7 @@ const POS = () => {
 
         // Peringatan stok menipis
         if (resJson.lowStockWarning && resJson.lowStockWarning.length > 0) {
-          resJson.lowStockWarning.forEach(w => toast.warning(`⚠️ Stok menipis: ${w}`));
+          resJson.lowStockWarning.forEach(w => toast.warning(`Stok menipis: ${w}`));
         }
       }
     } catch (err) {
@@ -2134,7 +2134,7 @@ Berikut kami lampirkan dokumen Invoice Anda dalam format PDF.`;
                 onClick={handleAddToCartFromModal}
               >
                 Lanjutkan
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <ArrowRight size={18} strokeWidth={2.5} />
               </button>
             </div>
 

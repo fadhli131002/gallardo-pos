@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Search, Plus, Paperclip, Filter, X, Wallet, TrendingUp, AlertTriangle, CalendarDays, RefreshCw, Pencil, Trash2 } from 'lucide-react';
+import { Search, Plus, Paperclip, Filter, X, Wallet, TrendingUp, AlertTriangle, CalendarDays, RefreshCw, Pencil, Trash2 } from '@/icons/itshover';
 import { formatCurrency } from '../../data/mockData';
 import { format } from 'date-fns';
 import './FinanceExpenses.css';

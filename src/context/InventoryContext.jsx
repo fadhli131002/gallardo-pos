@@ -9,37 +9,7 @@ export const useInventory = () => {
 
 export const InventoryProvider = ({ children }) => {
   const { token, user } = useAuth();
-  // Initial dummy data
-  const [inventory, setInventory] = useState([
-    { id: 'INV-001', kategori: 'PPF', brand: 'Vansgard', varian: 'Ultra', stokUtama: 10, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 15 },
-    { id: 'INV-002', kategori: 'PPF', brand: 'Vansgard', varian: 'Matte', stokUtama: 10, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 15 },
-    { id: 'INV-003', kategori: 'PPF', brand: 'Vansgard', varian: 'Armor', stokUtama: 10, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 15 },
-    { id: 'INV-004', kategori: 'PPF', brand: 'Vansgard', varian: 'Super Safe', stokUtama: 10, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 15 },
-    { id: 'INV-005', kategori: 'PPF', brand: 'Vansgard', varian: 'Color', stokUtama: 10, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 15 },
-    { id: 'INV-006', kategori: 'Coating', brand: 'Rantiz', varian: '9H', stokUtama: 20, stokPecahan: 0, satuan: 'Botol', branch: 'Gallardo', konversi: 50 },
-    { id: 'INV-007', kategori: 'Coating', brand: 'Rantiz', varian: '14H', stokUtama: 20, stokPecahan: 0, satuan: 'Botol', branch: 'Gallardo', konversi: 50 },
-    { id: 'INV-008', kategori: 'Coating', brand: 'Rantiz', varian: '20H', stokUtama: 20, stokPecahan: 0, satuan: 'Botol', branch: 'Gallardo', konversi: 50 },
-    { id: 'INV-009', kategori: 'Coating', brand: 'Rantiz', varian: 'Glass Coating', stokUtama: 20, stokPecahan: 0, satuan: 'Botol', branch: 'Gallardo', konversi: 50 },
-    { id: 'INV-010', kategori: 'Kaca Film', brand: 'Performante - Iron Black', varian: 'Performante Iron Black 35', kegelapan: '40%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-011', kategori: 'Kaca Film', brand: 'Performante - Iron Black', varian: 'Performante Iron Black 20', kegelapan: '60%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-012', kategori: 'Kaca Film', brand: 'Performante - Iron Black', varian: 'Performante Iron Black 05', kegelapan: '80%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-013', kategori: 'Kaca Film', brand: 'Performante - Black Stone', varian: 'Performante Black Stone 70', kegelapan: '20%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-014', kategori: 'Kaca Film', brand: 'Performante - Black Stone', varian: 'Performante Black Stone 35', kegelapan: '40%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-015', kategori: 'Kaca Film', brand: 'Performante - Black Stone', varian: 'Performante Black Stone 20', kegelapan: '60%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-016', kategori: 'Kaca Film', brand: 'Performante - Black Stone', varian: 'Performante Black Stone 05', kegelapan: '80%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-017', kategori: 'Kaca Film', brand: 'Deluxe - Classic', varian: 'Deluxe Classic 35', kegelapan: '40%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-018', kategori: 'Kaca Film', brand: 'Deluxe - Classic', varian: 'Deluxe Classic 20', kegelapan: '60%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-019', kategori: 'Kaca Film', brand: 'Deluxe - Classic', varian: 'Deluxe Classic 05', kegelapan: '80%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-020', kategori: 'Kaca Film', brand: 'Deluxe - Jet Black', varian: 'Deluxe Jet Black 70', kegelapan: '20%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-021', kategori: 'Kaca Film', brand: 'Deluxe - Jet Black', varian: 'Deluxe Jet Black 35', kegelapan: '40%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-022', kategori: 'Kaca Film', brand: 'Deluxe - Jet Black', varian: 'Deluxe Jet Black 20', kegelapan: '60%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-028', kategori: 'Kaca Film', brand: 'Deluxe - Jet Black', varian: 'Deluxe Jet Black 05', kegelapan: '80%', stokUtama: 15, stokPecahan: 0, satuan: 'Roll', branch: 'Gallardo', konversi: 30 },
-    { id: 'INV-023', kategori: 'Tools & Equipment', brand: 'Aplikator', varian: '-', stokUtama: 100, stokPecahan: 0, satuan: 'Pcs', branch: 'Gallardo', konversi: 1 },
-    { id: 'INV-024', kategori: 'Tools & Equipment', brand: 'Detailing Brush', varian: '-', stokUtama: 50, stokPecahan: 0, satuan: 'Pcs', branch: 'Gallardo', konversi: 1 },
-    { id: 'INV-025', kategori: 'Tools & Equipment', brand: 'Skep', varian: '-', stokUtama: 30, stokPecahan: 0, satuan: 'Pcs', branch: 'Gallardo', konversi: 1 },
-    { id: 'INV-026', kategori: 'Tools & Equipment', brand: 'Mesin Rotary', varian: '-', stokUtama: 5, stokPecahan: 0, satuan: 'Unit', branch: 'Gallardo', konversi: 1 },
-    { id: 'INV-027', kategori: 'Tools & Equipment', brand: 'Lap Microfiber', varian: '-', stokUtama: 200, stokPecahan: 0, satuan: 'Pcs', branch: 'Gallardo', konversi: 1 }
-  ]);
+  const [inventory, setInventory] = useState([]);
 
   const [inventoryLogs, setInventoryLogs] = useState([]);
 
@@ -56,7 +26,7 @@ export const InventoryProvider = ({ children }) => {
       });
       if (res.ok) {
         const json = await res.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        if (json.success && Array.isArray(json.data)) {
           const mapped = json.data.map(item => ({
             id: item.id,
             kategori: item.kategori,
@@ -100,9 +70,13 @@ export const InventoryProvider = ({ children }) => {
             const isRetail = trx.type === 'RETAIL' || (trx.customer_name && trx.customer_name.toLowerCase().includes('pelanggan umum'));
 
             let konversi = inv.konversi || 1;
+            const isLiter =
+              String(inv.satuan || '').trim().toUpperCase().includes('LITER') ||
+              String(inv.varian || '').trim().toUpperCase().includes('1 LITER');
             if (inv.kategori === 'Kaca Film') konversi = 30;
             else if (inv.kategori === 'PPF') konversi = 15;
-            const deductedUtama = Math.floor(log.jumlah / konversi);
+            else if (inv.kategori === 'Coating') konversi = isLiter ? 1000 : 50;
+            const deductedUtama = Math.floor((log.jumlah + 0.001) / konversi);
             const deductedPecahan = parseFloat((log.jumlah % konversi).toFixed(2));
             const totalDeducted = parseFloat(log.jumlah.toFixed(2));
 
@@ -110,14 +84,16 @@ export const InventoryProvider = ({ children }) => {
             if (inv.kategori === 'Tools & Equipment') {
               deductedStr = `${totalDeducted} ${inv.satuan || 'Pcs'}`;
             } else if (inv.kategori === 'Coating') {
-              deductedStr = `${totalDeducted} ml`;
+              const dedUnits = Math.round((totalDeducted / (50 / 3)) * 10) / 10;
+              deductedStr = `${totalDeducted} ml${dedUnits >= 1 ? ` (~${Math.round(totalDeducted / (50 / 3))} UNIT)` : ''}`;
             } else {
+              const totalDedCM = Math.round(totalDeducted * 100).toLocaleString('id-ID');
               deductedStr = deductedUtama > 0
-                ? `${deductedUtama} Roll ${deductedPecahan > 0 ? `+ ${Math.round(deductedPecahan * 100) / 100} Meter` : ''}`
-                : `${Math.round(totalDeducted * 100) / 100} Meter`;
+                ? `${deductedUtama} Roll ${deductedPecahan > 0 ? `+ ${Math.round(deductedPecahan * 100) / 100} m ` : ''}(${totalDedCM} CM)`
+                : `${Math.round(totalDeducted * 100) / 100} m (${totalDedCM} CM)`;
             }
 
-            const remUtama = Math.floor(log.stok_sesudah / konversi);
+            const remUtama = Math.floor((log.stok_sesudah + 0.001) / konversi);
             const remPecahan = parseFloat((log.stok_sesudah % konversi).toFixed(2));
             const totalRem = parseFloat(log.stok_sesudah.toFixed(2));
 
@@ -125,9 +101,12 @@ export const InventoryProvider = ({ children }) => {
             if (inv.kategori === 'Tools & Equipment') {
               remainingStr = `${totalRem} ${inv.satuan || 'Pcs'}`;
             } else if (inv.kategori === 'Coating') {
-              remainingStr = `${remUtama} Botol (${remPecahan} ml)`;
+              const unitPerUtama = isLiter ? 60 : 3;
+              const remUnits = (remUtama * unitPerUtama) + Math.floor((remPecahan + 0.5) / (50 / 3));
+              remainingStr = `${remUtama} ${inv.satuan || (isLiter ? 'LITER' : 'Botol')} + ${remPecahan} ml (${remUnits.toLocaleString('id-ID')} UNIT / ${Math.round(totalRem).toLocaleString('id-ID')} ML)`;
             } else {
-              remainingStr = `${remUtama} Roll + ${Math.round(remPecahan * 100) / 100} Meter`;
+              const totalRemCM = Math.round(totalRem * 100).toLocaleString('id-ID');
+              remainingStr = `${remUtama} Roll + ${Math.round(remPecahan * 100) / 100} m (${totalRemCM} CM)`;
             }
 
             let serviceName = '';

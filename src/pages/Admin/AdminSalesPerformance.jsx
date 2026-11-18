@@ -1,4 +1,4 @@
-import { Trophy, Download } from 'lucide-react';
+import { Trophy, Download } from '@/icons/itshover';
 import { useOrders } from '../../context/OrderContext';
 import html2pdf from 'html2pdf.js';
 import { format } from 'date-fns';

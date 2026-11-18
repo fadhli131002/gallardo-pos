@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { PieChart, LogOut } from 'lucide-react';
+import { PieChart, LogOut } from '@/icons/itshover';
 import { motion, AnimatePresence } from 'framer-motion';
 import logoGallardo from '../../assets/logo-gallardo.png';
 import logoNewRatu from '../../assets/logo-new-ratu.png';

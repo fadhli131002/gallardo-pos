@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Package, Plus, Edit2, Trash2, X, AlertTriangle, Printer, Loader2, MessageSquareWarning } from 'lucide-react';
+import { Package, Plus, Edit2, Trash2, X, AlertTriangle, Printer, Loader2, MessageSquareWarning } from '@/icons/itshover';
 import html2pdf from 'html2pdf.js';
 import { useOutletContext } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
@@ -955,13 +955,7 @@ const AdminInventory = () => {
           <div className="modal-content premium-card relative animate-scale-up" style={{ width: '100%', maxWidth: '400px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '24px', padding: '32px 24px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
 
             <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 6h18"></path>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                <line x1="10" y1="11" x2="10" y2="17"></line>
-                <line x1="14" y1="11" x2="14" y2="17"></line>
-              </svg>
+              <Trash2 size={28} color="#ef4444" strokeWidth={2.5} />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '32px' }}>

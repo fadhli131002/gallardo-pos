@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Bell, X, AlertTriangle, Clock } from 'lucide-react';
+import { Bell, X, AlertTriangle, Clock } from '@/icons/itshover';
 
 const POLL_INTERVAL = 5 * 60 * 1000; // 5 menit
 
@@ -65,8 +65,8 @@ const DueAlertBanner = () => {
           <div>
             <p className={`font-semibold text-sm ${primaryConfig.text}`}>
               {hasCritical
-                ? `🔴 ${criticalCount} Piutang Jatuh Tempo HARI INI!`
-                : `⚠️ ${alerts.length} Piutang Mendekati Jatuh Tempo`
+                ? `${criticalCount} Piutang Jatuh Tempo HARI INI!`
+                : `${alerts.length} Piutang Mendekati Jatuh Tempo`
               }
             </p>
             <p className={`text-xs ${primaryConfig.text} opacity-75`}>

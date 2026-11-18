@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Flag, AlertTriangle, Send, Check } from 'lucide-react';
+import { X, Flag, AlertTriangle, Send, Check } from '@/icons/itshover';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 

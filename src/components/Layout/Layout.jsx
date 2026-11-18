@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, ShoppingCart, LogOut, Users, Shield, Car, FileCheck, CalendarClock, TrendingUp, Package, Wallet, Wrench, Store, Trophy, MessageSquareWarning, PieChart, Megaphone } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, ShoppingCart, LogOut, Users, Shield, Car, FileCheck, CalendarClock, TrendingUp, Package, Wallet, Wrench, Store, Trophy, MessageSquareWarning, PieChart, Megaphone } from '@/icons/itshover';
 import { motion, AnimatePresence } from 'framer-motion';
 import logoGallardo from '../../assets/logo-gallardo.png';
 import logoNewRatu from '../../assets/logo-new-ratu.png';

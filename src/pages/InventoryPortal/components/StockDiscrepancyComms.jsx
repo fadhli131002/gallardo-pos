@@ -16,7 +16,7 @@ import {
   Check,
   RotateCcw,
   Sparkles
-} from 'lucide-react';
+} from '@/icons/itshover';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInventoryComms } from '../context/InventoryCommsContext';
 import { useAuth } from '../../../context/AuthContext';
@@ -356,9 +356,9 @@ const StockDiscrepancyComms = ({ onOpenNewTicketModal }) => {
                       : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                   }`}
                 >
-                  <option value="OPEN">🔴 Status: OPEN</option>
-                  <option value="IN_PROGRESS">🟡 Status: IN PROGRESS</option>
-                  <option value="RESOLVED">🟢 Status: RESOLVED</option>
+                  <option value="OPEN">Status: OPEN</option>
+                  <option value="IN_PROGRESS">Status: IN PROGRESS</option>
+                  <option value="RESOLVED">Status: RESOLVED</option>
                 </select>
 
                 {activeTicket.status !== 'RESOLVED' && (

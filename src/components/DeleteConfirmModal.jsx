@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, AlertTriangle } from 'lucide-react';
+import { X, AlertTriangle } from '@/icons/itshover';
 
 const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, title = "Hapus Data?", message = "Data yang dihapus tidak dapat dikembalikan." }) => {
   if (!isOpen) return null;

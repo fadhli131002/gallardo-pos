@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, Download, Eye, Printer, Filter, X, MoreVertical, DollarSign } from 'lucide-react';
+import { Search, Download, Eye, Printer, Filter, X, MoreVertical, DollarSign } from '@/icons/itshover';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOrders } from '../../context/OrderContext';
 import { formatCurrency } from '../../data/mockData';

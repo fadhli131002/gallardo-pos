@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
-import { ChevronRight, Wrench, X, AlertTriangle, Check, RefreshCw, Calendar, ShieldCheck } from 'lucide-react';
+import { ChevronRight, Wrench, X, AlertTriangle, Check, RefreshCw, Calendar, ShieldCheck } from '@/icons/itshover';
 import { toast } from 'sonner';
 import { useOrders } from '../../context/OrderContext';
 import { useInventory } from '../../context/InventoryContext';
@@ -219,7 +219,7 @@ const AdminDashboard = () => {
     <div className="dashboard-container animate-fade-in">
       <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 className="page-title">Halo, {displayName} 👋</h1>
+          <h1 className="page-title">Halo, {displayName}</h1>
           <p className="page-subtitle">Admin Workspace - Pusat kendali operasional, order masuk, dan penugasan</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>

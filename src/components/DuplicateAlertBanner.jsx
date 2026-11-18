@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertTriangle, ChevronRight, X, Bell, CheckCircle, ExternalLink, ShieldAlert, User, Car, Calendar, DollarSign } from 'lucide-react';
+import { AlertTriangle, ChevronRight, X, Bell, CheckCircle, ExternalLink, ShieldAlert, User, Car, Calendar, DollarSign } from '@/icons/itshover';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
 
@@ -431,8 +431,8 @@ const DuplicateAlertBanner = ({ onRefreshData }) => {
             }}>
               <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
                 {isAdminOrSuper 
-                  ? '💡 Tekan tombol "Tegur Sales" untuk mengirimkan notifikasi in-app ke akun PIC Sales terkait.' 
-                  : '💡 Anda sedang dalam mode pantau sebagai Sales Team.'}
+                  ? 'Tekan tombol "Tegur Sales" untuk mengirimkan notifikasi in-app ke akun PIC Sales terkait.' 
+                  : 'Anda sedang dalam mode pantau sebagai Sales Team.'}
               </div>
               <button
                 type="button"

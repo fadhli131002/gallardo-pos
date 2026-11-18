@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, DollarSign, Package, ShoppingBag, FileText, Printer, Search, Download, Loader2, CreditCard, TrendingUp, TrendingDown, PieChart, ArrowUpRight, ArrowDownRight, Minus, CheckCircle2 } from 'lucide-react';
+import { Calendar, DollarSign, Package, ShoppingBag, FileText, Printer, Search, Download, Loader2, CreditCard, TrendingUp, TrendingDown, PieChart, ArrowUpRight, ArrowDownRight, Minus, CheckCircle2, AlertTriangle } from '@/icons/itshover';
 import html2pdf from 'html2pdf.js';
 import { toast } from 'sonner';
 import { formatTransactionId } from '../../utils/formatId';
@@ -389,7 +389,7 @@ const AdminMonthlyReport = () => {
           </div>
         ) : error ? (
           <div className="bg-white rounded-[20px] border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] p-8 text-center min-h-[320px] flex flex-col items-center justify-center">
-            <div className="text-red-500 text-5xl mb-3">⚠️</div>
+            <div className="text-red-500 mb-3 flex items-center justify-center"><AlertTriangle size={48} /></div>
             <p className="text-xl font-bold text-slate-900 mb-1">Gagal Memuat Data</p>
             <p className="text-slate-500 text-sm max-w-md">{error}</p>
             <button 

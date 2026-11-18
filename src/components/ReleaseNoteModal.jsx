@@ -1,6 +1,6 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { Sparkles, X, Check, Megaphone, Calendar, Tag, ShieldCheck } from 'lucide-react';
+import { Sparkles, X, Check, Megaphone, Calendar, Tag, ShieldCheck } from '@/icons/itshover';
 
 /**
  * Utility untuk menghapus karakter emoji unicode dari teks (menjaga format newline tetap utuh)

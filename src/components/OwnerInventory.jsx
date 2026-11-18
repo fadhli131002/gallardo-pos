@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, History, AlertTriangle, ArrowUpRight, ArrowDownRight, Archive, Box } from 'lucide-react';
+import { Package, History, AlertTriangle, ArrowUpRight, ArrowDownRight, Archive, Box } from '@/icons/itshover';
 import { toast } from 'sonner';
 
 export default function OwnerInventory({ isDarkMode }) {

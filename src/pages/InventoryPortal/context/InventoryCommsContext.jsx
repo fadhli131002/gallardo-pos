@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useInventory } from '../../../context/InventoryContext';
 import { useAuth } from '../../../context/AuthContext';
 import { toast } from 'sonner';
+import { MessageCircle } from '@/icons/itshover';
 
 const InventoryCommsContext = createContext();
 
@@ -13,122 +14,8 @@ export const useInventoryComms = () => {
   return context;
 };
 
-const INITIAL_DISCREPANCY_TICKETS = [
-  {
-    id: 'DISC-2026-001',
-    inventoryId: 'INV-006',
-    itemName: 'Rantiz 9H Coating',
-    category: 'Coating',
-    systemStock: 20,
-    physicalStock: 18,
-    discrepancy: -2,
-    unit: 'Botol',
-    status: 'OPEN', // 'OPEN' | 'IN_PROGRESS' | 'RESOLVED'
-    priority: 'HIGH', // 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
-    reportedBy: 'Mba Umi (Gudang)',
-    reportedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-    resolvedBy: null,
-    resolvedAt: null,
-    resolutionNote: '',
-    messages: [
-      {
-        id: 'msg-101',
-        sender: 'Mba Umi (Gudang)',
-        role: 'inventory',
-        content: 'Admin, fisik botol Rantiz 9H sisa 18 di rak chemical B, tapi di sistem masih tercatat 20 botol. Mohon dicek apakah ada transaksi kasir yang belum terpotong otomatis.',
-        createdAt: new Date(Date.now() - 3600000 * 3).toISOString()
-      },
-      {
-        id: 'msg-102',
-        sender: 'Daniel (Admin)',
-        role: 'admin',
-        content: 'Halo Mba Umi, kami cek ada transaksi SPK #0044 kemarin sore untuk coating Honda CR-V yang baru diselesaikan mekanik. Saya cek ke kasir apakah statusnya sudah lunas atau pending ya.',
-        createdAt: new Date(Date.now() - 3600000 * 2).toISOString()
-      }
-    ]
-  },
-  {
-    id: 'DISC-2026-002',
-    inventoryId: 'INV-002',
-    itemName: 'Vansgard Matte',
-    category: 'PPF',
-    systemStock: 10,
-    physicalStock: 9,
-    discrepancy: -1,
-    unit: 'Roll',
-    status: 'IN_PROGRESS',
-    priority: 'CRITICAL',
-    reportedBy: 'Mba Umi (Gudang)',
-    reportedAt: new Date(Date.now() - 3600000 * 18).toISOString(),
-    resolvedBy: null,
-    resolvedAt: null,
-    resolutionNote: '',
-    messages: [
-      {
-        id: 'msg-201',
-        sender: 'Mba Umi (Gudang)',
-        role: 'inventory',
-        content: 'Admin, 1 Roll Vansgard Matte telah dikeluarkan untuk pengerjaan Porsche Macan kemarin, fisik di gudang sisa 9 roll, tapi di master stok sistem masih tertera 10.',
-        createdAt: new Date(Date.now() - 3600000 * 18).toISOString()
-      },
-      {
-        id: 'msg-202',
-        sender: 'Femy (Admin)',
-        role: 'admin',
-        content: 'Invoice Porsche Macan sedang menunggu pelunasan DP dari customer. Sudah saya koordinasikan dengan Finance, nanti sore akan disinkronkan.',
-        createdAt: new Date(Date.now() - 3600000 * 12).toISOString()
-      },
-      {
-        id: 'msg-203',
-        sender: 'Mba Umi (Gudang)',
-        role: 'inventory',
-        content: 'Baik Min, kami tandai In Progress agar tidak membingungkan shift malam yang stok opname.',
-        createdAt: new Date(Date.now() - 3600000 * 11).toISOString()
-      }
-    ]
-  },
-  {
-    id: 'DISC-2026-003',
-    inventoryId: 'INV-014',
-    itemName: 'Performante Black Stone 35',
-    category: 'Kaca Film',
-    systemStock: 15,
-    physicalStock: 15,
-    discrepancy: 0,
-    unit: 'Roll',
-    status: 'RESOLVED',
-    priority: 'LOW',
-    reportedBy: 'Mba Umi (Gudang)',
-    reportedAt: new Date(Date.now() - 3600000 * 48).toISOString(),
-    resolvedBy: 'Daniel (Admin)',
-    resolvedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-    resolutionNote: 'Stok pecahan 5.5 meter telah diinput manual ke database sistem.',
-    messages: [
-      {
-        id: 'msg-301',
-        sender: 'Mba Umi (Gudang)',
-        role: 'inventory',
-        content: 'Ada potongan sisa 5.5 meter di kardus terpisah, tolong diinput ke stok pecahan roll ya min.',
-        createdAt: new Date(Date.now() - 3600000 * 48).toISOString()
-      },
-      {
-        id: 'msg-302',
-        sender: 'Daniel (Admin)',
-        role: 'admin',
-        content: 'Sudah diupdate ke stok pecahan: 5.5 Meter. Roll utama tetap 15 Roll.',
-        createdAt: new Date(Date.now() - 3600000 * 24).toISOString()
-      },
-      {
-        id: 'msg-303',
-        sender: 'System Log',
-        role: 'system',
-        isSystem: true,
-        content: 'Isu diselesaikan oleh Daniel (Admin). Stok pecahan disinkronkan menjadi 5.5 Meter.',
-        createdAt: new Date(Date.now() - 3600000 * 24).toISOString()
-      }
-    ]
-  }
-];
+const DUMMY_TICKET_IDS = new Set(['DISC-2026-001', 'DISC-2026-002', 'DISC-2026-003']);
+const INITIAL_DISCREPANCY_TICKETS = [];
 
 // WhatsApp-style Notification Audio Chime Synthesizer via Web Audio API
 export const playNotificationSound = () => {
@@ -188,12 +75,15 @@ export const InventoryCommsProvider = ({ children }) => {
   const { user } = useAuth();
   const { inventory, updateStock } = useInventory();
 
-  // Load persisted tickets from localStorage or use initial mock data
+  // Load persisted tickets from localStorage (excluding legacy dummy tickets)
   const [tickets, setTickets] = useState(() => {
     try {
       const saved = localStorage.getItem('gallardo_stock_discrepancies');
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(t => t && !DUMMY_TICKET_IDS.has(t.id));
+        }
       }
     } catch (e) {
       console.warn('Failed to load discrepancies from localStorage:', e);
@@ -237,7 +127,7 @@ export const InventoryCommsProvider = ({ children }) => {
                   toast(
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', width: '100%' }}>
                       <div style={{ width: '34px', height: '34px', borderRadius: '50%', backgroundColor: '#10b981', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', flexShrink: 0, boxShadow: '0 2px 5px rgba(16, 185, 129, 0.4)' }}>
-                        💬
+                        <MessageCircle size={18} color="#ffffff" />
                       </div>
                       <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

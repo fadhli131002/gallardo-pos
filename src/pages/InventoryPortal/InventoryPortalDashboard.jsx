@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
-import { Package, MessageSquareWarning, History, Plus, RefreshCw, Warehouse, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { MessageSquareWarning, Plus, RefreshCw } from '@/icons/itshover';
 import { useInventory } from '../../context/InventoryContext';
-import { useAuth } from '../../context/AuthContext';
 import { useInventoryComms } from './context/InventoryCommsContext';
+import MegaphoneButton from '../../components/MegaphoneButton';
 import InventoryOverviewWidget from './components/InventoryOverviewWidget';
 import MasterStockTable from './components/MasterStockTable';
 import RestockModal from './components/RestockModal';
 import AdjustModal from './components/AdjustModal';
+import AddStockModal from './components/AddStockModal';
 import NewDiscrepancyModal from './components/NewDiscrepancyModal';
 import StockDiscrepancyComms from './components/StockDiscrepancyComms';
 import InventoryLogsTable from './components/InventoryLogsTable';
 import { toast } from 'sonner';
 
 const InventoryPortalDashboard = () => {
-  const { user } = useAuth();
   const {
     inventory,
     inventoryLogs,
+    addStock,
     updateStock,
     refreshInventoryFromApi
   } = useInventory();
@@ -25,8 +25,7 @@ const InventoryPortalDashboard = () => {
   const {
     openCount,
     totalUnreadCount = 0,
-    createTicket,
-    tickets
+    createTicket
   } = useInventoryComms();
 
   const [activeTab, setActiveTab] = useState('master'); // 'master' | 'comms' | 'logs'
@@ -38,6 +37,7 @@ const InventoryPortalDashboard = () => {
   const [adjustModalItem, setAdjustModalItem] = useState(null);
   const [discrepancyModalItem, setDiscrepancyModalItem] = useState(null);
   const [isNewTicketModalOpen, setIsNewTicketModalOpen] = useState(false);
+  const [isAddStockModalOpen, setIsAddStockModalOpen] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -51,7 +51,7 @@ const InventoryPortalDashboard = () => {
   };
 
   // Restock confirmation handler
-  const handleConfirmRestock = async ({ itemId, stokUtama, stokPecahan, addedUtama, note }) => {
+  const handleConfirmRestock = async ({ itemId, stokUtama, stokPecahan, addedUtama, actionSummary, note }) => {
     const item = inventory.find(i => i.id === itemId);
     if (!item) return;
 
@@ -59,20 +59,21 @@ const InventoryPortalDashboard = () => {
       ...item,
       stokUtama,
       stokPecahan,
-      keterangan: note || `Restock masuk +${addedUtama} ${item.satuan}`
+      keterangan: note || `Restock masuk +${actionSummary || `${addedUtama} ${item.satuan}`}`
     });
   };
 
   // Adjust / Opname confirmation handler
-  const handleConfirmAdjust = async ({ itemId, stokUtama, stokPecahan, diffUtama, reason, note }) => {
+  const handleConfirmAdjust = async ({ itemId, stokUtama, stokPecahan, diffUtama, deltaSummary, reason, note }) => {
     const item = inventory.find(i => i.id === itemId);
     if (!item) return;
 
+    const deltaLabel = deltaSummary || `${diffUtama >= 0 ? '+' : ''}${diffUtama} ${item.satuan}`;
     await updateStock(itemId, {
       ...item,
       stokUtama,
       stokPecahan,
-      keterangan: `Stok opname (${reason}): ${diffUtama >= 0 ? '+' : ''}${diffUtama} ${item.satuan}. Catatan: ${note}`
+      keterangan: `Stok opname (${reason}): ${deltaLabel}. Catatan: ${note}`
     });
   };
 
@@ -83,55 +84,47 @@ const InventoryPortalDashboard = () => {
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Top Bento Header Container */}
-      <div
-        className="w-full bg-white border border-slate-200/90 rounded-2xl px-6 py-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-row items-center justify-between gap-6"
-        style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-      >
-        {/* Left: Icon + Title + Subtitle + Brand Badge */}
-        <div className="flex items-center gap-4 min-w-0 text-left">
-          <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
-            <Warehouse size={22} className="text-white" />
-          </div>
-          <div className="min-w-0 text-left">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-                Portal Manajemen Stok Gudang
-              </h1>
-              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200/80 font-mono tracking-tight flex-shrink-0">
-                Gallardo Auto Sport &bull; New Ratu
-              </span>
-            </div>
-            <p className="text-xs md:text-sm text-slate-500 font-normal mt-1 leading-relaxed text-left">
-              Monitoring fisik, pencatatan restock, stok opname, dan ruang komunikasi selisih barang terintegrasi dengan POS Kasir.
-            </p>
-          </div>
+    <div className="admin-inventory-page animate-fade-in">
+      {/* Page Header identik dengan AdminInventory.jsx */}
+      <div className="page-header" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 className="page-title">Inventory &amp; Stok</h1>
+          <p className="page-subtitle">Kelola data material, konversi satuan, dan ketersediaan barang bengkel</p>
         </div>
-
-        {/* Right: Action Buttons neatly positioned to the far right on the same horizontal plane */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <MegaphoneButton showLabel={true} />
           <button
+            type="button"
+            className="btn-secondary"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="h-10 px-4 text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 rounded-xl transition-all flex items-center gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.05)] active:scale-95 disabled:opacity-50"
-            title="Sinkronkan data dengan server"
+            style={{ gap: '8px', opacity: isRefreshing ? 0.7 : 1 }}
           >
-            <RefreshCw size={14} className={isRefreshing ? 'animate-spin text-slate-500' : 'text-slate-500'} />
+            <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
             <span>{isRefreshing ? 'Menyinkronkan...' : 'Sinkronkan Data'}</span>
           </button>
-
           <button
+            type="button"
+            className="btn-secondary"
             onClick={() => setIsNewTicketModalOpen(true)}
-            className="h-10 px-4 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 active:scale-95 rounded-xl shadow-[0_1px_3px_rgba(225,29,72,0.25)] flex items-center gap-2 transition-all"
+            style={{ gap: '8px' }}
           >
-            <Plus size={16} />
+            <MessageSquareWarning size={18} />
             <span>Lapor Selisih Stok</span>
+          </button>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => setIsAddStockModalOpen(true)}
+            style={{ gap: '8px', backgroundColor: '#111827' }}
+          >
+            <Plus size={18} />
+            <span>Tambah Stok Masuk</span>
           </button>
         </div>
       </div>
 
-      {/* 1. Overview Widgets */}
+      {/* 1. Overview Metric Cards (Gaya AdminDashboard) */}
       <InventoryOverviewWidget
         inventory={inventory}
         inventoryLogs={inventoryLogs}
@@ -141,64 +134,109 @@ const InventoryPortalDashboard = () => {
         onSwitchTab={(tab) => setActiveTab(tab)}
       />
 
-      {/* 2. Main Navigation Tabs (Bento Segmented Control) */}
-      <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200/80 w-fit">
+      {/* 2. Navigation Tabs identik dengan AdminInventory.jsx */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '16px',
+          marginBottom: '24px',
+          borderBottom: '1px solid #e5e7eb',
+          paddingBottom: '0',
+          overflowX: 'auto'
+        }}
+      >
         <button
+          type="button"
           onClick={() => setActiveTab('master')}
-          className={`px-4 py-2 text-xs font-semibold rounded-lg flex items-center gap-2 transition-all ${
-            activeTab === 'master'
-              ? 'bg-white text-slate-900 shadow-sm font-bold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
+          style={{
+            padding: '12px 24px',
+            background: 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'master' ? '2px solid #111' : '2px solid transparent',
+            color: activeTab === 'master' ? '#111' : '#6b7280',
+            fontWeight: activeTab === 'master' ? 'bold' : '500',
+            fontSize: '14px',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            whiteSpace: 'nowrap'
+          }}
         >
-          <Package size={15} />
-          <span>Master Stok Gudang</span>
-          <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-            activeTab === 'master' ? 'bg-slate-100 text-slate-700 font-bold' : 'bg-slate-200/70 text-slate-600'
-          }`}>
-            {inventory.length}
-          </span>
+          Data Master Inventory
         </button>
 
         <button
-          onClick={() => setActiveTab('comms')}
-          className={`px-4 py-2 text-xs font-semibold rounded-lg flex items-center gap-2 transition-all relative ${
-            activeTab === 'comms'
-              ? 'bg-white text-amber-700 shadow-sm font-bold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
+          type="button"
+          onClick={() => setActiveTab('logs')}
+          style={{
+            padding: '12px 24px',
+            background: 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'logs' ? '2px solid #111' : '2px solid transparent',
+            color: activeTab === 'logs' ? '#111' : '#6b7280',
+            fontWeight: activeTab === 'logs' ? 'bold' : '500',
+            fontSize: '14px',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            whiteSpace: 'nowrap'
+          }}
         >
-          <MessageSquareWarning size={15} />
-          <span>Stock Discrepancy Comms</span>
+          Riwayat Pemotongan (Logs)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('comms')}
+          style={{
+            padding: '12px 24px',
+            background: 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'comms' ? '2px solid #4f46e5' : '2px solid transparent',
+            color: activeTab === 'comms' ? '#4f46e5' : '#6b7280',
+            fontWeight: activeTab === 'comms' ? 'bold' : '500',
+            fontSize: '14px',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <MessageSquareWarning size={16} />
+          <span>Chat Selisih Stok (Gudang)</span>
           {totalUnreadCount > 0 ? (
-            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm animate-pulse flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+            <span
+              style={{
+                backgroundColor: '#10b981',
+                color: '#ffffff',
+                fontSize: '11px',
+                fontWeight: 800,
+                padding: '2px 8px',
+                borderRadius: '9999px',
+                boxShadow: '0 1px 3px rgba(16, 185, 129, 0.4)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ffffff' }} />
               {totalUnreadCount} Pesan Baru
             </span>
           ) : openCount > 0 ? (
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 font-bold">
+            <span
+              style={{
+                backgroundColor: '#fef3c7',
+                color: '#92400e',
+                fontSize: '11px',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '9999px',
+                border: '1px solid #fde68a'
+              }}
+            >
               {openCount} Open
             </span>
           ) : null}
-        </button>
-
-        <button
-          onClick={() => setActiveTab('logs')}
-          className={`px-4 py-2 text-xs font-semibold rounded-lg flex items-center gap-2 transition-all ${
-            activeTab === 'logs'
-              ? 'bg-white text-indigo-700 shadow-sm font-bold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <History size={15} />
-          <span>Mutasi & Riwayat Stok</span>
-          {inventoryLogs.length > 0 && (
-            <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-              activeTab === 'logs' ? 'bg-indigo-100 text-indigo-800 font-bold' : 'bg-slate-200/70 text-slate-600'
-            }`}>
-              {inventoryLogs.length}
-            </span>
-          )}
         </button>
       </div>
 
@@ -233,7 +271,6 @@ const InventoryPortalDashboard = () => {
       </div>
 
       {/* 4. Modals */}
-      {/* Restock Modal */}
       <RestockModal
         isOpen={Boolean(restockModalItem)}
         onClose={() => setRestockModalItem(null)}
@@ -241,7 +278,6 @@ const InventoryPortalDashboard = () => {
         onConfirmRestock={handleConfirmRestock}
       />
 
-      {/* Adjust Modal */}
       <AdjustModal
         isOpen={Boolean(adjustModalItem)}
         onClose={() => setAdjustModalItem(null)}
@@ -253,7 +289,6 @@ const InventoryPortalDashboard = () => {
         }}
       />
 
-      {/* New Discrepancy Ticket Modal */}
       <NewDiscrepancyModal
         isOpen={isNewTicketModalOpen}
         onClose={() => {
@@ -263,6 +298,13 @@ const InventoryPortalDashboard = () => {
         inventory={inventory}
         preselectedItem={discrepancyModalItem}
         onSubmitTicket={handleCreateTicketSubmit}
+      />
+
+      <AddStockModal
+        isOpen={isAddStockModalOpen}
+        onClose={() => setIsAddStockModalOpen(false)}
+        inventory={inventory}
+        onAddStock={addStock}
       />
     </div>
   );

@@ -18,11 +18,41 @@ const getInventory = async (req, res, next) => {
       orderBy: [{ kategori: 'asc' }, { brand: 'asc' }]
     });
 
-    // Tandai item yang stoknya menipis
-    const itemsWithFlag = items.map(item => ({
-      ...item,
-      is_low_stock: item.stok_utama <= item.min_stok
-    }));
+    // Tandai item yang stoknya menipis & sertakan kalkulasi konversi satuan terkecil
+    const itemsWithFlag = items.map(item => {
+      const kat = item.kategori || '';
+      const utama = Number(item.stok_utama || 0);
+      const pecahan = Number(item.stok_pecahan || 0);
+      let konversi = item.konversi || 1;
+      let total_cm = null;
+      let total_ml = null;
+      let total_unit = null;
+
+      if (kat === 'PPF') {
+        konversi = 15;
+        total_cm = Math.round((utama * 1500) + (pecahan * 100));
+      } else if (kat === 'Kaca Film') {
+        konversi = 30;
+        total_cm = Math.round((utama * 3000) + (pecahan * 100));
+      } else if (kat === 'Coating') {
+        const isLiter =
+          String(item.satuan || '').trim().toUpperCase().includes('LITER') ||
+          String(item.varian || '').trim().toUpperCase().includes('1 LITER');
+        konversi = isLiter ? 1000 : 50;
+        const unitPerUtama = isLiter ? 60 : 3;
+        total_ml = parseFloat(((utama * konversi) + pecahan).toFixed(2));
+        total_unit = (utama * unitPerUtama) + Math.floor((pecahan + 0.5) / (50 / 3));
+      }
+
+      return {
+        ...item,
+        konversi,
+        total_cm,
+        total_ml,
+        total_unit,
+        is_low_stock: item.stok_utama <= item.min_stok
+      };
+    });
 
     const lowStockCount = itemsWithFlag.filter(i => i.is_low_stock).length;
 
@@ -104,27 +134,44 @@ const updateInventoryStock = async (req, res, next) => {
       return res.status(404).json({ success: false, error: 'Produk tidak ditemukan' });
     }
 
-    let konversi = konversi_body !== undefined ? konversi_body : (existing.konversi || 1);
-    if ((kategori || existing.kategori) === 'Kaca Film') konversi = 30;
-    else if ((kategori || existing.kategori) === 'PPF') konversi = 15;
+    const targetKategori = kategori || existing.kategori;
+    const targetSatuan = satuan || existing.satuan || '';
+    const targetVarian = varian || existing.varian || '';
+    const isLiter =
+      String(targetSatuan).trim().toUpperCase().includes('LITER') ||
+      String(targetVarian).trim().toUpperCase().includes('1 LITER');
+    let konversi = konversi_body !== undefined ? Number(konversi_body) : (existing.konversi || 1);
+    if (targetKategori === 'Kaca Film') konversi = 30;
+    else if (targetKategori === 'PPF') konversi = 15;
+    else if (targetKategori === 'Coating') konversi = isLiter ? 1000 : 50;
 
-    const oldBase = (existing.stok_utama * existing.konversi) + existing.stok_pecahan;
-    const newUtama   = stok_utama   !== undefined ? stok_utama   : existing.stok_utama;
-    const newPecahan = stok_pecahan !== undefined ? stok_pecahan : existing.stok_pecahan;
-    const newBase    = (newUtama * konversi) + newPecahan;
-    const delta      = newBase - oldBase;
+    const oldBase = parseFloat(((existing.stok_utama * konversi) + existing.stok_pecahan).toFixed(2));
+    let rawUtama   = stok_utama   !== undefined ? Number(stok_utama)   : existing.stok_utama;
+    let rawPecahan = stok_pecahan !== undefined ? Number(stok_pecahan) : existing.stok_pecahan;
+
+    // Normalisasi jika pecahan melebihi 1 satuan utama (Roll / Botol)
+    let newUtama = Math.max(0, Math.floor(rawUtama));
+    let newPecahan = Math.max(0, parseFloat(rawPecahan.toFixed(2)));
+    if (konversi > 1 && newPecahan >= konversi) {
+      const extraUtama = Math.floor((newPecahan + 0.001) / konversi);
+      newUtama += extraUtama;
+      newPecahan = parseFloat((newPecahan - (extraUtama * konversi)).toFixed(2));
+    }
+
+    const newBase = parseFloat(((newUtama * konversi) + newPecahan).toFixed(2));
+    const delta   = parseFloat((newBase - oldBase).toFixed(2));
 
     const updated = await prisma.inventory.update({
       where: { id },
       data: {
         stok_utama:   newUtama,
         stok_pecahan: newPecahan,
+        konversi,
         ...(kategori !== undefined && { kategori }),
         ...(brand !== undefined && { brand }),
         ...(varian !== undefined && { varian }),
         ...(kegelapan !== undefined && { kegelapan }),
         ...(satuan !== undefined && { satuan }),
-        ...(konversi_body !== undefined && { konversi: konversi }),
         ...(min_stok !== undefined && { min_stok }),
         ...(harga_jual !== undefined && { harga_jual: Number(harga_jual) }),
         ...(harga_modal !== undefined && { harga_modal: Number(harga_modal) }),
@@ -195,9 +242,9 @@ const createInventoryItem = async (req, res, next) => {
         kegelapan:    kegelapan || null,
         stok_utama:   Number(stok_utama) || 0,
         stok_pecahan: Number(stok_pecahan) || 0,
-        satuan:       satuan || 'Roll',
+        satuan:       satuan || (kategori === 'Coating' ? 'Botol' : 'Roll'),
         branch:       branch || 'Gallardo',
-        konversi:     kategori === 'Kaca Film' ? 30 : (kategori === 'PPF' ? 15 : (Number(konversi) || 1)),
+        konversi:     kategori === 'Kaca Film' ? 30 : (kategori === 'PPF' ? 15 : (kategori === 'Coating' ? 50 : (Number(konversi) || 1))),
         min_stok:     Number(min_stok) || 2,
         harga_jual:   harga_jual ? Number(harga_jual) : 0,
         harga_modal:  harga_modal ? Number(harga_modal) : 0

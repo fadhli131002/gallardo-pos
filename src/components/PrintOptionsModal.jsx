@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Printer, Download, MessageCircle, Loader2 } from 'lucide-react';
+import { X, Printer, Download, MessageCircle, Loader2 } from '@/icons/itshover';
 
 const PrintOptionsModal = ({
   isOpen,

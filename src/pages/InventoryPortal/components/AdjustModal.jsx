@@ -1,22 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, SlidersHorizontal, AlertTriangle, Check, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import {
+  X,
+  AlertTriangle,
+  Check,
+  MinusCircle,
+  PlusCircle,
+  Equal
+} from '@/icons/itshover';
 import { toast } from 'sonner';
+import {
+  getConversionDetails,
+  calculateStockMutation,
+  formatThousand
+} from '../utils/unitConversion';
 
 const ADJUST_REASONS = [
+  'Sisa Potongan Pemasangan Workshop',
   'Stok Opname Rutin Akhir Shift',
   'Penyesuaian Fisik Aktual Gudang',
   'Barang Rusak / Cacat Pabrik / Bocor',
-  'Sisa Potongan Pemasangan Workshop',
   'Koreksi Salah Input Kasir / Transaksi',
   'Sampel Uji / Display Pelanggan',
   'Lainnya (Tuliskan di Catatan)'
 ];
 
 const AdjustModal = ({ isOpen, onClose, item, onConfirmAdjust, onFlagIssue }) => {
-  const [physicalUtama, setPhysicalUtama] = useState(0);
-  const [physicalPecahan, setPhysicalPecahan] = useState(0);
+  const [adjustMode, setAdjustMode] = useState('deduct');
+  const [inputUnit, setInputUnit] = useState('CM');
+  const [primaryQty, setPrimaryQty] = useState(0);
+  const [secondaryQty, setSecondaryQty] = useState(0);
+  const [secondaryUnit, setSecondaryUnit] = useState('M');
   const [reason, setReason] = useState(ADJUST_REASONS[0]);
   const [note, setNote] = useState('');
   const [alsoCreateTicket, setAlsoCreateTicket] = useState(false);
@@ -24,8 +38,22 @@ const AdjustModal = ({ isOpen, onClose, item, onConfirmAdjust, onFlagIssue }) =>
 
   useEffect(() => {
     if (item) {
-      setPhysicalUtama(Number(item.stokUtama || 0));
-      setPhysicalPecahan(Number(item.stokPecahan || 0));
+      setAdjustMode('deduct');
+      if (item.kategori === 'PPF' || item.kategori === 'Kaca Film') {
+        setInputUnit('CM');
+        setPrimaryQty(350);
+        setSecondaryQty(0);
+        setSecondaryUnit('M');
+      } else if (item.kategori === 'Coating') {
+        setInputUnit('UNIT');
+        setPrimaryQty(1);
+        setSecondaryQty(0);
+        setSecondaryUnit('ML');
+      } else {
+        setInputUnit('PCS');
+        setPrimaryQty(1);
+        setSecondaryQty(0);
+      }
       setReason(ADJUST_REASONS[0]);
       setNote('');
       setAlsoCreateTicket(false);
@@ -34,39 +62,114 @@ const AdjustModal = ({ isOpen, onClose, item, onConfirmAdjust, onFlagIssue }) =>
 
   if (!isOpen || !item) return null;
 
-  const currentUtama = Number(item.stokUtama || 0);
-  const currentPecahan = Number(item.stokPecahan || 0);
-  const targetUtama = Number(physicalUtama || 0);
-  const targetPecahan = Number(physicalPecahan || 0);
+  const conv = getConversionDetails(item);
+  const calc = calculateStockMutation(
+    item,
+    adjustMode,
+    inputUnit,
+    primaryQty,
+    secondaryQty,
+    secondaryUnit
+  );
 
-  const diffUtama = targetUtama - currentUtama;
-  const diffPecahan = targetPecahan - currentPecahan;
+  const handleModeChange = (newMode) => {
+    setAdjustMode(newMode);
+    if (newMode === 'set') {
+      if (conv.type === 'FILM_PPF') {
+        if (inputUnit === 'CM') setPrimaryQty(conv.totalCM);
+        else if (inputUnit === 'M') setPrimaryQty(conv.totalM);
+        else {
+          setPrimaryQty(conv.utama);
+          setSecondaryQty(secondaryUnit === 'CM' ? conv.pecahanCM : conv.pecahan);
+        }
+      } else if (conv.type === 'COATING') {
+        if (inputUnit === 'ML') setPrimaryQty(conv.totalML);
+        else if (inputUnit === 'UNIT') setPrimaryQty(conv.totalUnit);
+        else {
+          setPrimaryQty(conv.utama);
+          setSecondaryQty(conv.pecahanML);
+        }
+      } else {
+        setPrimaryQty(conv.utama);
+      }
+    } else {
+      if (conv.type === 'FILM_PPF') {
+        setPrimaryQty(inputUnit === 'CM' ? 350 : inputUnit === 'M' ? 3.5 : 1);
+        setSecondaryQty(0);
+      } else if (conv.type === 'COATING') {
+        setPrimaryQty(inputUnit === 'UNIT' ? 1 : inputUnit === 'ML' ? 16.67 : 1);
+        setSecondaryQty(0);
+      } else {
+        setPrimaryQty(1);
+      }
+    }
+  };
+
+  const handleUnitChange = (newUnit) => {
+    setInputUnit(newUnit);
+    setSecondaryQty(0);
+    if (adjustMode === 'set') {
+      if (newUnit === 'CM') setPrimaryQty(conv.totalCM);
+      else if (newUnit === 'M') setPrimaryQty(conv.totalM);
+      else if (newUnit === 'ROLL') {
+        setPrimaryQty(conv.utama);
+        setSecondaryQty(secondaryUnit === 'CM' ? conv.pecahanCM : conv.pecahan);
+      } else if (newUnit === 'ML') setPrimaryQty(conv.totalML);
+      else if (newUnit === 'UNIT') setPrimaryQty(conv.totalUnit);
+      else if (newUnit === 'BOTOL') {
+        setPrimaryQty(conv.utama);
+        setSecondaryQty(conv.pecahanML);
+      }
+    } else {
+      if (newUnit === 'CM') setPrimaryQty(350);
+      else if (newUnit === 'M') setPrimaryQty(3.5);
+      else if (newUnit === 'ROLL') setPrimaryQty(1);
+      else if (newUnit === 'UNIT') setPrimaryQty(1);
+      else if (newUnit === 'ML') setPrimaryQty(16.67);
+      else if (newUnit === 'BOTOL') setPrimaryQty(1);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!calc.hasChanged) {
+      toast.error('Tidak ada perubahan stok untuk disimpan');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      const modeLabel =
+        adjustMode === 'deduct'
+          ? `Pengurangan -${calc.actionSummary}`
+          : adjustMode === 'add'
+          ? `Penambahan +${calc.actionSummary}`
+          : `Set Opname ke ${calc.resultSummary}`;
+
       await onConfirmAdjust({
         itemId: item.id,
-        stokUtama: targetUtama,
-        stokPecahan: targetPecahan,
-        diffUtama,
-        diffPecahan,
+        stokUtama: calc.stokUtama,
+        stokPecahan: calc.stokPecahan,
+        diffUtama: calc.diffUtama,
+        diffPecahan: calc.diffPecahan,
+        deltaSummary: calc.deltaSummary,
+        resultSummary: calc.resultSummary,
         reason,
-        note: note || reason
+        note: `${modeLabel}${note ? `: ${note}` : ''}`
       });
 
-      // If user checked "Also flag issue in Comms", trigger ticket creation
-      if (alsoCreateTicket && diffUtama !== 0 && onFlagIssue) {
+      if (alsoCreateTicket && calc.hasChanged && onFlagIssue) {
         onFlagIssue({
           inventoryId: item.id,
-          physicalStock: targetUtama,
-          priority: Math.abs(diffUtama) >= 2 ? 'HIGH' : 'MEDIUM',
-          initialMessage: `Penyesuaian Stok Opname: Fisik ${targetUtama} ${item.satuan} vs Sistem ${currentUtama} ${item.satuan} (Selisih: ${diffUtama}). Alasan: ${reason}. Catatan: ${note || '-'}`
+          physicalStock: calc.stokUtama,
+          priority: Math.abs(calc.diffUtama) >= 2 ? 'HIGH' : 'MEDIUM',
+          initialMessage: `Penyesuaian Stok (${modeLabel}): Stok baru ${calc.resultSummary} (Selisih: ${calc.deltaSummary}). Alasan: ${reason}. Catatan: ${note || '-'}`
         });
       }
 
-      toast.success(`Stok opname ${item.brand} ${item.varian} berhasil disesuaikan ke ${targetUtama} ${item.satuan}!`);
+      toast.success(
+        `Stok ${item.brand} ${item.varian} berhasil disesuaikan (${calc.deltaSummary})!`
+      );
       onClose();
     } catch (err) {
       console.error(err);
@@ -76,185 +179,526 @@ const AdjustModal = ({ isOpen, onClose, item, onConfirmAdjust, onFlagIssue }) =>
     }
   };
 
+  const labelStyle = {
+    display: 'block',
+    marginBottom: '6px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#374151'
+  };
+
+  const inputStyle = {
+    width: '100%',
+    padding: '10px 14px',
+    borderRadius: '8px',
+    border: '1px solid #d1d5db',
+    fontSize: '15px',
+    backgroundColor: '#ffffff',
+    color: '#111827',
+    outline: 'none'
+  };
+
   return createPortal(
-    <AnimatePresence>
-      <div 
-        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) onClose();
+    <div
+      className="modal-overlay animate-fade-in"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        padding: '24px'
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="premium-card"
+        style={{
+          width: '100%',
+          maxWidth: '580px',
+          maxHeight: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          overflow: 'hidden',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
         }}
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          transition={{ duration: 0.2 }}
-          className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-neutral-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden my-auto"
+        {/* Header identik dengan AdminInventory.jsx */}
+        <div
+          style={{
+            padding: '20px 24px',
+            borderBottom: '1px solid #f3f4f6',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: '#f9fafb',
+            flexShrink: 0
+          }}
         >
-          {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-100 dark:border-neutral-800 flex items-center justify-between bg-gray-50/50 dark:bg-neutral-900/50">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                <SlidersHorizontal size={20} />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                  Penyesuaian Stok (Stok Opname)
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {item.id} &bull; {item.kategori}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
-            >
-              <X size={20} />
-            </button>
+          <div>
+            <h2 className="font-sans" style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#111827' }}>
+              Penyesuaian &amp; Konversi Stok
+            </h2>
+            <p style={{ margin: '2px 0 0 0', fontSize: '13px', color: '#6b7280' }}>
+              {item.id} &bull; {item.kategori} &bull; {conv.ruleHint}
+            </p>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              padding: '8px',
+              borderRadius: '50%',
+              backgroundColor: '#f3f4f6',
+              color: '#6b7280',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            {/* Target Item Details */}
-            <div className="p-3.5 bg-gray-50 dark:bg-[#252525] rounded-xl border border-gray-200/80 dark:border-neutral-700/80">
-              <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">
-                Item Sasaran
-              </span>
-              <p className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
-                {item.brand} {item.varian} {item.kegelapan && `(${item.kegelapan})`}
-              </p>
-              <div className="flex items-center justify-between mt-2 text-xs">
-                <span className="text-gray-500 dark:text-gray-400">Stok Sistem Saat Ini:</span>
-                <span className="font-mono font-bold text-gray-900 dark:text-white">
-                  {currentUtama} {item.satuan} {currentPecahan > 0 ? `+ ${currentPecahan} ${item.kategori === 'Coating' ? 'ml' : 'm'}` : ''}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Item Info Box */}
+            <div
+              style={{
+                padding: '14px 16px',
+                backgroundColor: '#f9fafb',
+                borderRadius: '10px',
+                border: '1px solid #e5e7eb'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
+                  Stok Sistem Saat Ini
+                </span>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    backgroundColor: '#ffffff',
+                    color: '#111827',
+                    border: '1px solid #d1d5db'
+                  }}
+                >
+                  Total: {conv.totalKonversiDisplay}
                 </span>
               </div>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>
+                {item.brand} {item.varian} {item.kegelapan ? `(${item.kegelapan})` : ''}
+              </div>
+              <div style={{ display: 'flex', gap: '16px', marginTop: '6px', fontSize: '13px', color: '#4b5563' }}>
+                <span>
+                  Stok Utama: <strong style={{ color: '#111827' }}>{conv.utamaDisplay}</strong>
+                </span>
+                {conv.isConvertible && (
+                  <span>
+                    Pecahan: <strong style={{ color: '#111827' }}>{conv.pecahanFullDisplay}</strong>
+                  </span>
+                )}
+              </div>
             </div>
 
-            {/* Inputs: Physical count */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                  Stok Fisik Aktual ({item.satuan}) *
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={physicalUtama}
-                  onChange={(e) => setPhysicalUtama(Math.max(0, parseInt(e.target.value) || 0))}
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none dark:text-white font-mono font-bold"
-                  required
-                />
+            {/* Segmented Mode Control */}
+            <div>
+              <label style={labelStyle}>Jenis Tindakan Penyesuaian</label>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '6px',
+                  padding: '4px',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '10px'
+                }}
+              >
+                {[
+                  { id: 'deduct', label: 'Potong / Kurangi', icon: MinusCircle },
+                  { id: 'add', label: 'Tambah Stok', icon: PlusCircle },
+                  { id: 'set', label: 'Set Opname', icon: Equal }
+                ].map(({ id, label, icon: Icon }) => {
+                  const active = adjustMode === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => handleModeChange(id)}
+                      style={{
+                        padding: '8px 10px',
+                        fontSize: '13px',
+                        fontWeight: active ? 600 : 500,
+                        borderRadius: '7px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        backgroundColor: active ? '#111827' : 'transparent',
+                        color: active ? '#ffffff' : '#374151',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <Icon size={14} />
+                      <span>{label}</span>
+                    </button>
+                  );
+                })}
               </div>
+            </div>
 
-              {(item.kategori === 'Kaca Film' || item.kategori === 'PPF' || item.kategori === 'Coating') && (
+            {/* Dropdown Satuan Input */}
+            {conv.isConvertible && (
+              <div>
+                <label style={labelStyle}>Pilih Satuan Input</label>
+                {conv.type === 'FILM_PPF' ? (
+                  <select value={inputUnit} onChange={(e) => handleUnitChange(e.target.value)} style={inputStyle}>
+                    <option value="CM">
+                      Centimeter / CM (Misal potong 350 CM atau tambah 1.500 CM)
+                    </option>
+                    <option value="M">Meter / m (1 m = 100 CM)</option>
+                    <option value="ROLL">
+                      Roll (1 Roll = {formatThousand(conv.cmPerRoll)} CM / {conv.mPerRoll} m) + Pecahan
+                    </option>
+                  </select>
+                ) : (
+                  <select value={inputUnit} onChange={(e) => handleUnitChange(e.target.value)} style={inputStyle}>
+                    <option value="UNIT">UNIT Mobil (1 UNIT = 16,67 ML)</option>
+                    <option value="ML">Mililiter / ML (Input langsung kapasitas ML)</option>
+                    <option value="BOTOL">
+                      {conv.isLiter
+                        ? 'LITER (1 LITER = 1.000 ML / 60 UNIT) + Pecahan ML'
+                        : 'Botol (1 Botol = 50 ML / 3 UNIT) + Pecahan ML'}
+                    </option>
+                  </select>
+                )}
+              </div>
+            )}
+
+            {/* Dynamic Quantity Inputs */}
+            {conv.type === 'FILM_PPF' && inputUnit === 'ROLL' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                    Fisik Pecahan ({item.kategori === 'Coating' ? 'ml' : 'Meter'})
+                  <label style={labelStyle}>
+                    {adjustMode === 'set' ? 'Stok Fisik (Roll)' : 'Jumlah (Roll)'}
                   </label>
                   <input
                     type="number"
                     min="0"
-                    step="0.1"
-                    value={physicalPecahan}
-                    onChange={(e) => setPhysicalPecahan(Math.max(0, parseFloat(e.target.value) || 0))}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none dark:text-white font-mono font-medium"
+                    step="1"
+                    value={primaryQty}
+                    onChange={(e) => setPrimaryQty(Math.max(0, parseInt(e.target.value) || 0))}
+                    style={inputStyle}
+                    required
                   />
                 </div>
-              )}
-            </div>
-
-            {/* Variance indicator banner */}
-            <div className={`p-3 rounded-xl border flex items-center justify-between text-xs transition-colors ${
-              diffUtama === 0
-                ? 'bg-gray-50 dark:bg-neutral-800/60 border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-gray-300'
-                : diffUtama > 0
-                ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
-                : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300'
-            }`}>
-              <div className="flex items-center gap-2">
-                {diffUtama !== 0 ? <AlertTriangle size={16} /> : <Check size={16} />}
-                <span className="font-semibold">
-                  {diffUtama === 0
-                    ? 'Stok Sesuai (Tidak Ada Selisih)'
-                    : diffUtama > 0
-                    ? `Surplus Fisik: +${diffUtama} ${item.satuan}`
-                    : `Defisit Fisik: ${diffUtama} ${item.satuan}`}
-                </span>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label style={{ fontSize: '14px', fontWeight: 500, color: '#374151' }}>
+                      Pecahan ({secondaryUnit === 'CM' ? 'CM' : 'Meter'})
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (secondaryUnit === 'M') {
+                          setSecondaryUnit('CM');
+                          setSecondaryQty(Math.round(secondaryQty * 100));
+                        } else {
+                          setSecondaryUnit('M');
+                          setSecondaryQty(parseFloat((secondaryQty / 100).toFixed(2)));
+                        }
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: '#111827',
+                        textDecoration: 'underline',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Ganti ke {secondaryUnit === 'M' ? 'CM' : 'Meter'}
+                    </button>
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    step={secondaryUnit === 'CM' ? '1' : '0.1'}
+                    value={secondaryQty}
+                    onChange={(e) => setSecondaryQty(Math.max(0, parseFloat(e.target.value) || 0))}
+                    style={inputStyle}
+                  />
+                </div>
               </div>
-              <div className="font-mono text-xs font-bold">
-                {currentUtama} &rarr; <span className="underline">{targetUtama} {item.satuan}</span>
+            ) : conv.type === 'COATING' && inputUnit === 'BOTOL' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <label style={labelStyle}>
+                    {adjustMode === 'set' ? `Stok Fisik (${conv.satuan})` : `Jumlah (${conv.satuan})`}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={primaryQty}
+                    onChange={(e) => setPrimaryQty(Math.max(0, parseInt(e.target.value) || 0))}
+                    style={inputStyle}
+                    required
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Pecahan (ml)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={secondaryQty}
+                    onChange={(e) => setSecondaryQty(Math.max(0, parseFloat(e.target.value) || 0))}
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label style={labelStyle}>
+                  {adjustMode === 'deduct'
+                    ? 'Jumlah yang Dipotong / Dikurangi'
+                    : adjustMode === 'add'
+                    ? 'Jumlah yang Ditambahkan'
+                    : 'Total Fisik Aktual'}{' '}
+                  (
+                  {inputUnit === 'CM'
+                    ? 'Centimeter / CM'
+                    : inputUnit === 'M'
+                    ? 'Meter / m'
+                    : inputUnit === 'UNIT'
+                    ? 'UNIT Mobil'
+                    : inputUnit === 'ML'
+                    ? 'Mililiter / ML'
+                    : item.satuan}
+                  )
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step={inputUnit === 'M' || inputUnit === 'ML' ? '0.01' : '1'}
+                  value={primaryQty}
+                  onChange={(e) => setPrimaryQty(Math.max(0, parseFloat(e.target.value) || 0))}
+                  style={inputStyle}
+                  required
+                />
+
+                {inputUnit === 'CM' && adjustMode !== 'set' && (
+                  <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', color: '#6b7280' }}>Pilih Cepat:</span>
+                    {[150, 300, 350, 500, 1000, conv.cmPerRoll].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setPrimaryQty(preset)}
+                        style={{
+                          padding: '3px 8px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          backgroundColor: '#f3f4f6',
+                          color: '#111827',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {adjustMode === 'deduct' ? '-' : '+'}
+                        {formatThousand(preset)} CM
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {inputUnit === 'UNIT' && adjustMode !== 'set' && (
+                  <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', color: '#6b7280' }}>Pilih Cepat:</span>
+                    {[1, 2, 3, 6].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setPrimaryQty(preset)}
+                        style={{
+                          padding: '3px 8px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          backgroundColor: '#f3f4f6',
+                          color: '#111827',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {adjustMode === 'deduct' ? '-' : '+'}
+                        {preset} UNIT ({preset % 3 === 0 ? `${preset / 3} Btl` : `${formatThousand(preset * 16.67, 2)} ML`})
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Live Conversion & Variance Indicator */}
+            <div
+              style={{
+                padding: '12px 16px',
+                backgroundColor: calc.exceedsStock ? '#fef2f2' : '#f3f4f6',
+                borderRadius: '8px',
+                border: `1px solid ${calc.exceedsStock ? '#fca5a5' : '#d1d5db'}`,
+                fontSize: '13px',
+                color: '#111827'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <span style={{ color: '#4b5563', fontWeight: 500 }}>
+                  {calc.exceedsStock
+                    ? 'Perhatian: Melebihi sisa stok (Stok diset ke 0)'
+                    : 'Mutasi Konversi:'}
+                </span>
+                <strong
+                  style={{
+                    color:
+                      (calc.deltaCM ?? calc.deltaML ?? calc.diffUtama) > 0
+                        ? '#059669'
+                        : '#dc2626'
+                  }}
+                >
+                  {calc.deltaSummary}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  paddingTop: '6px',
+                  borderTop: '1px solid #e5e7eb'
+                }}
+              >
+                <span style={{ color: '#111827', fontWeight: 600 }}>Hasil Pecahan Sistem Baru:</span>
+                <strong>{calc.resultSummary}</strong>
               </div>
             </div>
 
             {/* Reason selector */}
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                Alasan Penyesuaian *
-              </label>
-              <select
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-white dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none dark:text-white"
-              >
+              <label style={labelStyle}>Alasan Penyesuaian</label>
+              <select value={reason} onChange={(e) => setReason(e.target.value)} style={inputStyle}>
                 {ADJUST_REASONS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
                 ))}
               </select>
             </div>
 
             {/* Note text */}
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                Keterangan Tambahan
-              </label>
+              <label style={labelStyle}>Keterangan Tambahan</label>
               <textarea
                 rows="2"
-                placeholder="Detail hasil pemeriksaan fisik rak gudang..."
+                placeholder="Detail pemotongan SPK atau hasil pemeriksaan fisik rak gudang..."
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-white dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none dark:text-white resize-none"
-              ></textarea>
+                style={{ ...inputStyle, resize: 'none' }}
+              />
             </div>
 
             {/* Checkbox to flag discrepancy to Comms */}
-            {diffUtama !== 0 && (
-              <label className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 cursor-pointer">
+            {calc.hasChanged && (
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  color: '#374151'
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={alsoCreateTicket}
                   onChange={(e) => setAlsoCreateTicket(e.target.checked)}
-                  className="rounded text-amber-600 focus:ring-amber-500 w-4 h-4"
                 />
-                <span className="text-xs text-amber-900 dark:text-amber-200 font-medium">
-                  Buat tiket di <strong>Stock Discrepancy Comms</strong> agar admin mengetahui selisih ini
+                <span>
+                  Buat tiket di <strong>Chat Selisih Stok</strong> agar admin mengetahui penyesuaian ini
                 </span>
               </label>
             )}
+          </div>
 
-            {/* Footer */}
-            <div className="pt-3 border-t border-gray-100 dark:border-neutral-800 flex items-center justify-end gap-2.5">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
-              >
-                Batal
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-lg shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
-              >
-                <Check size={16} />
-                {isSubmitting ? 'Menyimpan...' : 'Simpan Penyesuaian'}
-              </button>
-            </div>
-          </form>
-        </motion.div>
+          {/* Fixed Footer identik dengan AdminInventory.jsx */}
+          <div
+            style={{
+              padding: '16px 24px',
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end',
+              borderTop: '1px solid #e5e7eb',
+              backgroundColor: '#f9fafb',
+              flexShrink: 0
+            }}
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '10px 20px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#374151',
+                backgroundColor: '#ffffff',
+                border: '1px solid #d1d5db',
+                cursor: 'pointer'
+              }}
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || !calc.hasChanged}
+              style={{
+                padding: '10px 24px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#ffffff',
+                backgroundColor: '#111827',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                opacity: isSubmitting || !calc.hasChanged ? 0.5 : 1
+              }}
+            >
+              <Check size={16} />
+              <span>{isSubmitting ? 'Menyimpan...' : 'Simpan Penyesuaian'}</span>
+            </button>
+          </div>
+        </form>
       </div>
-    </AnimatePresence>,
+    </div>,
     document.body
   );
 };

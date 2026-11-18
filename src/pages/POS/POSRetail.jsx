@@ -5,7 +5,7 @@ import { PRICING_MATRIX, CAR_BRANDS, formatCurrency, PRODUCT_CATALOG } from '../
 import { useOrders } from '../../context/OrderContext';
 import { useInventory } from '../../context/InventoryContext';
 import { format } from 'date-fns';
-import { Trash2, Plus, Minus, Calculator, Wallet, User, Car, CheckCircle, Package, Search, Tag, Settings, CreditCard, ChevronDown, ChevronRight, Check, CheckSquare, Printer, MessageCircle, X, ShoppingCart, Loader2, FileText, CarFront, Upload, Percent, Banknote, QrCode, Gift } from 'lucide-react';
+import { Trash2, Plus, Minus, Calculator, Wallet, User, Car, CheckCircle, Package, Search, Tag, Settings, CreditCard, ChevronDown, ChevronRight, Check, CheckSquare, Printer, MessageCircle, X, ShoppingCart, Loader2, FileText, CarFront, Upload, Percent, Banknote, QrCode, Gift } from '@/icons/itshover';
 import html2pdf from 'html2pdf.js';
 import SharedInvoice from '../../components/SharedInvoice';
 import logoGallardo from '../../assets/logo-gallardo.png';
@@ -642,7 +642,7 @@ const POSRetail = () => {
         if (!response.ok) {
           // Stok tidak mencukupi atau error backend → batalkan checkout, tampilkan pesan
           const errMsg = resJson.message || resJson.error || 'Gagal sinkronisasi transaksi ke database.';
-          toast.error(`❌ ${errMsg}`);
+          toast.error(`${errMsg}`);
           setIsSubmitting(false);
           return; // STOP — jangan lanjutkan reset cart
         } else {
@@ -667,7 +667,7 @@ const POSRetail = () => {
 
         // Peringatan stok menipis dari backend (non-blocking)
         if (resJson.lowStockWarning && resJson.lowStockWarning.length > 0) {
-          resJson.lowStockWarning.forEach(w => toast.warning(`⚠️ Stok menipis: ${w}`));
+          resJson.lowStockWarning.forEach(w => toast.warning(`Stok menipis: ${w}`));
         }
       } catch (err) {
         console.error('Error saat menghubungi API transactions:', err);

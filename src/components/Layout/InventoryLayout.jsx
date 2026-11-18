@@ -1,34 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   Package,
   MessageSquareWarning,
   History,
   LogOut,
-  PanelLeftClose,
-  PanelLeftOpen,
   Wrench,
   Megaphone
-} from 'lucide-react';
+} from '@/icons/itshover';
 import { motion, AnimatePresence } from 'framer-motion';
 import logoGallardo from '../../assets/logo-gallardo.png';
 import logoNewRatu from '../../assets/logo-new-ratu.png';
 import { useAuth } from '../../context/AuthContext';
 import { useInventoryComms } from '../../pages/InventoryPortal/context/InventoryCommsContext';
-import MegaphoneButton from '../MegaphoneButton';
-import './InventoryLayout.css';
+import './Layout.css';
 
 const InventoryLayout = () => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [userBranch, setUserBranch] = useState('Gallardo');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const navigate = useNavigate();
-  const location = useLocation();
   const { user, logout: authLogout, loading } = useAuth();
-  const { totalUnreadCount = 0 } = useInventoryComms() || {};
+  const { openCount = 0, totalUnreadCount = 0 } = useInventoryComms() || {};
 
-  // Enforce Light Mode
+  // Pastikan selalu Light Mode seperti Admin Dashboard
   useEffect(() => {
     document.documentElement.classList.remove('dark');
     localStorage.removeItem('inventory-theme');
@@ -49,238 +45,237 @@ const InventoryLayout = () => {
     setTimeout(() => {
       authLogout();
       navigate('/login', { state: { fromLogout: true } });
-    }, 400);
+    }, 500);
   };
 
-  const toggleSidebar = () => {
-    setIsExpanded(prev => !prev);
-  };
+  const NavText = ({ children, className = 'font-sans font-medium' }) => (
+    <motion.span
+      initial={false}
+      animate={{
+        opacity: isExpanded ? 1 : 0,
+        width: isExpanded ? 'auto' : 0,
+        marginLeft: isExpanded ? 16 : 0
+      }}
+      style={{
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        display: 'block',
+        minWidth: isExpanded ? 'max-content' : '0'
+      }}
+      className={className}
+    >
+      {children}
+    </motion.span>
+  );
 
   return (
-    <div className="inventory-layout-container bg-[#f8f9fa]">
-        {/* Logout Transition Overlay */}
-        <AnimatePresence>
-          {isLoggingOut && (
+    <div className="layout-container">
+      <AnimatePresence>
+        {isLoggingOut && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: '#000000',
+              zIndex: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black z-50 flex items-center justify-center"
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
             >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
-              >
-                <Wrench size={42} className="text-white" />
-              </motion.div>
+              <Wrench size={48} color="#ffffff" />
             </motion.div>
-          )}
-        </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Sidebar (Optimized pure CSS width transition, zero Framer Motion lag on aside) */}
-        <aside
-          className={`inventory-sidebar bg-white dark:bg-[#181818] border-r border-gray-200 dark:border-neutral-800 flex flex-col z-20 ${
-            isExpanded ? 'w-[260px]' : 'w-[76px]'
-          }`}
-          onMouseEnter={() => setIsExpanded(true)}
+      {/* Sidebar identik dengan Layout.jsx (Admin/Sales) */}
+      <motion.aside
+        className="sidebar print:hidden"
+        initial={false}
+        animate={{ width: isExpanded ? 320 : 80 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        onMouseEnter={() => setIsExpanded(true)}
+        onMouseLeave={() => setIsExpanded(false)}
+      >
+        <div
+          className="sidebar-brand"
+          style={{
+            padding: isExpanded ? '2rem 1.5rem' : '2rem 0',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
         >
-          {/* Brand Header */}
-          <div className="flex items-center justify-between py-5 px-3 border-b border-gray-100 dark:border-neutral-800">
-            <div className="flex flex-col items-center flex-1 overflow-hidden">
-              <img
-                src={userBranch === 'New Ratu' ? logoNewRatu : logoGallardo}
-                alt="Brand Logo"
-                className="transition-all duration-200"
+          <img
+            src={userBranch === 'New Ratu' ? logoNewRatu : logoGallardo}
+            alt={userBranch}
+            style={{
+              width: isExpanded ? (userBranch === 'New Ratu' ? '60px' : '140px') : '40px',
+              height: 'auto',
+              objectFit: 'contain',
+              transition: 'all 0.3s ease'
+            }}
+          />
+        </div>
+
+        <nav className="sidebar-nav">
+          <motion.span
+            className="font-sans text-xs text-secondary px-4 mb-2 block font-semibold tracking-wider"
+            style={{
+              marginTop: '0.5rem',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textAlign: isExpanded ? 'left' : 'center'
+            }}
+            initial={false}
+            animate={{ opacity: isExpanded ? 1 : 0, height: isExpanded ? 'auto' : 0 }}
+          >
+            WORKSPACE GUDANG
+          </motion.span>
+
+          <NavLink
+            to="/inventory-portal/dashboard"
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            style={{
+              justifyContent: isExpanded ? 'flex-start' : 'center',
+              padding: isExpanded ? '1rem 1.25rem' : '1rem 0'
+            }}
+          >
+            <Package size={22} style={{ flexShrink: 0 }} />
+            <NavText>Master Stok Gudang</NavText>
+          </NavLink>
+
+          <NavLink
+            to="/inventory-portal/comms"
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            style={{
+              justifyContent: isExpanded ? 'flex-start' : 'center',
+              padding: isExpanded ? '1rem 1.25rem' : '1rem 0'
+            }}
+          >
+            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+              <MessageSquareWarning size={22} style={{ flexShrink: 0 }} />
+              {totalUnreadCount > 0 ? (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-2px',
+                    right: '-2px',
+                    width: '9px',
+                    height: '9px',
+                    borderRadius: '50%',
+                    backgroundColor: '#10b981',
+                    border: '1.5px solid white'
+                  }}
+                />
+              ) : openCount > 0 ? (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-2px',
+                    right: '-2px',
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: '#f59e0b',
+                    border: '1.5px solid white'
+                  }}
+                />
+              ) : null}
+            </div>
+            <NavText>Chat Selisih Stok</NavText>
+            {totalUnreadCount > 0 && isExpanded ? (
+              <span
                 style={{
-                  width: isExpanded ? '130px' : '38px',
-                  height: 'auto',
-                  objectFit: 'contain'
+                  marginLeft: 'auto',
+                  fontSize: '10px',
+                  fontWeight: 800,
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  padding: '2px 7px',
+                  borderRadius: '9999px'
                 }}
-              />
+              >
+                {totalUnreadCount} Baru
+              </span>
+            ) : openCount > 0 && isExpanded ? (
               <span
-                className={`text-[10px] font-bold tracking-widest text-indigo-600 dark:text-indigo-400 uppercase font-mono mt-1.5 transition-all duration-200 ${
-                  isExpanded ? 'opacity-100 max-h-5' : 'opacity-0 max-h-0 overflow-hidden'
-                }`}
+                style={{
+                  marginLeft: 'auto',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  backgroundColor: '#fef3c7',
+                  color: '#92400e',
+                  padding: '2px 6px',
+                  borderRadius: '9999px',
+                  border: '1px solid #fde68a'
+                }}
               >
-                Inventory & Logistics
+                {openCount} Open
               </span>
-            </div>
+            ) : null}
+          </NavLink>
 
-            {/* Toggle button */}
-            {isExpanded && (
-              <button
-                type="button"
-                onClick={toggleSidebar}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
-                title="Ciutkan Sidebar"
-              >
-                <PanelLeftClose size={17} />
-              </button>
-            )}
-          </div>
+          <NavLink
+            to="/inventory-portal/logs"
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            style={{
+              justifyContent: isExpanded ? 'flex-start' : 'center',
+              padding: isExpanded ? '1rem 1.25rem' : '1rem 0'
+            }}
+          >
+            <History size={22} style={{ flexShrink: 0 }} />
+            <NavText>Riwayat Pemotongan (Logs)</NavText>
+          </NavLink>
 
-          {/* Navigation Links */}
-          <nav className="flex-1 py-4 px-2.5 space-y-1.5 overflow-y-auto">
-            <div
-              className={`px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 font-mono transition-all duration-200 ${
-                isExpanded ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden mb-0'
-              }`}
-            >
-              Workspace Gudang
-            </div>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-release-notes'))}
+            className="nav-item"
+            style={{
+              background: 'none',
+              border: 'none',
+              width: '100%',
+              cursor: 'pointer',
+              justifyContent: isExpanded ? 'flex-start' : 'center',
+              padding: isExpanded ? '1rem 1.25rem' : '1rem 0',
+              color: '#6366f1'
+            }}
+          >
+            <Megaphone size={22} style={{ flexShrink: 0 }} />
+            <NavText className="font-sans font-bold text-indigo-600">What's New (Update)</NavText>
+          </button>
+        </nav>
 
-            {/* Nav 1: Master Stok */}
-            <NavLink
-              to="/inventory-portal/dashboard"
-              className={({ isActive }) =>
-                `inventory-nav-item flex items-center px-3 py-2.5 rounded-xl transition-colors ${
-                  isActive
-                    ? 'bg-indigo-600 text-white shadow-sm font-bold'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800'
-                }`
-              }
-              title="Dashboard Master Stok"
-            >
-              <Package size={20} className="flex-shrink-0" />
-              <span
-                className={`text-xs font-semibold tracking-wide ml-3 whitespace-nowrap transition-all duration-150 ${
-                  isExpanded ? 'opacity-100 max-w-xs' : 'opacity-0 max-w-0 overflow-hidden ml-0'
-                }`}
-              >
-                Master Stok Gudang
-              </span>
-            </NavLink>
+        <div className="sidebar-footer">
+          <button
+            className="nav-item logout-btn"
+            onClick={handleLogout}
+            style={{
+              justifyContent: isExpanded ? 'flex-start' : 'center',
+              padding: isExpanded ? '1rem 1.25rem' : '1rem 0'
+            }}
+          >
+            <LogOut size={22} style={{ flexShrink: 0 }} />
+            <NavText>Logout</NavText>
+          </button>
+        </div>
+      </motion.aside>
 
-            {/* Nav 2: Discrepancy Comms */}
-            <NavLink
-              to="/inventory-portal/comms"
-              className={({ isActive }) =>
-                `inventory-nav-item flex items-center px-3 py-2.5 rounded-xl transition-colors ${
-                  isActive
-                    ? 'bg-amber-600 text-white shadow-sm font-bold'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-neutral-800'
-                }`
-              }
-              title="Stock Discrepancy Comms"
-            >
-              <div className="relative flex items-center">
-                <MessageSquareWarning size={20} className="flex-shrink-0" />
-                {totalUnreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white animate-pulse" />
-                )}
-              </div>
-              <span
-                className={`text-xs font-semibold tracking-wide ml-3 whitespace-nowrap transition-all duration-150 ${
-                  isExpanded ? 'opacity-100 max-w-xs' : 'opacity-0 max-w-0 overflow-hidden ml-0'
-                }`}
-              >
-                Discrepancy Comms
-              </span>
-              {totalUnreadCount > 0 && isExpanded && (
-                <span className="ml-auto text-[10px] font-extrabold px-1.5 py-0.2 rounded-full bg-emerald-500 text-white shadow-sm animate-pulse">
-                  {totalUnreadCount}
-                </span>
-              )}
-            </NavLink>
-
-            {/* Nav 3: Mutasi & Riwayat */}
-            <NavLink
-              to="/inventory-portal/logs"
-              className={({ isActive }) =>
-                `inventory-nav-item flex items-center px-3 py-2.5 rounded-xl transition-colors ${
-                  isActive
-                    ? 'bg-indigo-600 text-white shadow-sm font-bold'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800'
-                }`
-              }
-              title="Mutasi & Riwayat Stok"
-            >
-              <History size={20} className="flex-shrink-0" />
-              <span
-                className={`text-xs font-semibold tracking-wide ml-3 whitespace-nowrap transition-all duration-150 ${
-                  isExpanded ? 'opacity-100 max-w-xs' : 'opacity-0 max-w-0 overflow-hidden ml-0'
-                }`}
-              >
-                Mutasi & Riwayat
-              </span>
-            </NavLink>
-
-            {/* Nav 4: What's New (Update) */}
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new CustomEvent('open-release-notes'))}
-              className="inventory-nav-item flex items-center px-3 py-2.5 rounded-xl transition-colors text-indigo-600 hover:bg-indigo-50 w-full text-left"
-              title="Catatan Rilis & Fitur Baru (What's New)"
-            >
-              <Megaphone size={20} className="flex-shrink-0 text-indigo-600" />
-              <span
-                className={`text-xs font-bold tracking-wide ml-3 whitespace-nowrap transition-all duration-150 text-indigo-600 ${
-                  isExpanded ? 'opacity-100 max-w-xs' : 'opacity-0 max-w-0 overflow-hidden ml-0'
-                }`}
-              >
-                What's New (Update)
-              </span>
-            </button>
-          </nav>
-
-          {/* User Profile Footer */}
-          <div className="p-3 border-t border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs flex-shrink-0 border border-indigo-200">
-                {user?.name ? user.name[0].toUpperCase() : 'M'}
-              </div>
-              <div
-                className={`flex flex-col min-w-0 overflow-hidden transition-all duration-150 ${
-                  isExpanded ? 'opacity-100 max-w-xs' : 'opacity-0 max-w-0'
-                }`}
-              >
-                <span className="text-xs font-bold text-gray-900 truncate">
-                  {user?.name || 'Mba Umi'}
-                </span>
-                <span className="text-[10px] text-gray-400 capitalize">
-                  {user?.role || 'inventory'} &bull; {userBranch}
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-gray-400 hover:text-rose-500 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
-              title="Keluar / Logout"
-            >
-              <LogOut size={16} />
-            </button>
-          </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <main className="inventory-main-content">
-          {/* Header Bar */}
-          <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 px-6 py-3.5 flex items-center justify-between sticky top-0 z-10">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-md bg-gray-100 text-gray-600">
-                LOKASI: GUDANG {userBranch.toUpperCase()}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <MegaphoneButton showLabel={true} />
-              <span className="text-xs text-gray-400 font-mono hidden md:inline">
-                {new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}
-              </span>
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="Sistem Gudang Online"></div>
-            </div>
-          </header>
-
-          {/* Scrollable Subpage Content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-[1550px] mx-auto w-full">
-              <Outlet context={{ userBranch }} />
-            </div>
-          </div>
-        </main>
-      </div>
+      <main className="main-content bg-secondary">
+        <div className="content-wrapper">
+          <Outlet context={{ userBranch }} />
+        </div>
+      </main>
+    </div>
   );
 };
 

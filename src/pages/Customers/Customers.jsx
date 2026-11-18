@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
 import { useOrders } from '../../context/OrderContext';
 import { format, addYears } from 'date-fns';
-import { X, Search, FileText, Download, Printer, Loader2, Shield, ShieldAlert, MessageCircle, FileSpreadsheet, CheckCircle } from 'lucide-react';
+import { X, Search, FileText, Download, Printer, Loader2, Shield, ShieldAlert, MessageCircle, FileSpreadsheet, CheckCircle } from '@/icons/itshover';
 import SharedInvoice from '../../components/SharedInvoice';
 import * as XLSX from 'xlsx';
 import { formatCurrency } from '../../data/mockData';

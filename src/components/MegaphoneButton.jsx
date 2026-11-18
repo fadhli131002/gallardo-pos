@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Megaphone, Sparkles } from 'lucide-react';
+import { Megaphone, Sparkles } from '@/icons/itshover';
 import { useAuth } from '../context/AuthContext';
 import { LATEST_SYSTEM_RELEASE } from '../config/systemReleaseNotes';
 

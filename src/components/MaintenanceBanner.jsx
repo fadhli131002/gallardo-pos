@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { AlertTriangle, Wrench, ChevronUp, ChevronDown, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Wrench, ChevronUp, ChevronDown, RefreshCw } from '@/icons/itshover';
 import './MaintenanceBanner.css';
 
 export default function MaintenanceBanner() {

@@ -2,7 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText } from 'lucide-react';
+import { FileText, X } from '@/icons/itshover';
 
 export default function DashboardDetailsModal({ isOpen, onClose, type, data, loading }) {
 
@@ -562,9 +562,7 @@ export default function DashboardDetailsModal({ isOpen, onClose, type, data, loa
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-200 transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="w-5 h-5" />
           </button>
         </div>
 

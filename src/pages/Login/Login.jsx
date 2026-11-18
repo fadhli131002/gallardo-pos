@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, Loader2, Wrench } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Wrench } from '@/icons/itshover';
 import lamboImage from '../../assets/lambo-gray.png';
 import logoGallardo from '../../assets/logo-gallardo.png';
 import logoNewRatu from '../../assets/logo-new-ratu.png';

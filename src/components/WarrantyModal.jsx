@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { X, Download, Shield } from 'lucide-react';
+import { X, Download, Shield } from '@/icons/itshover';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import logoGallardo from '../assets/logo-gallardo.png';

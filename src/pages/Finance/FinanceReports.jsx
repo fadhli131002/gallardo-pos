@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Download, Filter, Share2, Activity, AlertTriangle } from 'lucide-react';
+import { Download, Filter, Share2, Activity, AlertTriangle } from '@/icons/itshover';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area, LineChart, Line
@@ -233,7 +233,7 @@ const FinanceReports = () => {
               </button>
               {bebanValid === false && (
                 <div className="absolute right-0 top-full mt-1 z-10 w-64 bg-orange-50 border border-orange-200 rounded-lg p-3 text-xs text-orange-800 shadow-lg hidden group-hover:block">
-                  <strong>⚠️ Beban Operasional Kosong</strong>
+                  <strong className="inline-flex items-center gap-1"><AlertTriangle size={14} /> Beban Operasional Kosong</strong>
                   <p className="mt-1">Laporan bulan {currentMonth} tidak dapat digenerate karena Beban Operasional = Rp 0. Isi beban di menu Beban Operasional terlebih dahulu.</p>
                 </div>
               )}

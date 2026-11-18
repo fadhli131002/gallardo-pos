@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ShieldAlert, X, Send, AlertTriangle } from 'lucide-react';
+import { ShieldAlert, X, Send, AlertTriangle } from '@/icons/itshover';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
 

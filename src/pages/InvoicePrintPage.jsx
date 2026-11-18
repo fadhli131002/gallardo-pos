@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useOrders } from '../context/OrderContext';
 import SharedInvoice from '../components/SharedInvoice';
-import { Printer, MessageCircle, X } from 'lucide-react';
+import { Printer, MessageCircle, X } from '@/icons/itshover';
 import { formatCurrency } from '../data/mockData';
 
 const InvoicePrintPage = () => {
