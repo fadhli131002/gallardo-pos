@@ -7,6 +7,7 @@ import logoNewRatu from '../../assets/logo-new-ratu.png';
 import './Layout.css'; // Reusing Layout CSS for consistency
 
 import { useAuth } from '../../context/AuthContext';
+import PWAInstallNavItem from '../PWAInstallNavItem';
 
 const OwnerLayout = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -106,6 +107,7 @@ const OwnerLayout = () => {
         </nav>
 
         <div className="sidebar-footer">
+          <PWAInstallNavItem isExpanded={isExpanded} NavText={NavText} />
           <button className="nav-item logout-btn" onClick={handleLogout} style={{ justifyContent: isExpanded ? 'flex-start' : 'center', padding: isExpanded ? '1rem 1.25rem' : '1rem 0' }}>
             <LogOut size={22} style={{ flexShrink: 0 }} />
             <NavText>Logout</NavText>

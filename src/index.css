@@ -411,5 +411,42 @@ td.empty-state {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* PWA Standalone Mode & Mobile Safe Areas (Anti-Slop Layoutmobile) */
+@supports (padding: max(0px)) {
+  body {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+}
+
+/* Interaction Affordances per R-39 */
+button,
+a,
+summary,
+select,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* Standalone PWA feel */
+@media all and (display-mode: standalone) {
+  body {
+    overscroll-behavior-y: contain;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  
+  input, textarea {
+    user-select: text;
+  }
+}
+
 
 

@@ -18,12 +18,12 @@ const FinanceCommissions = () => {
   const fetchCommissions = async () => {
     try {
       setLoading(true);
-      
+
       let query = '';
       const now = new Date();
       let startDate = '';
       let endDate = '';
-    
+
       if (dateFilter === 'Hari Ini') {
         startDate = new Date(now.setHours(0, 0, 0, 0)).toISOString();
         endDate = new Date(now.setHours(23, 59, 59, 999)).toISOString();
@@ -34,7 +34,7 @@ const FinanceCommissions = () => {
         startDate = new Date(now.getFullYear(), 0, 1).toISOString();
         endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999).toISOString();
       }
-    
+
       if (dateFilter !== 'Semua Waktu') {
         query = `?startDate=${startDate}&endDate=${endDate}`;
       }
@@ -67,12 +67,12 @@ const FinanceCommissions = () => {
         },
         body: JSON.stringify({ commissionAmount: newCommission })
       });
-      
+
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.message || 'Gagal menyimpan komisi');
       }
-      
+
       toast.success('Komisi berhasil disimpan');
       // Re-fetch data to recalculate everything
       fetchCommissions();
@@ -171,7 +171,7 @@ const FinanceCommissions = () => {
         </div>
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col"
@@ -203,7 +203,7 @@ const FinanceCommissions = () => {
               ) : (
                 commissions.map((item, index) => (
                   <Fragment key={item.sales_id}>
-                    <tr 
+                    <tr
                       className="hover:bg-gray-50 transition-colors cursor-pointer group"
                       onClick={() => toggleRow(item.sales_id)}
                     >
@@ -227,7 +227,7 @@ const FinanceCommissions = () => {
                     </tr>
                     <AnimatePresence>
                       {expandedRows[item.sales_id] && (
-                        <motion.tr 
+                        <motion.tr
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
@@ -247,9 +247,9 @@ const FinanceCommissions = () => {
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100 bg-white">
-                                    {item.transactions?.map(trx => (
-                                      <tr key={trx.id} className="hover:bg-gray-50">
-                                        <td className="py-3 px-3 text-gray-800 font-medium">TRX/{trx.id}</td>
+                                  {item.transactions?.map(trx => (
+                                    <tr key={trx.id} className="hover:bg-gray-50">
+                                      <td className="py-3 px-3 text-gray-800 font-medium">TRX/{trx.id}</td>
                                       <td className="py-3 px-3 text-gray-600">
                                         {new Date(trx.date).toLocaleDateString('id-ID')}
                                       </td>
@@ -260,7 +260,7 @@ const FinanceCommissions = () => {
                                           {trx.is_manual ? (
                                             <span className="absolute -left-4 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" title="Komisi Manual"></span>
                                           ) : null}
-                                          <input 
+                                          <input
                                             type="number"
                                             defaultValue={trx.commission}
                                             onKeyDown={(e) => {
@@ -278,7 +278,7 @@ const FinanceCommissions = () => {
                                             className="w-32 px-3 py-1.5 text-right text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50 focus:bg-white transition-colors"
                                             placeholder="Default 5%"
                                           />
-                                          <button 
+                                          <button
                                             className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-primary-600 transition-colors"
                                             title="Simpan perubahan"
                                             onClick={(e) => {

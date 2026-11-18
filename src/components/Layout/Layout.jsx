@@ -8,6 +8,7 @@ import './Layout.css';
 
 import { useAuth } from '../../context/AuthContext';
 import { useInventoryComms } from '../../pages/InventoryPortal/context/InventoryCommsContext';
+import PWAInstallNavItem from '../PWAInstallNavItem';
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -326,6 +327,7 @@ const Layout = () => {
         </nav>
 
         <div className="sidebar-footer">
+          <PWAInstallNavItem isExpanded={isExpanded} NavText={NavText} />
           <button className="nav-item logout-btn" onClick={handleLogout} style={{ justifyContent: isExpanded ? 'flex-start' : 'center', padding: isExpanded ? '1rem 1.25rem' : '1rem 0' }}>
             <LogOut size={22} style={{ flexShrink: 0 }} />
             <NavText>Logout</NavText>

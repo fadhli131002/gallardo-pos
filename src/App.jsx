@@ -4,7 +4,6 @@ import Login from './pages/Login/Login';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Calendar from './pages/Calendar/Calendar';
 import POS from './pages/POS/POS';
-import Customers from './pages/Customers/Customers';
 import POSRetail from './pages/POS/POSRetail';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import VehicleMaster from './pages/Admin/VehicleMaster';
@@ -37,6 +36,7 @@ import InventoryPortalLogsPage from './pages/InventoryPortal/InventoryPortalLogs
 
 import { Toaster } from 'sonner';
 import MaintenanceBanner from './components/MaintenanceBanner';
+import PWABanner from './components/PWABanner';
 import ReleaseNotesHandler from './components/ReleaseNotesHandler';
 
 import { useAuth } from './context/AuthContext';
@@ -74,6 +74,7 @@ function App() {
     <Router>
       <Toaster position="top-right" richColors />
       <MaintenanceBanner />
+      <PWABanner />
       <ReleaseNotesHandler />
       <Routes>
         <Route path="/login" element={<Login />} />

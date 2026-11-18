@@ -6,6 +6,7 @@ import { OrderProvider } from './context/OrderContext.jsx'
 import { InventoryProvider } from './context/InventoryContext.jsx'
 import { InventoryCommsProvider } from './pages/InventoryPortal/context/InventoryCommsContext.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { PWAProvider } from './context/PWAContext.jsx'
 
 // Gunakan environment variable jika ada, jika tidak fallback ke localhost atau origin server (karena menggunakan Nginx reverse proxy)
 window.API_URL = import.meta.env.VITE_API_URL || (
@@ -16,14 +17,16 @@ window.API_URL = import.meta.env.VITE_API_URL || (
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <InventoryProvider>
-        <InventoryCommsProvider>
-          <OrderProvider>
-            <App />
-          </OrderProvider>
-        </InventoryCommsProvider>
-      </InventoryProvider>
-    </AuthProvider>
+    <PWAProvider>
+      <AuthProvider>
+        <InventoryProvider>
+          <InventoryCommsProvider>
+            <OrderProvider>
+              <App />
+            </OrderProvider>
+          </InventoryCommsProvider>
+        </InventoryProvider>
+      </AuthProvider>
+    </PWAProvider>
   </StrictMode>,
 )

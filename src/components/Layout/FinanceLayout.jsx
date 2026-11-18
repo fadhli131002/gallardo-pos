@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import logoGallardo from '../../assets/logo-gallardo.png';
 import logoNewRatu from '../../assets/logo-new-ratu.png';
 import { useAuth } from '../../context/AuthContext';
+import PWAInstallNavItem from '../PWAInstallNavItem';
 import './Layout.css';
 
 const FinanceLayout = () => {
@@ -219,6 +220,7 @@ const FinanceLayout = () => {
         </nav>
 
         <div className="sidebar-footer">
+          <PWAInstallNavItem isExpanded={isExpanded} NavText={NavText} />
           <button
             className="nav-item logout-btn"
             onClick={handleLogout}
